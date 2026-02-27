@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "target": "ESNext",
     "module": "ESNext",
     "noEmit": true,
@@ -15,8 +13,10 @@
     "allowImportingTsExtensions": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "@marcosvnmelo/nestjs-platform-h3": ["./src/index.ts"]
+    }
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src", "tests"]
 }

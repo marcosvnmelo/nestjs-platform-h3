@@ -1,3 +1,23 @@
 {
-  "singleQuote": true
+  "singleQuote": true,
+  "quoteProps": "consistent",
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "<TYPES>",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "<TYPES>^@nestjs",
+    "^@nestjs/(.*)$",
+    "",
+    "<TYPES>^@marcosvnmelo",
+    "^@marcosvnmelo/(.*)$",
+    "",
+    "<TYPES>^[.|..|~]",
+    "^~/",
+    "^@/",
+    "^[../]",
+    "^[./]"
+  ],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "importOrderTypeScriptVersion": "4.4.0"
 }

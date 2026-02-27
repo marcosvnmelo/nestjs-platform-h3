@@ -1110,6 +1110,17 @@ export class H3Adapter extends AbstractHttpAdapter<
     return new Promise<typeof kHandled | undefined>((resolve, reject) => {
       let resolved = false;
 
+      const resolveHandled = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(kHandled);
+        }
+      };
+
+      // Register finish before invoking handler to avoid missing a synchronous
+      // res.end() that emits finish immediately.
+      res.once('finish', resolveHandled);
+
       // next() callback for version filtering
       const next = (err?: Error) => {
         if (resolved) return;
@@ -1128,10 +1139,9 @@ export class H3Adapter extends AbstractHttpAdapter<
         if (result && typeof result.then === 'function') {
           result
             .then(() => {
-              // Handler completed, mark as handled
-              if (!resolved) {
-                resolved = true;
-                resolve(kHandled);
+              // Handler completed, mark as handled if response has already ended.
+              if (!resolved && (res.writableEnded || res.headersSent)) {
+                resolveHandled();
               }
             })
             .catch((err: Error) => {
@@ -1141,14 +1151,9 @@ export class H3Adapter extends AbstractHttpAdapter<
               }
             });
         } else {
-          // Synchronous handler - wait for response finish
-          if (!resolved) {
-            res.once('finish', () => {
-              if (!resolved) {
-                resolved = true;
-                resolve(kHandled);
-              }
-            });
+          // Synchronous handler may have already ended response.
+          if (!resolved && (res.writableEnded || res.headersSent)) {
+            resolveHandled();
           }
         }
       } catch (err) {

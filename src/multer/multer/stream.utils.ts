@@ -161,8 +161,6 @@ export async function parseMultipartWithBusboy(
         fields.push({
           fieldname,
           value,
-          encoding,
-          mimetype: mimeType,
         });
       },
     );
@@ -413,8 +411,6 @@ export async function parseMultipartAsStreams(
           const field: H3FormField = {
             fieldname,
             value,
-            encoding,
-            mimetype: mimeType,
           };
 
           const callbackResult = onField(field);

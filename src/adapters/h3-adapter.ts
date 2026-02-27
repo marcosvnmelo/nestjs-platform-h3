@@ -340,14 +340,20 @@ export class H3Adapter extends AbstractHttpAdapter<
       const req = event.runtime?.node?.req;
       const res = event.runtime?.node?.res;
 
+      if (!req || !res) {
+        return;
+      }
+
       // Register onResponse hook if set (same as wrapHandler)
       if (this.onResponseHook && res) {
-        res.on('finish', () => {
+        res.once('finish', () => {
           void this.onResponseHook?.apply(this, [req, res]);
         });
       }
 
-      return handler(req, res);
+      // Ensure not-found handler is treated as fully handled by H3.
+      await this.invokeHandler(handler, req, res);
+      return kHandled;
     });
     return this;
   }

@@ -72,14 +72,6 @@ export function FilesStreamInterceptor(
         ...localOptions,
       };
 
-      // Apply maxCount to the files limit if specified
-      if (maxCount !== undefined) {
-        mergedOptions.limits = {
-          ...mergedOptions.limits,
-          files: maxCount,
-        };
-      }
-
       // Parse multipart form data using busboy for stream processing
       const { files, fields } = await parseMultipartWithBusboy(
         h3Event,
@@ -89,9 +81,8 @@ export function FilesStreamInterceptor(
       // Filter to get only files from the specified field
       const fieldFiles = filterFilesByFieldNameStream(files, fieldName);
 
-      // Enforce maxCount if specified (in case there are multiple fields)
+      // Enforce maxCount by truncating (silently accept only the first maxCount files)
       if (maxCount !== undefined && fieldFiles.length > maxCount) {
-        // Truncate to maxCount
         request.files = fieldFiles.slice(0, maxCount);
       } else {
         request.files = fieldFiles;

@@ -9,6 +9,7 @@ import {
   Head,
   Header,
   HttpCode,
+  Inject,
   Options,
   Param,
   Patch,
@@ -25,7 +26,10 @@ import { UserByIdPipe } from './pipes/user-by-id.pipe';
 
 @Controller('hello')
 export class HelloController {
-  constructor(private readonly helloService: HelloService) {}
+  constructor(
+    @Inject(HelloService)
+    private readonly helloService: HelloService,
+  ) {}
 
   @Get()
   @Header('Authorization', 'Bearer')

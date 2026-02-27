@@ -1,0 +1,36 @@
+packages:
+  - benchmark
+  - tests
+
+catalog:
+  # Core framework
+  '@nestjs/common': '11.1.14'
+  '@nestjs/core': '11.1.14'
+  '@nestjs/testing': '11.1.14'
+  '@nestjs/platform-express': '11.1.14'
+  '@nestjs/platform-fastify': '11.1.14'
+  
+  # Build tools
+  '@rslib/core': '0.19.6'
+  '@rstest/core': '^0.8.5'
+  '@rstest/adapter-rslib': '^0.2.0'
+  
+  # HTTP servers
+  express: '5.2.1'
+  fastify: '5.7.4'
+  h3: '2.0.1-rc.14'
+  
+  # Utilities
+  '@fastify/busboy': '3.2.0'
+  path-to-regexp: '8.3.0'
+  rxjs: '7.8.2'
+  reflect-metadata: '^0.2.2'
+  
+  # Dev dependencies
+  typescript: '5.9.3'
+  '@types/node': '^24'
+  '@types/express': '5.0.6'
+  '@types/autocannon': '7.12.7'
+  '@types/supertest': '7.2.0'
+  supertest: '^7.2.2'
+  autocannon: '8.0.0'

@@ -5,9 +5,9 @@ import ts from 'typescript-eslint';
 export default defineConfig([
   js.configs.recommended,
   ts.configs.recommended,
-  { ignores: ['dist/'] },
+  { ignores: ['**/dist'] },
   {
-    files: ['**/*.ts'],
+    files: ['**/src/**/*.ts', '**/e2e/**/*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',

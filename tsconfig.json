@@ -10,13 +10,12 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
+    "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "baseUrl": ".",
-    "paths": {
-      "@marcosvnmelo/nestjs-platform-h3": ["./src/index.ts"]
-    }
+    "rootDir": "./src",
+    "outDir": "./dist"
   },
-  "include": ["src", "tests"]
+  "include": ["src"]
 }

@@ -1,0 +1,25 @@
+{
+  "name": "@marcosvnmelo/nestjs-platform-h3-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rslib build",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/testing": "catalog:",
+    "supertest": "catalog:"
+  },
+  "devDependencies": {
+    "@rslib/core": "catalog:",
+    "@rstest/adapter-rslib": "catalog:",
+    "@types/node": "catalog:",
+    "@types/supertest": "catalog:",
+    "typescript": "catalog:"
+  }
+}

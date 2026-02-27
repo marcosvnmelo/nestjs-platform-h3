@@ -1,14 +1,15 @@
 import { Readable } from 'stream';
-import {
-  StorageEngine,
-  StorageCallback,
-  RemoveCallback,
-  MemoryStorageOptions,
-} from './storage.interface';
-import {
-  H3UploadedFile,
+
+import type {
   H3FileStream,
+  H3UploadedFile,
 } from '../interfaces/multer-options.interface';
+import type {
+  MemoryStorageOptions,
+  RemoveCallback,
+  StorageCallback,
+  StorageEngine,
+} from './storage.interface';
 
 /**
  * Memory storage engine for keeping uploaded files in memory as buffers.
@@ -48,13 +49,13 @@ export class MemoryStorage implements StorageEngine {
     // Stream-based file - buffer the entire stream
     if ('stream' in file && file.stream) {
       this.bufferStream(file)
-        .then(buffer => {
+        .then((buffer) => {
           callback(null, {
             buffer,
             size: buffer.length,
           });
         })
-        .catch(err => {
+        .catch((err) => {
           callback(err);
         });
       return;

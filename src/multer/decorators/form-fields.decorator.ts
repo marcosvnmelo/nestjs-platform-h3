@@ -1,5 +1,7 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { H3FormField } from '../interfaces/multer-options.interface';
+import type { ExecutionContext } from '@nestjs/common';
+import { createParamDecorator } from '@nestjs/common';
+
+import type { H3FormField } from '../interfaces/multer-options.interface';
 
 /**
  * Request body decorator that extracts all form fields from multipart requests.
@@ -93,7 +95,7 @@ export const FormField = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const fields: H3FormField[] = request.formFields || [];
 
-    const matchingFields = fields.filter(f => f.fieldname === fieldName);
+    const matchingFields = fields.filter((f) => f.fieldname === fieldName);
 
     if (matchingFields.length === 0) {
       return undefined;
@@ -104,6 +106,6 @@ export const FormField = createParamDecorator(
     }
 
     // Multiple values with same name
-    return matchingFields.map(f => f.value);
+    return matchingFields.map((f) => f.value);
   },
 );

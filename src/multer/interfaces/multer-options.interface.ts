@@ -1,5 +1,6 @@
-import { Readable } from 'stream';
-import { StorageEngine } from '../storage/storage.interface';
+import type { Readable } from 'stream';
+
+import type { StorageEngine } from '../storage/storage.interface';
 
 /**
  * H3 file upload options interface.

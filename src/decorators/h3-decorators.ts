@@ -1,5 +1,7 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import type { H3Event as H3EventType } from 'h3';
+
+import type { ExecutionContext } from '@nestjs/common';
+import { createParamDecorator } from '@nestjs/common';
 
 /**
  * Parameter decorator that extracts the underlying H3 event from the request.
@@ -7,7 +9,7 @@ import type { H3Event as H3EventType } from 'h3';
  *
  * @example
  * ```typescript
- * import { H3Event } from '@nestjs/platform-h3';
+ * import { H3Event } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {
@@ -38,7 +40,7 @@ export const H3Event = createParamDecorator(
  *
  * @example
  * ```typescript
- * import { H3Request } from '@nestjs/platform-h3';
+ * import { H3Request } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {
@@ -69,7 +71,7 @@ export const H3Request = createParamDecorator(
  *
  * @example
  * ```typescript
- * import { H3Response } from '@nestjs/platform-h3';
+ * import { H3Response } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {
@@ -99,7 +101,7 @@ export const H3Response = createParamDecorator(
  *
  * @example
  * ```typescript
- * import { H3Query } from '@nestjs/platform-h3';
+ * import { H3Query } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {
@@ -140,7 +142,7 @@ export const H3Query = createParamDecorator(
  *
  * @example
  * ```typescript
- * import { H3Params } from '@nestjs/platform-h3';
+ * import { H3Params } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {
@@ -181,7 +183,7 @@ export const H3Params = createParamDecorator(
  *
  * @example
  * ```typescript
- * import { H3Body } from '@nestjs/platform-h3';
+ * import { H3Body } from '@marcosvnmelo/nestjs-platform-h3';
  *
  * @Controller('users')
  * export class UsersController {

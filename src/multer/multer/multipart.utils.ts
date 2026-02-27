@@ -1,14 +1,15 @@
-import { H3Event } from 'h3';
-import {
-  H3UploadedFile,
-  H3MulterOptions,
-  H3MulterField,
+import type { H3Event } from 'h3';
+
+import type {
   H3FormField,
+  H3MulterField,
+  H3MulterOptions,
   H3MultipartParseResult,
+  H3UploadedFile,
 } from '../interfaces/multer-options.interface';
-import { transformException, h3MultipartExceptions } from './multer.utils';
-import { StorageEngine } from '../storage/storage.interface';
+import type { StorageEngine } from '../storage/storage.interface';
 import { DiskStorage } from '../storage/disk.storage';
+import { h3MultipartExceptions, transformException } from './multer.utils';
 
 /**
  * Checks if the request has multipart/form-data content type.
@@ -212,7 +213,7 @@ export function filterFilesByFieldName(
   files: H3UploadedFile[],
   fieldName: string,
 ): H3UploadedFile[] {
-  return files.filter(file => file.fieldname === fieldName);
+  return files.filter((file) => file.fieldname === fieldName);
 }
 
 /**
@@ -229,7 +230,7 @@ export function groupFilesByFields(
   const result: Record<string, H3UploadedFile[]> = {};
 
   for (const field of fields) {
-    const fieldFiles = files.filter(file => file.fieldname === field.name);
+    const fieldFiles = files.filter((file) => file.fieldname === field.name);
 
     // Apply maxCount limit if specified
     if (field.maxCount !== undefined && fieldFiles.length > field.maxCount) {
@@ -257,7 +258,7 @@ export function filterFormFieldsByName(
   fields: H3FormField[],
   fieldName: string,
 ): H3FormField[] {
-  return fields.filter(field => field.fieldname === fieldName);
+  return fields.filter((field) => field.fieldname === fieldName);
 }
 
 /**

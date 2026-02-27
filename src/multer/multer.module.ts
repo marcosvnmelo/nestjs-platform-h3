@@ -1,10 +1,12 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { MULTER_MODULE_OPTIONS } from './files.constants';
-import {
+import type { DynamicModule, Provider } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+
+import type {
   H3MulterModuleAsyncOptions,
   H3MulterModuleOptions,
   H3MulterOptionsFactory,
 } from './interfaces';
+import { MULTER_MODULE_OPTIONS } from './files.constants';
 
 /**
  * Module for configuring H3 file upload options globally.

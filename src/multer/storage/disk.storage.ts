@@ -1,17 +1,18 @@
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as crypto from 'crypto';
 import { Readable } from 'stream';
-import {
-  StorageEngine,
-  StorageCallback,
-  RemoveCallback,
-  DiskStorageOptions,
-} from './storage.interface';
-import {
-  H3UploadedFile,
+
+import type {
   H3FileStream,
+  H3UploadedFile,
 } from '../interfaces/multer-options.interface';
+import type {
+  DiskStorageOptions,
+  RemoveCallback,
+  StorageCallback,
+  StorageEngine,
+} from './storage.interface';
 
 /**
  * Generates a random filename using crypto.
@@ -104,7 +105,7 @@ export class DiskStorage implements StorageEngine {
         const finalPath = path.join(destination, filename);
 
         // Ensure destination directory exists
-        fs.mkdir(destination, { recursive: true }, mkdirError => {
+        fs.mkdir(destination, { recursive: true }, (mkdirError) => {
           if (mkdirError) {
             return callback(mkdirError);
           }
@@ -140,7 +141,7 @@ export class DiskStorage implements StorageEngine {
     info: { destination: string; filename: string },
   ): void {
     const buffer = file.buffer!;
-    fs.writeFile(finalPath, buffer, writeError => {
+    fs.writeFile(finalPath, buffer, (writeError) => {
       if (writeError) {
         return callback(writeError);
       }
@@ -238,7 +239,7 @@ export class DiskStorage implements StorageEngine {
       return callback(null);
     }
 
-    fs.unlink(filePath, err => {
+    fs.unlink(filePath, (err) => {
       // Ignore ENOENT errors (file doesn't exist)
       if (err && err.code !== 'ENOENT') {
         return callback(err);

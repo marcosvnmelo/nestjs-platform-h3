@@ -1,6 +1,6 @@
-import {
-  H3UploadedFile,
+import type {
   H3FileStream,
+  H3UploadedFile,
 } from '../interfaces/multer-options.interface';
 
 /**

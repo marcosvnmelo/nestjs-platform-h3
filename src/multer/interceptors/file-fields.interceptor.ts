@@ -1,22 +1,22 @@
-import {
+import type { Observable } from 'rxjs';
+
+import type {
   CallHandler,
   ExecutionContext,
-  Inject,
-  mixin,
   NestInterceptor,
-  Optional,
   Type,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { MULTER_MODULE_OPTIONS } from '../files.constants';
+import { Inject, mixin, Optional } from '@nestjs/common';
+
 import type { H3MulterModuleOptions } from '../interfaces';
-import {
+import type {
   H3MulterField,
   H3MulterOptions,
 } from '../interfaces/multer-options.interface';
+import { MULTER_MODULE_OPTIONS } from '../files.constants';
 import {
-  parseMultipartFormDataWithFields,
   groupFilesByFields,
+  parseMultipartFormDataWithFields,
 } from '../multer/multipart.utils';
 
 /**
@@ -38,7 +38,7 @@ export function FileFieldsInterceptor(
       @Optional()
       @Inject(MULTER_MODULE_OPTIONS)
       protected options: H3MulterModuleOptions = {},
-    ) { }
+    ) {}
 
     async intercept(
       context: ExecutionContext,

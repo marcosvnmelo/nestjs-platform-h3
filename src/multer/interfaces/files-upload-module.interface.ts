@@ -1,5 +1,6 @@
-import { ModuleMetadata, Type } from '@nestjs/common/interfaces';
-import { H3MulterOptions } from './multer-options.interface';
+import type { ModuleMetadata, Type } from '@nestjs/common/interfaces';
+
+import type { H3MulterOptions } from './multer-options.interface';
 
 export type H3MulterModuleOptions = H3MulterOptions;
 

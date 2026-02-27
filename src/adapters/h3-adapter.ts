@@ -1,15 +1,35 @@
+import * as fs from 'fs';
+import * as http from 'http';
+import * as http2 from 'http2';
+import * as https from 'https';
+import * as path from 'path';
+import type { CorsOptions, H3Config, H3Event } from 'h3';
+import {
+  fromNodeHandler,
+  getQuery,
+  getRouterParams,
+  H3,
+  handleCors,
+  readBody,
+  serveStatic,
+} from 'h3';
+import { toNodeHandler } from 'h3/node';
+import { pathToRegexp } from 'path-to-regexp';
+
+import type {
+  NestApplicationOptions,
+  RequestMethod,
+  VersioningOptions,
+} from '@nestjs/common';
+import type { VersionValue } from '@nestjs/common/interfaces';
 import {
   InternalServerErrorException,
   Logger,
-  NestApplicationOptions,
   NotFoundException,
-  RequestMethod,
   StreamableFile,
   VERSION_NEUTRAL,
-  VersioningOptions,
   VersioningType,
 } from '@nestjs/common';
-import { VersionValue } from '@nestjs/common/interfaces';
 import {
   isNil,
   isObject,
@@ -17,26 +37,8 @@ import {
   isUndefined,
 } from '@nestjs/common/utils/shared.utils';
 import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter';
-import {
-  H3,
-  fromNodeHandler,
-  getQuery,
-  getRouterParams,
-  H3Event,
-  readBody,
-  handleCors,
-  serveStatic,
-  type CorsOptions,
-  type H3Config,
-} from 'h3';
-import { toNodeHandler } from 'h3/node';
-import * as http from 'http';
-import * as http2 from 'http2';
-import * as https from 'https';
-import * as path from 'path';
-import * as fs from 'fs';
-import { pathToRegexp } from 'path-to-regexp';
-import { ServeStaticOptions } from '../interfaces/serve-static-options.interface';
+
+import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface';
 
 /**
  * Symbol used by H3 to indicate the response has been handled.
@@ -222,7 +224,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       }
       const stream = body.getStream();
       const mockRes = { send: (chunk: any) => res.end(chunk) } as any;
-      stream.once('error', err => {
+      stream.once('error', (err) => {
         body.errorHandler(err, mockRes);
       });
       return stream
@@ -336,7 +338,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   public setNotFoundHandler(handler: Function, _prefix?: string) {
     // Not found handler should be registered as a catch-all route, not middleware
     // This ensures it only runs when no other routes match
-    this.instance.all('/**', async event => {
+    this.instance.all('/**', async (event) => {
       const req = event.runtime?.node?.req;
       const res = event.runtime?.node?.res;
 
@@ -425,7 +427,7 @@ export class H3Adapter extends AbstractHttpAdapter<
     if (!this.httpServer) {
       return undefined;
     }
-    return new Promise(resolve => this.httpServer.close(resolve));
+    return new Promise((resolve) => this.httpServer.close(resolve));
   }
 
   public set(..._args: any[]): this {
@@ -457,7 +459,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       : prefix;
 
     // Register static file handler using H3's serveStatic
-    this.instance.use(async event => {
+    this.instance.use(async (event) => {
       const url =
         event.url.pathname + event.url.search ||
         event.runtime?.node?.req?.url ||
@@ -504,7 +506,7 @@ export class H3Adapter extends AbstractHttpAdapter<
 
       // Use H3's serveStatic helper
       const result = await serveStatic(event, {
-        getContents: async id => {
+        getContents: async (id) => {
           // Strip prefix from id since serveStatic passes the full path
           const idWithoutPrefix = normalizedPrefix
             ? id.replace(normalizedPrefix, '')
@@ -521,7 +523,7 @@ export class H3Adapter extends AbstractHttpAdapter<
             return undefined;
           }
         },
-        getMeta: async id => {
+        getMeta: async (id) => {
           // Strip prefix from id since serveStatic passes the full path
           const idWithoutPrefix = normalizedPrefix
             ? id.replace(normalizedPrefix, '')
@@ -555,13 +557,13 @@ export class H3Adapter extends AbstractHttpAdapter<
               ? ['/index.html']
               : Array.isArray(options?.index)
                 ? options.index.map((f: string) =>
-                  f.startsWith('/') ? f : `/${f}`,
-                )
+                    f.startsWith('/') ? f : `/${f}`,
+                  )
                 : [
-                  options.index.startsWith('/')
-                    ? options.index
-                    : `/${options.index}`,
-                ],
+                    options.index.startsWith('/')
+                      ? options.index
+                      : `/${options.index}`,
+                  ],
         // Allow fallthrough to next handler if file not found
         fallthrough: true,
       });
@@ -671,7 +673,7 @@ export class H3Adapter extends AbstractHttpAdapter<
 
   public enableCors(options?: CorsOptions) {
     // Use plain middleware function - don't wrap in eventHandler()
-    this.instance.use(event => {
+    this.instance.use((event) => {
       // Map NestJS CORS options to H3 CORS options
       // H3 uses different property names: exposeHeaders instead of exposedHeaders,
       // allowHeaders instead of allowedHeaders
@@ -732,7 +734,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       const { regexp } = pathToRegexp(normalizedPath);
 
       // Use plain middleware function - don't wrap in eventHandler()
-      this.instance.use(async event => {
+      this.instance.use(async (event) => {
         const currentPath = (event.runtime?.node?.req?.url || '').split('?')[0];
         if (regexp.exec(currentPath)) {
           await fromNodeHandler(callback as any)(event);
@@ -835,7 +837,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   public registerParserMiddleware(_prefix?: string, _rawBody?: boolean) {
     // Use plain middleware function - don't wrap in eventHandler()
     // Middleware must return undefined to allow route handlers to execute
-    this.instance.use(async event => {
+    this.instance.use(async (event) => {
       const method = event.runtime?.node?.req?.method || 'GET';
       if (['POST', 'PUT', 'PATCH'].includes(method)) {
         // Get content type and check if it's multipart - skip body parsing for multipart
@@ -965,7 +967,7 @@ export class H3Adapter extends AbstractHttpAdapter<
         | 'patch'
         | 'head'
         | 'options';
-      this.instance.on(lowerMethod, normalizedPath, async event => {
+      this.instance.on(lowerMethod, normalizedPath, async (event) => {
         // Lazy lookup: get current handlers from map at request time
         // This allows handlers registered after this point to be found
         const handlers = this.routeMap.get(routeKey);
@@ -1207,7 +1209,7 @@ export class H3Adapter extends AbstractHttpAdapter<
         if (Array.isArray(version)) {
           if (
             Array.isArray(extractedVersion) &&
-            version.filter(v => extractedVersion.includes(v as string)).length
+            version.filter((v) => extractedVersion.includes(v as string)).length
           ) {
             return handler(req, res, next);
           }

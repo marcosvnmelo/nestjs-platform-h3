@@ -1,7 +1,8 @@
-import { Readable, PassThrough } from 'stream';
-import { H3Event } from 'h3';
+import type { Readable } from 'stream';
+import { PassThrough } from 'stream';
+import type { H3Event } from 'h3';
 import Busboy from '@fastify/busboy';
-import {
+import type {
   H3UploadedFile,
   H3FileStream,
   H3MulterOptions,
@@ -10,7 +11,7 @@ import {
   H3MultipartParseResult,
 } from '../interfaces/multer-options.interface';
 import { transformException, h3MultipartExceptions } from './multer.utils';
-import { StorageEngine } from '../storage/storage.interface';
+import type { StorageEngine } from '../storage/storage.interface';
 import { DiskStorage } from '../storage/disk.storage';
 
 // Type definitions for Busboy
@@ -170,7 +171,7 @@ export async function parseMultipartWithBusboy(
       reject(transformException(err));
     });
 
-    busboy.on('close', async () => {
+    busboy.on('finish', async () => {
       try {
         await Promise.all(pendingFiles);
         resolve({ files, fields });
@@ -239,7 +240,7 @@ async function processFile(
       reject(err);
     });
 
-    fileStream.on('close', async () => {
+    fileStream.on('end', async () => {
       if (limitExceeded) {
         return;
       }
@@ -428,7 +429,7 @@ export async function parseMultipartAsStreams(
       reject(transformException(err));
     });
 
-    busboy.on('close', async () => {
+    busboy.on('finish', async () => {
       try {
         await Promise.all(pendingCallbacks);
         resolve();

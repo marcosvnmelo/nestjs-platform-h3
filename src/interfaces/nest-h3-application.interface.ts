@@ -1,10 +1,13 @@
-import { HttpServer, INestApplication } from '@nestjs/common';
+import type { H3 } from 'h3';
+import type * as http from 'http';
+import type * as http2 from 'http2';
+import type * as https from 'https';
+
+import type { INestApplication } from '@nestjs/common';
 import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { H3, H3Event } from 'h3';
-import * as http from 'http';
-import * as http2 from 'http2';
-import * as https from 'https';
-import { ServeStaticOptions } from './serve-static-options.interface';
+
+import type { H3Adapter } from '../adapters/h3-adapter';
+import type { ServeStaticOptions } from './serve-static-options.interface';
 
 /**
  * HTTP/2 compatible server type for H3.
@@ -30,7 +33,7 @@ export interface NestH3Application<
    *
    * @returns {HttpServer}
    */
-  getHttpAdapter(): HttpServer<H3Event, H3Event, H3>;
+  getHttpAdapter(): H3Adapter;
 
   /**
    * Starts the application.

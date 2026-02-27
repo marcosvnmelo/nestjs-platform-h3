@@ -993,13 +993,24 @@ export class H3Adapter extends AbstractHttpAdapter<
           // (version didn't match, or handler passed through)
         }
 
-        // No handler matched (all called next()) - throw 404
-        // This happens when versioned routes exist but no version matched
+        // No handler matched (all called next()) - return 404 directly.
+        // This avoids surfacing an unhandled rejection in test runners while
+        // preserving the expected HTTP behavior.
         const req = event.runtime?.node?.req;
         const res = event.runtime?.node?.res;
-        throw new NotFoundException(
-          `Cannot ${req?.method} ${event.url.pathname}`,
-        );
+        if (res && !res.writableEnded) {
+          const body = {
+            message: `Cannot ${req?.method} ${event.url.pathname}`,
+            error: 'Not Found',
+            statusCode: 404,
+          };
+          res.statusCode = 404;
+          if (!res.getHeader('Content-Type')) {
+            res.setHeader('Content-Type', 'application/json');
+          }
+          res.end(JSON.stringify(body));
+        }
+        return kHandled;
       });
     }
   }

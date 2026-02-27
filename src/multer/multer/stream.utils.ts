@@ -1,30 +1,19 @@
-import type { Readable } from 'stream';
 import { PassThrough } from 'stream';
 import type { H3Event } from 'h3';
+import type { Readable } from 'stream';
 import Busboy from '@fastify/busboy';
+
 import type {
-  H3UploadedFile,
   H3FileStream,
-  H3MulterOptions,
-  H3MulterField,
   H3FormField,
+  H3MulterField,
+  H3MulterOptions,
   H3MultipartParseResult,
+  H3UploadedFile,
 } from '../interfaces/multer-options.interface';
-import { transformException, h3MultipartExceptions } from './multer.utils';
 import type { StorageEngine } from '../storage/storage.interface';
 import { DiskStorage } from '../storage/disk.storage';
-
-// Type definitions for Busboy
-interface BusboyFileInfo {
-  filename: string;
-  encoding: string;
-  mimeType: string;
-}
-
-interface BusboyFieldInfo {
-  encoding: string;
-  mimeType: string;
-}
+import { h3MultipartExceptions, transformException } from './multer.utils';
 
 /**
  * Parses multipart form data from an H3 event using @fastify/busboy.
@@ -84,8 +73,7 @@ export async function parseMultipartWithBusboy(
 
     busboy.on(
       'file',
-      (fieldname: string, fileStream: Readable, info: BusboyFileInfo) => {
-        const { filename, encoding, mimeType } = info;
+      (fieldname, fileStream, filename, transferEncoding, mimeType) => {
         fileCount++;
         partCount++;
 
@@ -108,18 +96,18 @@ export async function parseMultipartWithBusboy(
           fieldname,
           fileStream,
           filename,
-          encoding,
+          transferEncoding,
           mimeType,
           storage,
           limits,
           options,
         )
-          .then(file => {
+          .then((file) => {
             if (file) {
               files.push(file);
             }
           })
-          .catch(err => {
+          .catch((err) => {
             reject(transformException(err));
           });
 
@@ -129,8 +117,14 @@ export async function parseMultipartWithBusboy(
 
     busboy.on(
       'field',
-      (fieldname: string, value: string, info: BusboyFieldInfo) => {
-        const { encoding, mimeType } = info;
+      (
+        fieldname: string,
+        value: string,
+        _fieldnameTruncated: boolean,
+        _valueTruncated: boolean,
+        _encoding: string,
+        _mimeType: string,
+      ) => {
         fieldCount++;
         partCount++;
 
@@ -360,8 +354,7 @@ export async function parseMultipartAsStreams(
 
     busboy.on(
       'file',
-      (fieldname: string, fileStream: Readable, info: BusboyFileInfo) => {
-        const { filename, encoding, mimeType } = info;
+      (fieldname, fileStream, filename, transferEncoding, mimeType) => {
         fileCount++;
         partCount++;
 
@@ -383,7 +376,7 @@ export async function parseMultipartAsStreams(
         const fileStreamObj: H3FileStream = {
           fieldname,
           originalname: filename,
-          encoding,
+          encoding: transferEncoding,
           mimetype: mimeType || 'application/octet-stream',
           stream: passThrough,
         };
@@ -397,8 +390,14 @@ export async function parseMultipartAsStreams(
 
     busboy.on(
       'field',
-      (fieldname: string, value: string, info: BusboyFieldInfo) => {
-        const { encoding, mimeType } = info;
+      (
+        fieldname: string,
+        value: string,
+        _fieldnameTruncated: boolean,
+        _valueTruncated: boolean,
+        _encoding: string,
+        _mimeType: string,
+      ) => {
         fieldCount++;
         partCount++;
 
@@ -449,7 +448,7 @@ export function filterFilesByFieldNameStream(
   files: H3UploadedFile[],
   fieldName: string,
 ): H3UploadedFile[] {
-  return files.filter(file => file.fieldname === fieldName);
+  return files.filter((file) => file.fieldname === fieldName);
 }
 
 /**
@@ -466,7 +465,7 @@ export function groupFilesByFieldsStream(
   const result: Record<string, H3UploadedFile[]> = {};
 
   for (const field of fields) {
-    const fieldFiles = files.filter(file => file.fieldname === field.name);
+    const fieldFiles = files.filter((file) => file.fieldname === field.name);
 
     if (field.maxCount !== undefined && fieldFiles.length > field.maxCount) {
       const error = new Error(
@@ -493,7 +492,7 @@ export function filterFormFieldsByName(
   fields: H3FormField[],
   fieldName: string,
 ): H3FormField[] {
-  return fields.filter(field => field.fieldname === fieldName);
+  return fields.filter((field) => field.fieldname === fieldName);
 }
 
 /**

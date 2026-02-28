@@ -1,0 +1,29 @@
+{
+  "name": "@marcosvnmelo/nestjs-platform-h3-benchmark",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rslib build",
+    "benchmark": "pnpm run build && node ./dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "@nestjs/platform-fastify": "catalog:",
+    "autocannon": "catalog:",
+    "express": "catalog:",
+    "fastify": "catalog:",
+    "h3": "catalog:",
+    "reflect-metadata": "catalog:"
+  },
+  "devDependencies": {
+    "@rslib/core": "catalog:",
+    "@types/autocannon": "catalog:",
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

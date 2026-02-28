@@ -35,8 +35,8 @@ import {
   isObject,
   isString,
   isUndefined,
-} from '@nestjs/common/utils/shared.utils';
-import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter';
+} from '@nestjs/common/utils/shared.utils.js';
+import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter.js';
 
 import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface';
 

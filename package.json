@@ -32,6 +32,7 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "benchmark": "pnpm run build && pnpm --filter @marcosvnmelo/nestjs-platform-h3-benchmark run benchmark",
     "typecheck": "tsc --noEmit",
     "typecheck:workspace": "pnpm --filter ...* typecheck",
     "prepublishOnly": "pnpm run build",

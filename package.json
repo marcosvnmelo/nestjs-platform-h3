@@ -8,6 +8,10 @@
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcosvnmelo/nestjs-platform-h3"
+  },
   "keywords": [
     "typescript",
     "library",

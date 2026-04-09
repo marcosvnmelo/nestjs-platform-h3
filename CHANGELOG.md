@@ -1,3 +1,12 @@
+## [11.1.14-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.14-1...v11.1.14-2) (2026-04-09)
+
+
+### Features
+
+* update h3 version to 2.0.1-rc.20 ([9038542](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/90385422d7235fc1fd172aa0d870ec8116d5b678))
+
+
+
 ## [11.1.14-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/3bc44d9388daf9d0ac86a3885a10506d32340068...v11.1.14-1) (2026-02-28)
 
 

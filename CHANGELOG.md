@@ -1,3 +1,12 @@
+## [11.1.18-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.14-2...v11.1.18-1) (2026-04-09)
+
+
+### Features
+
+* update NestJS packages ([560bb44](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/560bb4415a8d49f1c29e61496405782d69fc4782))
+
+
+
 ## [11.1.14-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.14-1...v11.1.14-2) (2026-04-09)
 
 

@@ -11,9 +11,9 @@ catalog:
   '@nestjs/platform-fastify': '11.1.14'
   
   # Build tools
-  '@rslib/core': '0.19.6'
-  '@rstest/core': '^0.8.5'
-  '@rstest/adapter-rslib': '^0.2.0'
+  '@rslib/core': '0.21.0'
+  '@rstest/core': '^0.9.6'
+  '@rstest/adapter-rslib': '^0.2.2'
   
   # HTTP servers
   express: '5.2.1'

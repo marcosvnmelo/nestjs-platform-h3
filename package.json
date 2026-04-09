@@ -62,11 +62,11 @@
     "@rstest/adapter-rslib": "catalog:",
     "@rstest/core": "catalog:",
     "@types/node": "catalog:",
-    "eslint": "10.0.2",
+    "eslint": "10.2.0",
     "prettier": "3.8.1",
     "quick-publish": "0.7.1",
     "typescript": "catalog:",
-    "typescript-eslint": "8.56.1"
+    "typescript-eslint": "8.58.1"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.0.0",

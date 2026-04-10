@@ -47,6 +47,32 @@ import type { ServeStaticOptions } from '../interfaces/serve-static-options.inte
 const kHandled = Symbol.for('h3.handled');
 
 /**
+ * Sentinel value to distinguish "capture not yet stored" from "captured null body".
+ */
+const kNoBody: unique symbol = Symbol('h3.noBody');
+
+/**
+ * Lightweight HTTPResponse-compatible class for returning captured responses
+ * through H3's response pipeline. Named "HTTPResponse" so that H3's
+ * prepareResponseBody recognises it via the `constructor.name` check.
+ *
+ * Unlike the real h3 HTTPResponse, `.headers` is a plain `undefined` property
+ * (not a lazy getter), avoiding an unnecessary `new Headers()` allocation
+ * when H3's prepareResponse accesses it.
+ */
+
+class HTTPResponse {
+  body: Buffer | null;
+  status: number;
+  headers: undefined = undefined;
+
+  constructor(body: Buffer | null, status: number) {
+    this.body = body;
+    this.status = status;
+  }
+}
+
+/**
  * HTTP/2 options for the H3 adapter.
  *
  * @publicApi
@@ -232,7 +258,14 @@ export class H3Adapter extends AbstractHttpAdapter<
         .on('error', (err: Error) => body.errorLogger(err));
     }
 
+    // Check if capture context is active (set up by invokeHandler)
+    const capture = (res as any).__h3Body === kNoBody;
+
     if (isNil(body)) {
+      if (capture) {
+        (res as any).__h3Body = null;
+        return;
+      }
       return res.end();
     }
     if (isObject(body) && !Buffer.isBuffer(body) && !isString(body)) {
@@ -249,7 +282,18 @@ export class H3Adapter extends AbstractHttpAdapter<
       } else if (!responseContentType) {
         res.setHeader('Content-Type', 'application/json');
       }
-      return res.end(JSON.stringify(body));
+      const jsonBody = JSON.stringify(body);
+      if (capture) {
+        (res as any).__h3Body = Buffer.from(jsonBody);
+        return;
+      }
+      return res.end(jsonBody);
+    }
+    if (capture) {
+      (res as any).__h3Body = Buffer.isBuffer(body)
+        ? body
+        : Buffer.from(String(body));
+      return;
     }
     return res.end(body);
   }
@@ -271,6 +315,10 @@ export class H3Adapter extends AbstractHttpAdapter<
       (response as H3Event).runtime?.node?.res ||
       (response as http.ServerResponse);
     if (res && typeof res.end === 'function') {
+      if ((res as any).__h3Body === kNoBody) {
+        (res as any).__h3Body = message ? Buffer.from(message) : null;
+        return;
+      }
       if (message) {
         return res.end(message);
       }
@@ -293,7 +341,12 @@ export class H3Adapter extends AbstractHttpAdapter<
       (response as H3Event).runtime?.node?.res ||
       (response as http.ServerResponse);
     if (res && typeof res.end === 'function') {
-      return res.end('Render not supported');
+      const msg = 'Render not supported';
+      if ((res as any).__h3Body === kNoBody) {
+        (res as any).__h3Body = Buffer.from(msg);
+        return;
+      }
+      return res.end(msg);
     }
   }
 
@@ -309,6 +362,10 @@ export class H3Adapter extends AbstractHttpAdapter<
     if (res) {
       res.statusCode = statusCode;
       res.setHeader('Location', url);
+      if ((res as any).__h3Body === kNoBody) {
+        (res as any).__h3Body = null;
+        return;
+      }
       res.end();
     }
   }
@@ -354,8 +411,8 @@ export class H3Adapter extends AbstractHttpAdapter<
       }
 
       // Ensure not-found handler is treated as fully handled by H3.
-      await this.invokeHandler(handler, req, res);
-      return kHandled;
+      const result = await this.invokeHandler(handler, req, res);
+      return result ?? kHandled;
     });
     return this;
   }
@@ -986,9 +1043,10 @@ export class H3Adapter extends AbstractHttpAdapter<
             params,
           );
 
-          // Handler completed successfully - stop chain
-          if (result === kHandled) {
-            return kHandled;
+          // Handler completed successfully - return result to H3's pipeline
+          // (HTTPResponse for captured body, kHandled for streams)
+          if (result !== undefined) {
+            return result;
           }
 
           // Handler called next() or returned undefined - try next handler
@@ -1001,16 +1059,16 @@ export class H3Adapter extends AbstractHttpAdapter<
         const req = event.runtime?.node?.req;
         const res = event.runtime?.node?.res;
         if (res && !res.writableEnded) {
-          const body = {
+          const jsonBody = JSON.stringify({
             message: `Cannot ${req?.method} ${event.url.pathname}`,
             error: 'Not Found',
             statusCode: 404,
-          };
+          });
           res.statusCode = 404;
           if (!res.getHeader('Content-Type')) {
             res.setHeader('Content-Type', 'application/json');
           }
-          res.end(JSON.stringify(body));
+          return new HTTPResponse(Buffer.from(jsonBody), 404);
         }
         return kHandled;
       });
@@ -1024,13 +1082,13 @@ export class H3Adapter extends AbstractHttpAdapter<
    * @param handler - The NestJS route handler (possibly version-wrapped)
    * @param event - The H3 event
    * @param params - Route parameters (extracted by H3's router)
-   * @returns Promise that resolves to kHandled (if handled) or undefined (if next() called)
+   * @returns Promise that resolves to an HTTPResponse (body captured), kHandled (stream/direct end), or undefined (next() called)
    */
   private executeHandler(
     handler: Function,
     event: H3Event,
     params: Record<string, string>,
-  ): Promise<typeof kHandled | undefined> {
+  ): Promise<HTTPResponse | typeof kHandled | undefined> {
     const req = event.runtime?.node?.req;
     const res = event.runtime?.node?.res;
 
@@ -1045,6 +1103,11 @@ export class H3Adapter extends AbstractHttpAdapter<
       if (!res.getHeader(key)) {
         res.setHeader(key, value);
       }
+    }
+    // Clear H3 response headers so they don't get duplicated when
+    // H3's prepareResponse reads them again for the FastResponse.
+    for (const key of [...h3Headers.keys()]) {
+      h3Headers.delete(key);
     }
 
     // Add NestJS-expected properties to req (direct assignment for speed)
@@ -1062,27 +1125,29 @@ export class H3Adapter extends AbstractHttpAdapter<
 
     // Handle onRequest hook if set
     if (this.onRequestHook) {
-      return new Promise<typeof kHandled | undefined>((resolve, reject) => {
-        let invoked = false;
-        const invokeOnce = () => {
-          if (invoked) return;
-          invoked = true;
-          this.invokeHandler(handler, req, res).then(resolve).catch(reject);
-        };
+      return new Promise<HTTPResponse | typeof kHandled | undefined>(
+        (resolve, reject) => {
+          let invoked = false;
+          const invokeOnce = () => {
+            if (invoked) return;
+            invoked = true;
+            this.invokeHandler(handler, req, res).then(resolve).catch(reject);
+          };
 
-        try {
-          const hookResult = this.onRequestHook?.apply(this, [
-            req,
-            res,
-            invokeOnce,
-          ]);
-          if (hookResult && typeof hookResult.then === 'function') {
-            hookResult.then(() => invokeOnce()).catch(reject);
+          try {
+            const hookResult = this.onRequestHook?.apply(this, [
+              req,
+              res,
+              invokeOnce,
+            ]);
+            if (hookResult && typeof hookResult.then === 'function') {
+              hookResult.then(() => invokeOnce()).catch(reject);
+            }
+          } catch (err) {
+            reject(err);
           }
-        } catch (err) {
-          reject(err);
-        }
-      });
+        },
+      );
     }
 
     // Fast path: no hooks, just invoke handler
@@ -1091,80 +1156,88 @@ export class H3Adapter extends AbstractHttpAdapter<
 
   /**
    * Invokes the actual NestJS handler and manages response lifecycle.
-   * Optimized to avoid unnecessary listener registration.
    *
-   * Response handling:
-   * - For async handlers (return promise): resolve when promise completes, no res listener needed
-   * - For sync handlers: wait for res 'finish' event to know when response is sent
-   * - next() callback allows versioned handlers to skip to next handler if version doesn't match
-   * - Returns kHandled to signal H3 that response is handled, or undefined to continue middleware chain
+   * Instead of calling res.end() directly, reply/end/redirect capture the
+   * response body. After the handler completes, the captured body is returned
+   * as an HTTPResponse so H3/srvx can send it through its native pipeline
+   * (a single writeHead + write + end pass), eliminating the double-end
+   * overhead of the previous approach.
    *
    * @param handler - The NestJS route handler function
    * @param req - Node.js request (HTTP/1 or HTTP/2)
    * @param res - Node.js response (HTTP/1 or HTTP/2)
-   * @returns Promise resolving to kHandled or undefined
+   * @returns Promise resolving to HTTPResponse, kHandled, or undefined
    */
   private invokeHandler(
     handler: Function,
     req: http.IncomingMessage | http2.Http2ServerRequest,
     res: http.ServerResponse | http2.Http2ServerResponse,
-  ): Promise<typeof kHandled | undefined> {
-    return new Promise<typeof kHandled | undefined>((resolve, reject) => {
-      let resolved = false;
+  ): Promise<HTTPResponse | typeof kHandled | undefined> {
+    // Initialise the capture context so reply/end/redirect store the body
+    // instead of calling res.end() directly.
+    (res as any).__h3Body = kNoBody;
 
-      const resolveHandled = () => {
-        if (!resolved) {
+    return new Promise<HTTPResponse | typeof kHandled | undefined>(
+      (resolve, reject) => {
+        let resolved = false;
+
+        const resolveWith = (value: any) => {
+          if (!resolved) {
+            resolved = true;
+            resolve(value);
+          }
+        };
+
+        // Fallback: wait for finish (stream cases where pipe calls res.end)
+        res.once('finish', () => resolveWith(kHandled));
+
+        // next() callback for version filtering
+        const next = (err?: Error) => {
+          if (resolved) return;
           resolved = true;
-          resolve(kHandled);
-        }
-      };
+          if (err) {
+            reject(err);
+          } else {
+            resolve(undefined); // Continue to next handler (version didn't match)
+          }
+        };
 
-      // Register finish before invoking handler to avoid missing a synchronous
-      // res.end() that emits finish immediately.
-      res.once('finish', resolveHandled);
+        const checkCapture = () => {
+          if (resolved) return;
+          const capturedBody = (res as any).__h3Body;
+          if (capturedBody !== kNoBody) {
+            // Body was captured by reply/end/redirect — return through H3's pipeline
+            resolveWith(
+              new HTTPResponse(capturedBody, (res as any).statusCode || 200),
+            );
+          } else if (res.writableEnded || res.headersSent) {
+            // Response was sent directly (stream, @Res() decorator, etc.)
+            resolveWith(kHandled);
+          }
+          // else: wait for 'finish' event (rare edge case)
+        };
 
-      // next() callback for version filtering
-      const next = (err?: Error) => {
-        if (resolved) return;
-        resolved = true;
-        if (err) {
-          reject(err);
-        } else {
-          resolve(undefined); // Continue to next handler (version didn't match)
-        }
-      };
+        try {
+          const result = handler(req, res, next);
 
-      try {
-        const result = handler(req, res, next);
-
-        // If handler returns a promise, handle errors
-        if (result && typeof result.then === 'function') {
-          result
-            .then(() => {
-              // Handler completed, mark as handled if response has already ended.
-              if (!resolved && (res.writableEnded || res.headersSent)) {
-                resolveHandled();
-              }
-            })
-            .catch((err: Error) => {
+          if (result && typeof result.then === 'function') {
+            result.then(checkCapture).catch((err: Error) => {
               if (!resolved) {
                 resolved = true;
                 reject(err);
               }
             });
-        } else {
-          // Synchronous handler may have already ended response.
-          if (!resolved && (res.writableEnded || res.headersSent)) {
-            resolveHandled();
+          } else {
+            checkCapture();
+          }
+        } catch (err) {
+          if (!resolved) {
+            resolved = true;
+            reject(err as Error);
           }
         }
-      } catch (err) {
-        if (!resolved) {
-          resolved = true;
-          reject(err as Error);
-        }
-      }
-    });
+      },
+    );
   }
 
   /**

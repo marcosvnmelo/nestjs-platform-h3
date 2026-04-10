@@ -1,3 +1,12 @@
+## [11.1.18-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-1...v11.1.18-2) (2026-04-10)
+
+
+### Features
+
+* optimize H3 response pipeline by capturing response body ([32e5760](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/32e57600d0434245a3c28d481446d141d00cbbc0))
+
+
+
 ## [11.1.18-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.14-2...v11.1.18-1) (2026-04-09)
 
 

@@ -2,7 +2,6 @@
 .DS_Store
 *.local
 *.log*
-.catalog-resolved.json
 
 # Dist
 node_modules

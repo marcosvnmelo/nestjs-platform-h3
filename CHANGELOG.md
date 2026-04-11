@@ -1,3 +1,12 @@
+## [11.1.18-4](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-3...v11.1.18-4) (2026-04-11)
+
+
+### Features
+
+* add quick-publish patch ([02e8a7f](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/02e8a7f9a052e67a3703225cc237401f8d05abd2))
+
+
+
 ## [11.1.18-3](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-2...v11.1.18-3) (2026-04-11)
 
 

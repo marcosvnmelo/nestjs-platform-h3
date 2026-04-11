@@ -1,3 +1,12 @@
+## [11.1.18-5](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-4...v11.1.18-5) (2026-04-11)
+
+
+### Bug Fixes
+
+* update dts configuration to enable bundling ([cdbcd51](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/cdbcd510f857dc28af64b32a21087493b7966c1e))
+
+
+
 ## [11.1.18-4](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-3...v11.1.18-4) (2026-04-11)
 
 

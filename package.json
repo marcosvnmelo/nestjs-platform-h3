@@ -40,14 +40,12 @@
     "typecheck": "tsc --noEmit",
     "typecheck:workspace": "pnpm --filter ...* typecheck",
     "prepublishOnly": "pnpm run build",
-    "prepack": "node scripts/resolve-catalogs.mjs",
     "test": "pnpm --filter @marcosvnmelo/nestjs-platform-h3-tests run test",
     "test:watch": "pnpm --filter @marcosvnmelo/nestjs-platform-h3-tests run test:watch",
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "quick-publish",
-    "postpack": "node scripts/restore-catalogs.mjs"
+    "release": "quick-publish"
   },
   "dependencies": {
     "@fastify/busboy": "catalog:",

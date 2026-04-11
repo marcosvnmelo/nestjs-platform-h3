@@ -45,7 +45,9 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "quick-publish"
+    "prerelease": "node scripts/resolve-catalogs.mjs",
+    "release": "quick-publish",
+    "postrelease": "node scripts/restore-catalogs.mjs"
   },
   "dependencies": {
     "@fastify/busboy": "catalog:",

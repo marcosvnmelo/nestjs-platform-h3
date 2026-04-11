@@ -7,6 +7,18 @@ export default defineConfig([
   ts.configs.recommended,
   { ignores: ['**/dist'] },
   {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        URL: 'readonly',
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+  },
+  {
     files: ['**/src/**/*.ts', '**/e2e/**/*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

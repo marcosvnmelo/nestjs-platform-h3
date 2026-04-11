@@ -73,6 +73,11 @@ catalogs:
       specifier: 5.9.3
       version: 5.9.3
 
+patchedDependencies:
+  quick-publish:
+    hash: 65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d
+    path: patches/quick-publish.patch
+
 importers:
 
   .:
@@ -122,7 +127,7 @@ importers:
         version: 3.8.1
       quick-publish:
         specifier: 0.7.1
-        version: 0.7.1
+        version: 0.7.1(patch_hash=65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -4442,7 +4447,7 @@ snapshots:
 
   quick-lru@4.0.1: {}
 
-  quick-publish@0.7.1:
+  quick-publish@0.7.1(patch_hash=65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d):
     dependencies:
       cac: 6.7.14
       conventional-changelog-cli: 2.2.2

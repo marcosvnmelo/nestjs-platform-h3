@@ -6,14 +6,14 @@ catalog:
   # Core framework
   '@nestjs/common': '11.1.18'
   '@nestjs/core': '11.1.18'
-  '@nestjs/testing': '11.1.18'
   '@nestjs/platform-express': '11.1.18'
   '@nestjs/platform-fastify': '11.1.18'
+  '@nestjs/testing': '11.1.18'
 
   # Build tools
   '@rslib/core': '0.21.0'
-  '@rstest/core': '^0.9.6'
   '@rstest/adapter-rslib': '^0.2.2'
+  '@rstest/core': '^0.9.6'
 
   # HTTP servers
   express: '5.2.1'
@@ -23,14 +23,16 @@ catalog:
   # Utilities
   '@fastify/busboy': '3.2.0'
   path-to-regexp: '8.4.2'
-  rxjs: '7.8.2'
   reflect-metadata: '^0.2.2'
+  rxjs: '7.8.2'
 
   # Dev dependencies
-  typescript: '5.9.3'
-  '@types/node': '^24'
-  '@types/express': '5.0.6'
   '@types/autocannon': '7.12.7'
+  '@types/express': '5.0.6'
+  '@types/node': '^24'
   '@types/supertest': '7.2.0'
-  supertest: '^7.2.2'
   autocannon: '8.0.0'
+  supertest: '^7.2.2'
+  typescript: '5.9.3'
+patchedDependencies:
+  quick-publish: patches/quick-publish.patch

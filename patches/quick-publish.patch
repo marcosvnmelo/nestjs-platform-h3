@@ -1,0 +1,13 @@
+diff --git a/lib/commands.js b/lib/commands.js
+index e69ae7c84b05622d454d6df43c995a5d7373233c..2a9351e2a6c2b3842f5eaa6e2233eafca3cf1403 100644
+--- a/lib/commands.js
++++ b/lib/commands.js
+@@ -17,7 +17,7 @@ const bin = (name) => path_1.default.resolve(__dirname, `../node_modules/.bin/${
+  */
+ exports.COMMANDS = {
+     bumpVersion: (version) => `npm version ${version}`,
+-    npmPublish: (tag) => `npm publish --tag=${tag}`,
++    npmPublish: (tag) => `pnpm publish --no-git-checks --tag=${tag}`,
+     gitAdd: (file) => `git add ${file}`,
+     gitCommit: (message) => `git commit -m ${encodeURIComponent(message)}`,
+     gitPush: () => 'git push',

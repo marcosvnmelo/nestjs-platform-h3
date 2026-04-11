@@ -1,3 +1,14 @@
+## [11.1.18-3](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-2...v11.1.18-3) (2026-04-11)
+
+
+### Bug Fixes
+
+* add check for existing catalog entries before restoring ([b329a0c](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/b329a0c49edeadecb196eb4aa8048c99919a875b))
+* add scripts to resolve and restore catalog entries in package.json ([a2983a7](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/a2983a70e4dbe4465afa9cc5cc57f17790a49588))
+* update package.json scripts for catalog resolution and restoration ([a069a8c](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/a069a8c3b05df36964be9a75d1f659625ad7cfc3))
+
+
+
 ## [11.1.18-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-1...v11.1.18-2) (2026-04-10)
 
 

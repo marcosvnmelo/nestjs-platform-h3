@@ -1,3 +1,13 @@
+## [11.1.18-6](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-5...v11.1.18-6) (2026-04-12)
+
+
+### Features
+
+* add Express-like polyfill methods to H3 response object for NestJS compatibility ([3a3e19e](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/3a3e19eeb89920a7566aeb7b8037ad0321e44632))
+* add support for 'all' method in H3Adapter for route registration ([dfc6291](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/dfc629143dc88603b982b0cd2eca5aca02e27dde))
+
+
+
 ## [11.1.18-5](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-4...v11.1.18-5) (2026-04-11)
 
 

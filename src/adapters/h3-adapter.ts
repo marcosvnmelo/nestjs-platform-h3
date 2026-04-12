@@ -1155,6 +1155,79 @@ export class H3Adapter extends AbstractHttpAdapter<
   }
 
   /**
+   * Add Express-like polyfill methods to the response object for compatibility
+   * with NestJS middleware and decorators that expect an Express-like API.
+   */
+  private addExpressPolyfills(
+    res: http.ServerResponse | http2.Http2ServerResponse,
+  ) {
+    const resAny = res as any;
+
+    // type() - Set Content-Type header
+    if (!resAny.type) {
+      resAny.type = (contentType: string) => {
+        res.setHeader('Content-Type', contentType);
+        return resAny;
+      };
+    }
+
+    // json() - Send JSON response
+    if (!resAny.json) {
+      resAny.json = (body: any) => {
+        res.setHeader('Content-Type', 'application/json');
+        const jsonBody = JSON.stringify(body);
+        // Store body for capture
+        resAny.__h3Body = Buffer.from(jsonBody);
+        return resAny;
+      };
+    }
+
+    // send() - Send response
+    if (!resAny.send) {
+      resAny.send = (body: any) => {
+        if (body !== null && body !== undefined) {
+          resAny.__h3Body = Buffer.isBuffer(body)
+            ? body
+            : Buffer.from(String(body));
+        }
+        return resAny;
+      };
+    }
+
+    // set() / header() - Set headers
+    if (!resAny.set) {
+      resAny.set = (name: string, value?: string) => {
+        if (typeof name === 'object') {
+          Object.entries(name).forEach(([key, val]) => {
+            res.setHeader(key, String(val));
+          });
+        } else if (value !== undefined) {
+          res.setHeader(name, value);
+        }
+        return resAny;
+      };
+    }
+    if (!resAny.header) {
+      resAny.header = resAny.set;
+    }
+
+    // get() - Get header value
+    if (!resAny.get) {
+      resAny.get = (name: string) => {
+        return res.getHeader(name);
+      };
+    }
+
+    // status() - Set status code
+    if (!resAny.status) {
+      resAny.status = (code: number) => {
+        res.statusCode = code;
+        return resAny;
+      };
+    }
+  }
+
+  /**
    * Invokes the actual NestJS handler and manages response lifecycle.
    *
    * Instead of calling res.end() directly, reply/end/redirect capture the
@@ -1176,6 +1249,9 @@ export class H3Adapter extends AbstractHttpAdapter<
     // Initialise the capture context so reply/end/redirect store the body
     // instead of calling res.end() directly.
     (res as any).__h3Body = kNoBody;
+
+    // Add Express-like polyfill methods for compatibility with NestJS middleware
+    this.addExpressPolyfills(res);
 
     return new Promise<HTTPResponse | typeof kHandled | undefined>(
       (resolve, reject) => {

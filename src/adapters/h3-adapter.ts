@@ -16,16 +16,12 @@ import {
 import { toNodeHandler } from 'h3/node';
 import { pathToRegexp } from 'path-to-regexp';
 
-import type {
-  NestApplicationOptions,
-  RequestMethod,
-  VersioningOptions,
-} from '@nestjs/common';
+import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
 import type { VersionValue } from '@nestjs/common/interfaces';
 import {
   InternalServerErrorException,
   Logger,
-  NotFoundException,
+  RequestMethod,
   StreamableFile,
   VERSION_NEUTRAL,
   VersioningType,
@@ -915,6 +911,19 @@ export class H3Adapter extends AbstractHttpAdapter<
     return 'h3';
   }
 
+  public use(handler: Function): void;
+  public use(path: string, handler: Function): void;
+  public use(...args: [Function] | [string, Function]) {
+    const path = (args.length > 1 ? args[0] : '/') as string;
+    const handler =
+      args.length > 1 ? (args[1] as Function) : (args[0] as Function);
+    const handlerWrapper = (req: any, res: any, next?: any) => {
+      this.addExpressPolyfills(res);
+      return handler(req, res, next);
+    };
+    this.createMiddlewareFactory(RequestMethod.ALL)(path, handlerWrapper);
+  }
+
   public get(handler: Function): void;
   public get(path: string, handler: Function): void;
   public get(...args: [Function] | [string, Function]) {
@@ -976,6 +985,15 @@ export class H3Adapter extends AbstractHttpAdapter<
     const handler =
       args.length > 1 ? (args[1] as Function) : (args[0] as Function);
     this.registerRoute('HEAD', path as string, handler);
+  }
+
+  public all(handler: Function): void;
+  public all(path: string, handler: Function): void;
+  public all(...args: [Function] | [string, Function]) {
+    const path = args.length > 1 ? args[0] : '/';
+    const handler =
+      args.length > 1 ? (args[1] as Function) : (args[0] as Function);
+    this.registerRoute('', path as string, handler);
   }
 
   /**
@@ -1115,6 +1133,7 @@ export class H3Adapter extends AbstractHttpAdapter<
     (req as any).params = params;
     (req as any).body = (event as any).body;
     (req as any).h3Event = event;
+    this.addExpressPolyfills(res);
 
     // Register response hook if set
     if (this.onResponseHook) {

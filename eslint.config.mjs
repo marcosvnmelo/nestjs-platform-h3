@@ -5,7 +5,7 @@ import ts from 'typescript-eslint';
 export default defineConfig([
   js.configs.recommended,
   ts.configs.recommended,
-  { ignores: ['**/dist'] },
+  { ignores: ['**/dist', '**/.rslib'] },
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {

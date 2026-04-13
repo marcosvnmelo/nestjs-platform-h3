@@ -4,16 +4,16 @@ packages:
 
 catalog:
   # Core framework
-  '@nestjs/common': '11.1.18'
-  '@nestjs/core': '11.1.18'
-  '@nestjs/platform-express': '11.1.18'
-  '@nestjs/platform-fastify': '11.1.18'
-  '@nestjs/testing': '11.1.18'
+  '@nestjs/common': '11.1.19'
+  '@nestjs/core': '11.1.19'
+  '@nestjs/platform-express': '11.1.19'
+  '@nestjs/platform-fastify': '11.1.19'
+  '@nestjs/testing': '11.1.19'
 
   # Build tools
   '@rslib/core': '0.21.0'
   '@rstest/adapter-rslib': '^0.2.2'
-  '@rstest/core': '^0.9.6'
+  '@rstest/core': '^0.9.7'
 
   # HTTP servers
   express: '5.2.1'

@@ -64,10 +64,10 @@
     "@rstest/core": "catalog:",
     "@types/node": "catalog:",
     "eslint": "10.2.0",
-    "prettier": "3.8.1",
+    "prettier": "3.8.2",
     "quick-publish": "0.7.1",
     "typescript": "catalog:",
-    "typescript-eslint": "8.58.1"
+    "typescript-eslint": "8.58.2"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.0.0",

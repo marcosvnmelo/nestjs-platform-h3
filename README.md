@@ -2,7 +2,7 @@
 
 H3 platform adapter for NestJS.
 
-This package lets you run regular NestJS apps on top of [h3](https://h3.unjs.io), including support for:
+This package lets you run regular NestJS apps on top of [h3](https://h3.dev), including support for:
 
 - Nest core HTTP features (routing, pipes, guards, interceptors, filters, middleware)
 - CORS and static assets

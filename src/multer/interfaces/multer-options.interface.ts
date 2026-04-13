@@ -6,7 +6,7 @@ import type { StorageEngine } from '../storage/storage.interface';
  * H3 file upload options interface.
  * Designed to be compatible with multer options structure for consistency.
  *
- * @see https://h3.unjs.io
+ * @see https://h3.dev
  *
  * @publicApi
  */

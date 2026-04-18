@@ -4,7 +4,13 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
-      dts: false,
     },
   ],
+  tools: {
+    rspack: {
+      resolve: {
+        exportsFields: ['testExports', '...'],
+      },
+    },
+  },
 });

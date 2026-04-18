@@ -27,6 +27,13 @@
       "default": "./dist/index.js"
     }
   },
+  "testExports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -36,7 +43,7 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "benchmark": "pnpm run build && pnpm --filter @marcosvnmelo/nestjs-platform-h3-benchmark run benchmark",
+    "benchmark": "pnpm --filter @marcosvnmelo/nestjs-platform-h3-benchmark run benchmark",
     "typecheck": "tsc --noEmit",
     "typecheck:workspace": "pnpm --filter ...* typecheck",
     "prepublishOnly": "pnpm run build",

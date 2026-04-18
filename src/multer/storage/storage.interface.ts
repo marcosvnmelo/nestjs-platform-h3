@@ -1,7 +1,7 @@
 import type {
   H3FileStream,
   H3UploadedFile,
-} from '../interfaces/multer-options.interface';
+} from '../interfaces/multer-options.interface.ts';
 
 /**
  * Callback function for storage operations.

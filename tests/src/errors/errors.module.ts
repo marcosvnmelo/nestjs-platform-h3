@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { ErrorsController } from './errors.controller';
+import { ErrorsController } from './errors.controller.ts';
 
 @Module({
   controllers: [ErrorsController],

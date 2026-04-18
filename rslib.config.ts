@@ -4,7 +4,8 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
-      dts: { bundle: true },
+      bundle: false,
+      dts: true,
     },
   ],
 });

@@ -1,1 +1,1 @@
-export * from './h3-adapter';
+export * from './h3-adapter.ts';

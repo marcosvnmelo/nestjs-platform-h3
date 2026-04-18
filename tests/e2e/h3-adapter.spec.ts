@@ -1,4 +1,4 @@
-import type { App } from 'supertest/types';
+import type { App } from 'supertest/types.d.ts';
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
 import request from 'supertest';
 
@@ -7,7 +7,7 @@ import { Test } from '@nestjs/testing';
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../src/app.module.ts';
 
 describe('Hello world (H3 adapter)', () => {
   let server: App;

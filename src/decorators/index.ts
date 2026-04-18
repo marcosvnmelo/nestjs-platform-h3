@@ -5,4 +5,4 @@
  * MIT Licensed
  */
 
-export * from './h3-decorators';
+export * from './h3-decorators.ts';

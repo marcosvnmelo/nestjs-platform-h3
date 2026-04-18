@@ -8,8 +8,8 @@ import { Test } from '@nestjs/testing';
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
-import { AuthGuard } from '../src/guards/auth.guard';
-import { Roles, RolesGuard } from '../src/guards/roles.guard';
+import { AuthGuard } from '../src/guards/auth.guard.ts';
+import { Roles, RolesGuard } from '../src/guards/roles.guard.ts';
 
 @Controller('test')
 class TestController {

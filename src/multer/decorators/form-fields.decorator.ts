@@ -1,7 +1,7 @@
 import type { ExecutionContext } from '@nestjs/common';
 import { createParamDecorator } from '@nestjs/common';
 
-import type { H3FormField } from '../interfaces/multer-options.interface';
+import type { H3FormField } from '../interfaces/multer-options.interface.ts';
 
 /**
  * Request body decorator that extracts all form fields from multipart requests.

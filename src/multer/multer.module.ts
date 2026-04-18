@@ -5,8 +5,8 @@ import type {
   H3MulterModuleAsyncOptions,
   H3MulterModuleOptions,
   H3MulterOptionsFactory,
-} from './interfaces';
-import { MULTER_MODULE_OPTIONS } from './files.constants';
+} from './interfaces/index.ts';
+import { MULTER_MODULE_OPTIONS } from './files.constants.ts';
 
 /**
  * Module for configuring H3 file upload options globally.

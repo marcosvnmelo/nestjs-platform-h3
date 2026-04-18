@@ -3,13 +3,13 @@ import { Readable } from 'stream';
 import type {
   H3FileStream,
   H3UploadedFile,
-} from '../interfaces/multer-options.interface';
+} from '../interfaces/multer-options.interface.ts';
 import type {
   MemoryStorageOptions,
   RemoveCallback,
   StorageCallback,
   StorageEngine,
-} from './storage.interface';
+} from './storage.interface.ts';
 
 /**
  * Memory storage engine for keeping uploaded files in memory as buffers.

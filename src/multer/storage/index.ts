@@ -1,3 +1,3 @@
-export * from './storage.interface';
-export * from './disk.storage';
-export * from './memory.storage';
+export * from './storage.interface.ts';
+export * from './disk.storage.ts';
+export * from './memory.storage.ts';

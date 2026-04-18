@@ -8,7 +8,7 @@ import { Test } from '@nestjs/testing';
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../src/app.module.ts';
 
 const RETURN_VALUE = 'test';
 const SCOPED_VALUE = 'test_scoped';

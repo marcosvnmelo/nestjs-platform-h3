@@ -11,7 +11,7 @@ import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 import {
   functionalMiddleware,
   LoggerMiddleware,
-} from '../src/middleware/logger.middleware';
+} from '../src/middleware/logger.middleware.ts';
 
 @Controller('test')
 class TestController {

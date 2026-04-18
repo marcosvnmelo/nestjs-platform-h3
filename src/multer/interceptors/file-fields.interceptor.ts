@@ -8,16 +8,16 @@ import type {
 } from '@nestjs/common';
 import { Inject, mixin, Optional } from '@nestjs/common';
 
-import type { H3MulterModuleOptions } from '../interfaces';
+import type { H3MulterModuleOptions } from '../interfaces/index.ts';
 import type {
   H3MulterField,
   H3MulterOptions,
-} from '../interfaces/multer-options.interface';
-import { MULTER_MODULE_OPTIONS } from '../files.constants';
+} from '../interfaces/multer-options.interface.ts';
+import { MULTER_MODULE_OPTIONS } from '../files.constants.ts';
 import {
   groupFilesByFields,
   parseMultipartFormDataWithFields,
-} from '../multer/multipart.utils';
+} from '../multer/multipart.utils.ts';
 
 /**
  * Interceptor for handling file uploads from multiple fields on the H3 platform.

@@ -8,10 +8,10 @@ import type {
 } from '@nestjs/common';
 import { Inject, mixin, Optional } from '@nestjs/common';
 
-import type { H3MulterModuleOptions } from '../interfaces';
-import type { H3MulterOptions } from '../interfaces/multer-options.interface';
-import { MULTER_MODULE_OPTIONS } from '../files.constants';
-import { parseMultipartFormDataWithFields } from '../multer/multipart.utils';
+import type { H3MulterModuleOptions } from '../interfaces/index.ts';
+import type { H3MulterOptions } from '../interfaces/multer-options.interface.ts';
+import { MULTER_MODULE_OPTIONS } from '../files.constants.ts';
+import { parseMultipartFormDataWithFields } from '../multer/multipart.utils.ts';
 
 /**
  * Interceptor for parsing multipart form data without accepting any files

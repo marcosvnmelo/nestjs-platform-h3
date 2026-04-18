@@ -1,8 +1,8 @@
-export * from './interceptors';
-export * from './interfaces';
-export * from './multer.module';
-export * from './decorators';
-export * from './storage';
+export * from './interceptors/index.ts';
+export * from './interfaces/index.ts';
+export * from './multer.module.ts';
+export * from './decorators/index.ts';
+export * from './storage/index.ts';
 export {
   parseMultipartFormData,
   parseMultipartFormDataWithFields,
@@ -11,8 +11,8 @@ export {
   filterFormFieldsByName,
   fieldsToObject,
   isMultipartRequest,
-} from './multer/multipart.utils';
+} from './multer/multipart.utils.ts';
 export {
   parseMultipartWithBusboy,
   parseMultipartAsStreams,
-} from './multer/stream.utils';
+} from './multer/stream.utils.ts';

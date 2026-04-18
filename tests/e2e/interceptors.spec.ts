@@ -14,7 +14,7 @@ import {
   OVERRIDE_VALUE,
   OverrideInterceptor,
   TransformInterceptor,
-} from '../src/interceptors/interceptors';
+} from '../src/interceptors/interceptors.ts';
 
 @Controller('test')
 class TestController {

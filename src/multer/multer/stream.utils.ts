@@ -1,7 +1,7 @@
 import { PassThrough } from 'stream';
 import type { H3Event } from 'h3';
 import type { Readable } from 'stream';
-import Busboy from '@fastify/busboy';
+import { Busboy } from '@fastify/busboy';
 
 import type {
   H3FileStream,
@@ -10,10 +10,10 @@ import type {
   H3MulterOptions,
   H3MultipartParseResult,
   H3UploadedFile,
-} from '../interfaces/multer-options.interface';
-import type { StorageEngine } from '../storage/storage.interface';
-import { DiskStorage } from '../storage/disk.storage';
-import { h3MultipartExceptions, transformException } from './multer.utils';
+} from '../interfaces/multer-options.interface.ts';
+import type { StorageEngine } from '../storage/storage.interface.ts';
+import { DiskStorage } from '../storage/disk.storage.ts';
+import { h3MultipartExceptions, transformException } from './multer.utils.ts';
 
 /**
  * Parses multipart form data from an H3 event using @fastify/busboy.

@@ -8,11 +8,11 @@ import { Test } from '@nestjs/testing';
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
-import { ErrorsController } from '../src/errors/errors.controller';
+import { ErrorsController } from '../src/errors/errors.controller.ts';
 import {
   AllExceptionsFilter,
   HttpExceptionFilter,
-} from '../src/filters/exception.filter';
+} from '../src/filters/exception.filter.ts';
 
 describe('Exception Filters (H3 adapter)', () => {
   describe('Default exception handling', () => {

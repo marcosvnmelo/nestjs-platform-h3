@@ -17,7 +17,7 @@ import { toNodeHandler } from 'h3/node';
 import { pathToRegexp } from 'path-to-regexp';
 
 import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
-import type { VersionValue } from '@nestjs/common/interfaces';
+import type { VersionValue } from '@nestjs/common/interfaces/version-options.interface.js';
 import {
   InternalServerErrorException,
   Logger,
@@ -34,7 +34,7 @@ import {
 } from '@nestjs/common/utils/shared.utils.js';
 import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter.js';
 
-import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface';
+import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface.ts';
 
 /**
  * Symbol used by H3 to indicate the response has been handled.

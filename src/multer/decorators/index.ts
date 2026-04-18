@@ -1,1 +1,1 @@
-export * from './form-fields.decorator';
+export * from './form-fields.decorator.ts';

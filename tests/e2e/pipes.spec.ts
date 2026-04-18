@@ -12,7 +12,7 @@ import {
   ParseIntPipe,
   TransformPipe,
   ValidationPipe,
-} from '../src/pipes/validation.pipe';
+} from '../src/pipes/validation.pipe.ts';
 
 @Controller('test')
 class TestController {

@@ -8,10 +8,10 @@ import type {
 } from '@nestjs/common';
 import { Inject, mixin, Optional } from '@nestjs/common';
 
-import type { H3MulterModuleOptions } from '../interfaces';
-import type { H3MulterOptions } from '../interfaces/multer-options.interface';
-import { MULTER_MODULE_OPTIONS } from '../files.constants';
-import { parseMultipartWithBusboy } from '../multer/stream.utils';
+import type { H3MulterModuleOptions } from '../interfaces/index.ts';
+import type { H3MulterOptions } from '../interfaces/multer-options.interface.ts';
+import { MULTER_MODULE_OPTIONS } from '../files.constants.ts';
+import { parseMultipartWithBusboy } from '../multer/stream.utils.ts';
 
 /**
  * Stream-based interceptor for handling file uploads from any fields on the H3 platform.

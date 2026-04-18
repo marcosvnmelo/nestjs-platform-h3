@@ -6,10 +6,10 @@ import type {
   H3MulterOptions,
   H3MultipartParseResult,
   H3UploadedFile,
-} from '../interfaces/multer-options.interface';
-import type { StorageEngine } from '../storage/storage.interface';
-import { DiskStorage } from '../storage/disk.storage';
-import { h3MultipartExceptions, transformException } from './multer.utils';
+} from '../interfaces/multer-options.interface.ts';
+import type { StorageEngine } from '../storage/storage.interface.ts';
+import { DiskStorage } from '../storage/disk.storage.ts';
+import { h3MultipartExceptions, transformException } from './multer.utils.ts';
 
 /**
  * Checks if the request has multipart/form-data content type.

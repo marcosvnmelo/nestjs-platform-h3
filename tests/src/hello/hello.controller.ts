@@ -20,9 +20,9 @@ import {
   Res,
 } from '@nestjs/common';
 
-import type { CreateUserDto } from './dto/create-user.dto';
-import { HelloService } from './hello.service';
-import { UserByIdPipe } from './pipes/user-by-id.pipe';
+import type { CreateUserDto } from './dto/create-user.dto.ts';
+import { HelloService } from './hello.service.ts';
+import { UserByIdPipe } from './pipes/user-by-id.pipe.ts';
 
 @Controller('hello')
 export class HelloController {

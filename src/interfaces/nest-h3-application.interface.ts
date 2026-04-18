@@ -4,10 +4,10 @@ import type * as http2 from 'http2';
 import type * as https from 'https';
 
 import type { INestApplication } from '@nestjs/common';
-import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface.js';
 
-import type { H3Adapter } from '../adapters/h3-adapter';
-import type { ServeStaticOptions } from './serve-static-options.interface';
+import type { H3Adapter } from '../adapters/h3-adapter.ts';
+import type { ServeStaticOptions } from './serve-static-options.interface.ts';
 
 /**
  * HTTP/2 compatible server type for H3.
@@ -39,11 +39,18 @@ export interface NestH3Application<
    * Starts the application.
    *
    * @param {number|string} port
-   * @param {string} [hostname]
    * @param {Function} [callback] Optional callback
    * @returns {Promise} A Promise that, when resolved, is a reference to the underlying HttpServer.
    */
   listen(port: number | string, callback?: () => void): Promise<TServer>;
+  /**
+   * Starts the application.
+   *
+   * @param {number|string} port
+   * @param {string} [hostname]
+   * @param {Function} [callback] Optional callback
+   * @returns {Promise} A Promise that, when resolved, is a reference to the underlying HttpServer.
+   */
   listen(
     port: number | string,
     hostname: string,

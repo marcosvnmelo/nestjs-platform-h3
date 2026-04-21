@@ -1,22 +1,65 @@
-import type { H3 } from 'h3';
+import type { H3, H3Event, NodeHandler, NodeMiddleware } from 'h3';
 import type * as http from 'http';
 import type * as http2 from 'http2';
 import type * as https from 'https';
+import type {
+  NodeServerRequest,
+  NodeServerResponse,
+  ServerRequest,
+} from 'srvx';
 
 import type { INestApplication } from '@nestjs/common';
-import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface.js';
 
 import type { H3Adapter } from '../adapters/h3-adapter.ts';
+import type { $h3Event } from '../adapters/utils/symbols.utils.ts';
+import type { H3FormField, H3UploadedFile } from '../multer/index.ts';
+import type { CorsConfig } from './cors-options.interface.ts';
 import type { ServeStaticOptions } from './serve-static-options.interface.ts';
 
 /**
  * HTTP/2 compatible server type for H3.
  */
-type H3Server =
+export type H3Server =
   | http.Server
   | https.Server
   | http2.Http2Server
   | http2.Http2SecureServer;
+
+export type H3EventRequest = H3Event['req'];
+
+export type H3ServerRequest = NodeServerRequest;
+
+export type H3ServerResponse = NodeServerResponse;
+
+export type H3NodeHandler = NodeHandler;
+
+export type H3NodeMiddleware = NodeMiddleware;
+
+export type PolyfilledRequest<R extends H3ServerRequest> = R & {
+  [$h3Event]: H3Event;
+  // NOTE: Fields used by NestJS
+  query: Record<string, string>;
+  params: Record<string, string>;
+  body: unknown;
+  file?: H3UploadedFile;
+  files: H3UploadedFile[] | Record<string, H3UploadedFile[]>;
+  formFields: H3FormField[];
+};
+
+export type PolyfilledResponse<R extends H3ServerResponse> = R & {
+  contentType: (type: string) => PolyfilledResponse<R>;
+  type: (type: string) => PolyfilledResponse<R>;
+  get: H3ServerResponse['getHeader'];
+  header: (
+    ...args: [string, string] | [Record<string, string>]
+  ) => PolyfilledResponse<R>;
+  set: (
+    ...args: [string, string] | [Record<string, string>]
+  ) => PolyfilledResponse<R>;
+  json: (body: string | number | boolean | object) => void;
+  send: (body?: string | number | boolean | object | Buffer) => void;
+  status: (statusCode: number) => PolyfilledResponse<R>;
+};
 
 /**
  * Interface describing methods on NestH3Application.
@@ -31,7 +74,7 @@ export interface NestH3Application<
   /**
    * Returns the underlying HTTP adapter bounded to the H3 app.
    *
-   * @returns {HttpServer}
+   * @returns {H3Adapter}
    */
   getHttpAdapter(): H3Adapter;
 
@@ -77,9 +120,16 @@ export interface NestH3Application<
    * app.enableCors()
    * app.enableCors({ origin: 'https://example.com' })
    *
-   * @param options - CORS options
+   * @param config - CORS config
    */
-  enableCors(options?: CorsOptions): void;
+  enableCors(config?: CorsConfig): void;
+
+  /**
+   * A wrapper function around native `h3.fetch()` method.
+   * @param {Request | ServerRequest} request - The request object
+   * @returns {Promise<Response>}
+   */
+  fetch(request: Request | ServerRequest): Promise<Response>;
 
   /**
    * A wrapper function for H3 settings.
@@ -167,8 +217,8 @@ export interface NestH3Application<
    */
   setOnRequestHook(
     onRequestHook: (
-      req: http.IncomingMessage | http2.Http2ServerRequest,
-      res: http.ServerResponse | http2.Http2ServerResponse,
+      req: H3ServerRequest,
+      res: H3ServerResponse,
       done: () => void,
     ) => Promise<void> | void,
   ): void;
@@ -186,8 +236,8 @@ export interface NestH3Application<
    */
   setOnResponseHook(
     onResponseHook: (
-      req: http.IncomingMessage | http2.Http2ServerRequest,
-      res: http.ServerResponse | http2.Http2ServerResponse,
+      req: H3ServerRequest,
+      res: H3ServerResponse,
     ) => Promise<void> | void,
   ): void;
 

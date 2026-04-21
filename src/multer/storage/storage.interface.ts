@@ -1,3 +1,4 @@
+import type { H3ServerRequest } from '../../interfaces/nest-h3-application.interface.ts';
 import type {
   H3FileStream,
   H3UploadedFile,
@@ -34,7 +35,7 @@ export interface StorageEngine {
    * @param callback - Callback to invoke when storage is complete
    */
   _handleFile(
-    req: any,
+    req: H3ServerRequest,
     file: H3UploadedFile | H3FileStream,
     callback: StorageCallback,
   ): void;
@@ -46,7 +47,11 @@ export interface StorageEngine {
    * @param file - The file to remove
    * @param callback - Callback to invoke when removal is complete
    */
-  _removeFile(req: any, file: H3UploadedFile, callback: RemoveCallback): void;
+  _removeFile(
+    req: H3ServerRequest,
+    file: H3UploadedFile,
+    callback: RemoveCallback,
+  ): void;
 }
 
 /**
@@ -62,7 +67,7 @@ export interface DiskStorageOptions {
   destination?:
     | string
     | ((
-        req: any,
+        req: H3ServerRequest,
         file: H3UploadedFile | H3FileStream,
         callback: (error: Error | null, destination: string) => void,
       ) => void);
@@ -72,7 +77,7 @@ export interface DiskStorageOptions {
    * If not provided, a random name will be generated.
    */
   filename?: (
-    req: any,
+    req: H3ServerRequest,
     file: H3UploadedFile | H3FileStream,
     callback: (error: Error | null, filename: string) => void,
   ) => void;

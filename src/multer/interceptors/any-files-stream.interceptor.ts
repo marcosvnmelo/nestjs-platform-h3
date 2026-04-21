@@ -10,8 +10,13 @@ import { Inject, mixin, Optional } from '@nestjs/common';
 
 import type { H3MulterModuleOptions } from '../interfaces/index.ts';
 import type { H3MulterOptions } from '../interfaces/multer-options.interface.ts';
+import { extractH3Event } from '../../adapters/utils/h3-event.utils.ts';
+import {
+  H3ServerRequest,
+  PolyfilledRequest,
+} from '../../interfaces/nest-h3-application.interface.ts';
 import { MULTER_MODULE_OPTIONS } from '../files.constants.ts';
-import { parseMultipartWithBusboy } from '../multer/stream.utils.ts';
+import { parseMultipartWithBusboy } from '../multer/multipart.utils.ts';
 
 /**
  * Stream-based interceptor for handling file uploads from any fields on the H3 platform.
@@ -51,10 +56,10 @@ export function AnyFilesStreamInterceptor(
       next: CallHandler,
     ): Promise<Observable<any>> {
       const ctx = context.switchToHttp();
-      const request = ctx.getRequest();
+      const request = ctx.getRequest<PolyfilledRequest<H3ServerRequest>>();
 
       // Get H3 event from request
-      const h3Event = request.h3Event;
+      const h3Event = extractH3Event(request);
       if (!h3Event) {
         // If no h3Event, continue without file processing
         return next.handle();

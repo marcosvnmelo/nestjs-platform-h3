@@ -1,4 +1,7 @@
+import type { BusboyHeaders } from '@fastify/busboy';
 import type { H3Event } from 'h3';
+import type { Readable } from 'node:stream';
+import { Busboy } from '@fastify/busboy';
 
 import type {
   H3FormField,
@@ -8,6 +11,7 @@ import type {
   H3UploadedFile,
 } from '../interfaces/multer-options.interface.ts';
 import type { StorageEngine } from '../storage/storage.interface.ts';
+import { extractNodeRequestFromEvent } from '../../adapters/utils/node-runtime.utils.ts';
 import { DiskStorage } from '../storage/disk.storage.ts';
 import { h3MultipartExceptions, transformException } from './multer.utils.ts';
 
@@ -18,14 +22,14 @@ import { h3MultipartExceptions, transformException } from './multer.utils.ts';
  * @returns true if the request is multipart/form-data
  */
 export function isMultipartRequest(event: H3Event): boolean {
-  const contentType = event.runtime?.node?.req?.headers?.['content-type'] || '';
-  return contentType.includes('multipart/form-data');
+  const contentType = event.req.headers.get('Content-Type');
+  return contentType?.includes('multipart/form-data') ?? false;
 }
 
 /**
  * Parses multipart form data from an H3 event and extracts files.
  * This is the legacy function that only returns files.
- * Use parseMultipartFormDataWithFields for both files and fields.
+ * Use parseMultipartWithBusboy for both files and fields.
  *
  * @param event The H3 event containing the request
  * @param options Optional configuration for file upload limits and filtering
@@ -35,12 +39,136 @@ export async function parseMultipartFormData(
   event: H3Event,
   options?: H3MulterOptions,
 ): Promise<H3UploadedFile[]> {
-  const result = await parseMultipartFormDataWithFields(event, options);
+  const result = await parseMultipartWithBusboy(event, options);
   return result.files;
 }
 
 /**
- * Parses multipart form data from an H3 event and extracts both files and form fields.
+ * Process a single file from the stream.
+ * @internal
+ */
+async function processFile(
+  req: any,
+  fieldname: string,
+  fileStream: Readable,
+  filename: string,
+  encoding: string,
+  mimeType: string,
+  storage: StorageEngine | undefined,
+  limits: H3MulterOptions['limits'],
+  options?: H3MulterOptions,
+): Promise<H3UploadedFile | null> {
+  // Buffer the file to check size and apply filter
+  const chunks: Buffer[] = [];
+  let size = 0;
+  let limitExceeded = false;
+
+  return new Promise((resolve, reject) => {
+    const failOnFileSizeLimit = () => {
+      limitExceeded = true;
+      const error = new Error(h3MultipartExceptions.LIMIT_FILE_SIZE);
+      reject(transformException(error));
+    };
+
+    fileStream.on('limit', () => {
+      failOnFileSizeLimit();
+    });
+
+    fileStream.on('data', (chunk: Buffer) => {
+      size += chunk.length;
+
+      // Check file size limit
+      if (limits?.fileSize !== undefined && size > limits.fileSize) {
+        limitExceeded = true;
+        fileStream.destroy();
+        const error = new Error(h3MultipartExceptions.LIMIT_FILE_SIZE);
+        reject(transformException(error));
+        return;
+      }
+
+      chunks.push(chunk);
+    });
+
+    fileStream.on('error', (err: Error) => {
+      reject(err);
+    });
+
+    fileStream.on('end', async () => {
+      if (limitExceeded) {
+        return;
+      }
+
+      if ((fileStream as Readable & { truncated?: boolean }).truncated) {
+        failOnFileSizeLimit();
+        return;
+      }
+
+      // Handle empty file (no filename means no file was selected)
+      if (!filename) {
+        resolve(null);
+        return;
+      }
+
+      const buffer = Buffer.concat(chunks);
+
+      const file: H3UploadedFile = {
+        fieldname,
+        originalname: filename,
+        encoding,
+        mimetype: mimeType || 'application/octet-stream',
+        size: buffer.length,
+        buffer,
+      };
+
+      // Apply file filter if provided
+      if (options?.fileFilter) {
+        const accepted = await new Promise<boolean>(
+          (filterResolve, filterReject) => {
+            options.fileFilter!(
+              req,
+              file,
+              (error: Error | null, accept: boolean) => {
+                if (error) {
+                  filterReject(error);
+                } else {
+                  filterResolve(accept);
+                }
+              },
+            );
+          },
+        );
+
+        if (!accepted) {
+          resolve(null);
+          return;
+        }
+      }
+
+      // Apply storage engine if provided
+      if (storage) {
+        await new Promise<void>((storageResolve, storageReject) => {
+          storage._handleFile(req, file, (error, info) => {
+            if (error) {
+              storageReject(error);
+            } else if (info) {
+              // Merge storage info into file
+              Object.assign(file, info);
+              storageResolve();
+            } else {
+              storageResolve();
+            }
+          });
+        });
+      }
+
+      resolve(file);
+    });
+  });
+}
+
+/**
+ * Parses multipart form data from an H3 event using @fastify/busboy.
+ * Returns files and form fields with stream-based processing.
  *
  * @param event The H3 event containing the request
  * @param options Optional configuration for file upload limits, storage, and filtering
@@ -48,7 +176,7 @@ export async function parseMultipartFormData(
  *
  * @publicApi
  */
-export async function parseMultipartFormDataWithFields(
+export async function parseMultipartWithBusboy(
   event: H3Event,
   options?: H3MulterOptions,
 ): Promise<H3MultipartParseResult> {
@@ -62,115 +190,101 @@ export async function parseMultipartFormDataWithFields(
     storage = new DiskStorage({ destination: options.dest });
   }
 
-  // Check if this is a multipart request
-  if (!isMultipartRequest(event)) {
-    // Not a multipart request, return empty result
+  const nodeReq = extractNodeRequestFromEvent(event);
+  if (!nodeReq) {
     return { files, fields };
   }
 
-  try {
-    // Use the native H3 way to read form data
-    const formData = await event.req.formData();
+  if (!isMultipartRequest(event)) {
+    return { files, fields };
+  }
 
+  return new Promise((resolve, reject) => {
     let fileCount = 0;
     let fieldCount = 0;
     let partCount = 0;
+    const pendingFiles: Promise<void>[] = [];
 
-    for (const [fieldName, value] of formData.entries()) {
-      partCount++;
+    const busboy = Busboy({
+      headers: nodeReq.headers as BusboyHeaders,
+      limits: {
+        fieldNameSize: limits.fieldNameSize ?? 100,
+        fieldSize: limits.fieldSize ?? 1024 * 1024, // 1MB
+        fields: limits.fields,
+        fileSize: limits.fileSize,
+        files: limits.files,
+        parts: limits.parts,
+        headerPairs: limits.headerPairs ?? 2000,
+      },
+    });
 
-      // Check parts limit
-      if (limits.parts !== undefined && partCount > limits.parts) {
-        const error = new Error(h3MultipartExceptions.LIMIT_PART_COUNT);
-        throw transformException(error);
-      }
-
-      // Check field name size limit
-      if (
-        limits.fieldNameSize !== undefined &&
-        Buffer.byteLength(fieldName) > limits.fieldNameSize
-      ) {
-        const error = new Error(
-          h3MultipartExceptions.LIMIT_FIELD_KEY,
-        ) as Error & { field?: string };
-        error.field = fieldName;
-        throw transformException(error);
-      }
-
-      if (value instanceof File) {
-        // It's a file
+    busboy.on(
+      'file',
+      (fieldname, fileStream, filename, transferEncoding, mimeType) => {
         fileCount++;
+        partCount++;
 
         // Check files limit
         if (limits.files !== undefined && fileCount > limits.files) {
+          fileStream.resume(); // Drain the stream
           const error = new Error(h3MultipartExceptions.LIMIT_FILE_COUNT);
-          throw transformException(error);
+          return reject(transformException(error));
         }
 
-        const arrayBuffer = await value.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        // Check file size limit
-        if (limits.fileSize !== undefined && buffer.length > limits.fileSize) {
-          const error = new Error(h3MultipartExceptions.LIMIT_FILE_SIZE);
-          throw transformException(error);
+        // Check parts limit
+        if (limits.parts !== undefined && partCount > limits.parts) {
+          fileStream.resume();
+          const error = new Error(h3MultipartExceptions.LIMIT_PART_COUNT);
+          return reject(transformException(error));
         }
 
-        const file: H3UploadedFile = {
-          fieldname: fieldName,
-          originalname: value.name,
-          mimetype: value.type || 'application/octet-stream',
-          size: buffer.length,
-          buffer,
-        };
-
-        // Apply file filter if provided
-        if (options?.fileFilter) {
-          const accepted = await new Promise<boolean>((resolve, reject) => {
-            options.fileFilter!(
-              event.req,
-              file,
-              (error: Error | null, accept: boolean) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(accept);
-                }
-              },
-            );
+        const filePromise = processFile(
+          event.req,
+          fieldname,
+          fileStream,
+          filename,
+          transferEncoding,
+          mimeType,
+          storage,
+          limits,
+          options,
+        )
+          .then((file) => {
+            if (file) {
+              files.push(file);
+            }
+          })
+          .catch((err) => {
+            reject(transformException(err));
           });
 
-          if (!accepted) {
-            continue; // Skip this file
-          }
-        }
+        pendingFiles.push(filePromise);
+      },
+    );
 
-        // Apply storage engine if provided
-        if (storage) {
-          await new Promise<void>((resolve, reject) => {
-            storage._handleFile(event.req, file, (error, info) => {
-              if (error) {
-                reject(error);
-              } else if (info) {
-                // Merge storage info into file
-                Object.assign(file, info);
-                resolve();
-              } else {
-                resolve();
-              }
-            });
-          });
-        }
-
-        files.push(file);
-      } else {
-        // It's a field value (string)
+    busboy.on(
+      'field',
+      (
+        fieldname: string,
+        value: string,
+        _fieldnameTruncated: boolean,
+        _valueTruncated: boolean,
+        _encoding: string,
+        _mimeType: string,
+      ) => {
         fieldCount++;
+        partCount++;
 
         // Check fields limit
         if (limits.fields !== undefined && fieldCount > limits.fields) {
           const error = new Error(h3MultipartExceptions.LIMIT_FIELD_COUNT);
-          throw transformException(error);
+          return reject(transformException(error));
+        }
+
+        // Check parts limit
+        if (limits.parts !== undefined && partCount > limits.parts) {
+          const error = new Error(h3MultipartExceptions.LIMIT_PART_COUNT);
+          return reject(transformException(error));
         }
 
         // Check field value size limit
@@ -181,25 +295,49 @@ export async function parseMultipartFormDataWithFields(
           const error = new Error(
             h3MultipartExceptions.LIMIT_FIELD_VALUE,
           ) as Error & { field?: string };
-          error.field = fieldName;
-          throw transformException(error);
+          error.field = fieldname;
+          return reject(transformException(error));
         }
 
-        // Store the field value
         fields.push({
-          fieldname: fieldName,
-          value: value,
+          fieldname,
+          value,
         });
-      }
-    }
+      },
+    );
 
-    return { files, fields };
-  } catch (error) {
-    if (error instanceof Error) {
-      throw transformException(error);
-    }
-    throw error;
-  }
+    busboy.on('error', (err: Error) => {
+      reject(transformException(err));
+    });
+
+    busboy.on('finish', async () => {
+      try {
+        await Promise.all(pendingFiles);
+        resolve({ files, fields });
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    // Handle file size limit exceeded
+    busboy.on('filesLimit', () => {
+      const error = new Error(h3MultipartExceptions.LIMIT_FILE_COUNT);
+      reject(transformException(error));
+    });
+
+    busboy.on('fieldsLimit', () => {
+      const error = new Error(h3MultipartExceptions.LIMIT_FIELD_COUNT);
+      reject(transformException(error));
+    });
+
+    busboy.on('partsLimit', () => {
+      const error = new Error(h3MultipartExceptions.LIMIT_PART_COUNT);
+      reject(transformException(error));
+    });
+
+    // Pipe the request to busboy
+    nodeReq.pipe(busboy);
+  });
 }
 
 /**

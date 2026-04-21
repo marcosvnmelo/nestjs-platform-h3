@@ -3,6 +3,13 @@ import type { H3Event as H3EventType } from 'h3';
 import type { ExecutionContext } from '@nestjs/common';
 import { createParamDecorator } from '@nestjs/common';
 
+import type {
+  H3ServerRequest,
+  H3ServerResponse,
+  PolyfilledRequest,
+} from '../interfaces/nest-h3-application.interface.ts';
+import { extractH3Event } from '../adapters/utils/h3-event.utils.ts';
+
 /**
  * Parameter decorator that extracts the underlying H3 event from the request.
  * The H3 event provides access to H3-specific APIs and utilities.
@@ -28,15 +35,15 @@ import { createParamDecorator } from '@nestjs/common';
  * @publicApi
  */
 export const H3Event = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): H3EventType | undefined => {
-    const request = ctx.switchToHttp().getRequest();
-    return request.h3Event;
+  (_data: unknown, ctx: ExecutionContext): H3EventType | undefined => {
+    const request = ctx.switchToHttp().getRequest<H3ServerRequest>();
+    return extractH3Event(request);
   },
 );
 
 /**
- * Parameter decorator that extracts the raw H3 request object.
- * This is the Node.js IncomingMessage with H3-specific properties attached.
+ * Parameter decorator that extracts the H3 request object.
+ * This is the Request object that comes inside the H3 event.
  *
  * @example
  * ```typescript
@@ -60,8 +67,11 @@ export const H3Event = createParamDecorator(
  * @publicApi
  */
 export const H3Request = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): any => {
-    return ctx.switchToHttp().getRequest();
+  (_data: unknown, ctx: ExecutionContext): any => {
+    const req = ctx.switchToHttp().getRequest<H3ServerRequest>();
+    const h3Event = extractH3Event(req);
+
+    return h3Event.req;
   },
 );
 
@@ -89,8 +99,8 @@ export const H3Request = createParamDecorator(
  * @publicApi
  */
 export const H3Response = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): any => {
-    return ctx.switchToHttp().getResponse();
+  (_data: unknown, ctx: ExecutionContext): any => {
+    return ctx.switchToHttp().getResponse<H3ServerResponse>();
   },
 );
 
@@ -129,7 +139,9 @@ export const H3Query = createParamDecorator(
     key: string | undefined,
     ctx: ExecutionContext,
   ): Record<string, any> | string | undefined => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx
+      .switchToHttp()
+      .getRequest<PolyfilledRequest<H3ServerRequest>>();
     const query = request.query || {};
     return key ? query[key] : query;
   },
@@ -170,7 +182,9 @@ export const H3Params = createParamDecorator(
     key: string | undefined,
     ctx: ExecutionContext,
   ): Record<string, any> | string | undefined => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx
+      .switchToHttp()
+      .getRequest<PolyfilledRequest<H3ServerRequest>>();
     const params = request.params || {};
     return key ? params[key] : params;
   },
@@ -208,8 +222,10 @@ export const H3Params = createParamDecorator(
  */
 export const H3Body = createParamDecorator(
   (key: string | undefined, ctx: ExecutionContext): any => {
-    const request = ctx.switchToHttp().getRequest();
-    const body = request.body || {};
+    const request = ctx
+      .switchToHttp()
+      .getRequest<PolyfilledRequest<H3ServerRequest>>();
+    const body = (request.body as Record<string, any>) ?? {};
     return key ? body[key] : body;
   },
 );

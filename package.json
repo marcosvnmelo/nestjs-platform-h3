@@ -25,6 +25,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./adapter/utils": {
+      "types": "./dist/adapters/utils/index.d.ts",
+      "import": "./dist/adapters/utils/index.js",
+      "default": "./dist/adapters/utils/index.js"
     }
   },
   "testExports": {
@@ -32,6 +37,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./adapter/utils": {
+      "types": "./src/adapters/utils/index.ts",
+      "import": "./src/adapters/utils/index.ts",
+      "default": "./src/adapters/utils/index.ts"
     }
   },
   "main": "./dist/index.js",

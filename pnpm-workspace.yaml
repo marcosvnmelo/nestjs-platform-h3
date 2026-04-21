@@ -1,9 +1,12 @@
 packages:
   - benchmark
-  - tests
+  - tests/*
 
 catalog:
   # Core framework
+
+  # Utilities
+  '@fastify/busboy': '3.2.0'
   '@nestjs/common': '11.1.19'
   '@nestjs/core': '11.1.19'
   '@nestjs/platform-express': '11.1.19'
@@ -15,23 +18,26 @@ catalog:
   '@rstest/adapter-rslib': '^0.2.2'
   '@rstest/core': '^0.9.7'
 
+  # Dev dependencies
+  '@types/autocannon': '7.12.7'
+  '@types/content-type': ^1.1.9
+  '@types/express': '5.0.6'
+  '@types/mime-types': ^3.0.1
+  '@types/node': '^24'
+  '@types/supertest': '7.2.0'
+  autocannon: '8.0.0'
+  class-validator: ^0.15.1
+  content-type: ^1.0.5
+
   # HTTP servers
   express: '5.2.1'
   fastify: '5.8.4'
   h3: '2.0.1-rc.20'
-
-  # Utilities
-  '@fastify/busboy': '3.2.0'
+  mime-types: ^3.0.2
   path-to-regexp: '8.4.2'
   reflect-metadata: '^0.2.2'
   rxjs: '7.8.2'
-
-  # Dev dependencies
-  '@types/autocannon': '7.12.7'
-  '@types/express': '5.0.6'
-  '@types/node': '^24'
-  '@types/supertest': '7.2.0'
-  autocannon: '8.0.0'
+  srvx: ^0.11.15
   supertest: '^7.2.2'
   typescript: '5.9.3'
 patchedDependencies:

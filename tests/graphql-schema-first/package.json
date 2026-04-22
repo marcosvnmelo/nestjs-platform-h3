@@ -1,0 +1,34 @@
+{
+  "name": "@marcosvnmelo/graphql-schema-first-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rslib build",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
+    "@marcosvnmelo/testing-shared": "workspace:*",
+    "@nestjs/apollo": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/graphql": "catalog:",
+    "@nestjs/testing": "catalog:",
+    "class-validator": "catalog:",
+    "graphql": "catalog:",
+    "graphql-subscriptions": "catalog:",
+    "supertest": "catalog:"
+  },
+  "devDependencies": {
+    "@apollo/server": "catalog:",
+    "@rslib/core": "catalog:",
+    "@rstest/adapter-rslib": "catalog:",
+    "@types/node": "catalog:",
+    "@types/supertest": "catalog:",
+    "typescript": "catalog:"
+  }
+}

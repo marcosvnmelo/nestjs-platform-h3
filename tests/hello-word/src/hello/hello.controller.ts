@@ -8,7 +8,6 @@ import {
   Head,
   Header,
   HttpCode,
-  Inject,
   Options,
   Param,
   Patch,

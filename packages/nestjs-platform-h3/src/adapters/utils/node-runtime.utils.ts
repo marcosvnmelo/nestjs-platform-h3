@@ -49,214 +49,307 @@ export function extractNodeRuntimeFromEvent<
 }
 
 /**
+ * Extract remaining path segments after parameter matching
+ * For a route pattern like /api/:tenantId/params with URL /api/test/params,
+ * extract the literal segments that follow the parameters: ['params']
+ * @internal
+ */
+function extractRemainingPath(routePattern: string): string[] {
+  if (!routePattern) return [];
+
+  const pattern =
+    routePattern.endsWith('/') && routePattern !== '/'
+      ? routePattern.slice(0, -1)
+      : routePattern;
+
+  // Split pattern into segments
+  const segments = pattern.split('/').filter(Boolean);
+  const remaining: string[] = [];
+
+  // Find the last parameter segment
+  let lastParamIndex = -1;
+  for (let i = segments.length - 1; i >= 0; i--) {
+    if (segments[i].startsWith(':')) {
+      lastParamIndex = i;
+      break;
+    }
+  }
+
+  // Collect only literal segments after the last parameter
+  for (let i = lastParamIndex + 1; i < segments.length; i++) {
+    if (!segments[i].startsWith(':')) {
+      remaining.push(segments[i]);
+    }
+  }
+
+  return remaining;
+}
+
+/**
  * Fills the request object with data from the H3 event.
  * These values are used by the NestJS decorators.
  * @internal
  */
-export function applyParamsToRequest(request: H3ServerRequest, event: H3Event) {
-  // Extract route parameters from H3 context and attach to request
-  // This makes them available to NestJS @Param() decorators
-  (request as PolyfilledRequest<H3ServerRequest>).params = getRouterParams(
-    event,
-    { decode: true },
-  );
+const paramsDescriptor: PropertyDescriptor = {
+  configurable: true,
+  enumerable: true,
+  get: undefined,
+};
+const queryDescriptor: PropertyDescriptor = {
+  configurable: true,
+  enumerable: true,
+  get: undefined,
+};
 
-  // Extract query parameters from H3 context and attach to request
-  // This makes them available to NestJS @Query() decorators
-  (request as PolyfilledRequest<H3ServerRequest>).query = getQuery(event);
+export function applyParamsToRequest(request: H3ServerRequest, event: H3Event) {
+  const polyfilledReq = request as PolyfilledRequest<H3ServerRequest>;
+
+  paramsDescriptor.get = function (this: typeof polyfilledReq) {
+    const params: Record<string, string | string[]> = {
+      ...getRouterParams(event, { decode: true }),
+    };
+
+    const routePattern = event.context.matchedRoute?.meta?.routePattern as
+      | string
+      | undefined;
+    if (routePattern) {
+      const remainingPath = extractRemainingPath(routePattern);
+      if (remainingPath.length > 0) {
+        params.path = remainingPath;
+      }
+    }
+
+    Object.defineProperty(this, 'params', {
+      value: params,
+      enumerable: true,
+    });
+    return params;
+  };
+  Object.defineProperty(polyfilledReq, 'params', paramsDescriptor);
+
+  queryDescriptor.get = function (this: typeof polyfilledReq) {
+    const query = getQuery(event);
+    Object.defineProperty(this, 'query', {
+      value: query,
+      enumerable: true,
+    });
+    return query;
+  };
+  Object.defineProperty(polyfilledReq, 'query', queryDescriptor);
 }
+
+function setCharset(type: string, charset: string) {
+  if (!type || !charset) {
+    return type;
+  }
+  if (/;\s*charset=/i.test(type)) {
+    return type;
+  }
+
+  let parsed;
+  try {
+    // parse type
+    parsed = contentType.parse(type);
+  } catch {
+    return type;
+  }
+
+  // set charset
+  parsed.parameters.charset = charset;
+
+  // format type
+  return contentType.format(parsed);
+}
+
+const responseContentTypePolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  type: string,
+) {
+  const ct =
+    type.indexOf('/') === -1
+      ? mime.contentType(type) || 'application/octet-stream'
+      : type;
+
+  return this.set('Content-Type', ct);
+};
+
+const responseGetPolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  name: string,
+) {
+  return this.getHeader(name);
+};
+
+const responseSetPolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  ...args: [string, string] | [Record<string, string>]
+) {
+  const [field, val] = args;
+  if (typeof field === 'string') {
+    let value = Array.isArray(val) ? val.map(String) : String(val);
+
+    // add charset to content-type
+    if (field.toLowerCase() === 'content-type') {
+      if (Array.isArray(value)) {
+        throw new TypeError('Content-Type cannot be set to an Array');
+      }
+      value = String(mime.contentType(value));
+    }
+
+    this.setHeader(field, value);
+  } else {
+    for (const key in field) {
+      this.set(key, field[key]);
+    }
+  }
+  return this;
+};
+
+const responseSendPolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  body: any,
+) {
+  let chunk = body;
+  let encoding: BufferEncoding | undefined;
+  let isStringChunk = false;
+  const req = this.req;
+
+  switch (typeof chunk) {
+    // string defaulting to html
+    case 'string': {
+      encoding = 'utf8';
+      isStringChunk = true;
+      const type = this.get('Content-Type');
+
+      if (typeof type === 'string') {
+        this.set('Content-Type', setCharset(type, 'utf-8'));
+      } else {
+        this.type('html');
+      }
+      break;
+    }
+    case 'boolean':
+    case 'number':
+    case 'object':
+      if (chunk === null) {
+        chunk = '';
+      } else if (ArrayBuffer.isView(chunk)) {
+        if (!this.get('Content-Type')) {
+          this.type('bin');
+        }
+      } else {
+        return this.json(chunk);
+      }
+      break;
+  }
+
+  // populate Content-Length
+  let len;
+  if (chunk !== undefined) {
+    if (Buffer.isBuffer(chunk)) {
+      // get length of Buffer
+      len = chunk.length;
+    } else if (isStringChunk) {
+      len = Buffer.byteLength(chunk, encoding);
+    } else {
+      // convert chunk to Buffer and calculate
+      encoding = undefined;
+      chunk = Buffer.from(chunk, encoding);
+      len = chunk.length;
+    }
+
+    this.set('Content-Length', len);
+  }
+
+  // strip irrelevant headers
+  if (204 === this.statusCode || 304 === this.statusCode) {
+    this.removeHeader('Content-Type');
+    this.removeHeader('Content-Length');
+    this.removeHeader('Transfer-Encoding');
+    chunk = '';
+  }
+
+  // alter headers for 205
+  if (this.statusCode === 205) {
+    this.set('Content-Length', '0');
+    this.removeHeader('Transfer-Encoding');
+    chunk = '';
+  }
+
+  if (req.method === 'HEAD') {
+    // skip body for HEAD
+    this.end();
+  } else {
+    // respond
+    if (isStringChunk && encoding) this.end(chunk, encoding);
+    else if (encoding) this.end(chunk, encoding);
+    else this.end(chunk);
+  }
+
+  return this;
+};
+
+const responseJsonPolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  obj: any,
+) {
+  const body = JSON.stringify(obj);
+
+  const contentTypeValue = this.getHeader('Content-Type');
+  if (
+    typeof contentTypeValue !== 'string' ||
+    !contentTypeValue.startsWith('application/json')
+  ) {
+    this.setHeader('Content-Type', 'application/json; charset=utf-8');
+  }
+
+  return this.send(body);
+};
+
+const responseStatusPolyfill = function (
+  this: PolyfilledResponse<H3ServerResponse>,
+  code: number,
+) {
+  // Check if the status code is not an integer
+  if (!Number.isInteger(code)) {
+    throw new TypeError(
+      `Invalid status code: ${JSON.stringify(code)}. Status code must be an integer.`,
+    );
+  }
+  // Check if the status code is outside of Node's valid range
+  if (code < 100 || code > 999) {
+    throw new RangeError(
+      `Invalid status code: ${JSON.stringify(code)}. Status code must be greater than 99 and less than 1000.`,
+    );
+  }
+
+  if (!this.headersSent) {
+    this.statusCode = code;
+  }
+  return this;
+};
 
 /**
  * Add Express-like polyfill methods to the response object for compatibility
  * with NestJS middleware and decorators that expect an Express-like API.
  */
 export function applyExpressPolyfills(response: H3ServerResponse): void {
-  function setCharset(type: string, charset: string) {
-    if (!type || !charset) {
-      return type;
-    }
+  const polyfilledRes = response as PolyfilledResponse<H3ServerResponse>;
 
-    // parse type
-    const parsed = contentType.parse(type);
-
-    // set charset
-    parsed.parameters.charset = charset;
-
-    // format type
-    return contentType.format(parsed);
-  }
-
-  (response as PolyfilledResponse<H3ServerResponse>).contentType ??= (
-    response as PolyfilledResponse<H3ServerResponse>
-  ).type ??= function contentType(
-    this: PolyfilledResponse<H3ServerResponse>,
-    type: string,
-  ) {
-    const ct =
-      type.indexOf('/') === -1
-        ? mime.contentType(type) || 'application/octet-stream'
-        : type;
-
-    return this.set('Content-Type', ct);
-  };
-
-  (response as PolyfilledResponse<H3ServerResponse>).get ??= function get(
-    this: PolyfilledResponse<H3ServerResponse>,
-    name: string,
-  ) {
-    return this.getHeader(name);
-  };
-
-  (response as PolyfilledResponse<H3ServerResponse>).set ??= (
-    response as PolyfilledResponse<H3ServerResponse>
-  ).header = function header(
-    this: PolyfilledResponse<H3ServerResponse>,
-    ...args: [string, string] | [Record<string, string>]
-  ) {
-    const [field, val] = args;
-    if (typeof field === 'string') {
-      let value = Array.isArray(val) ? val.map(String) : String(val);
-
-      // add charset to content-type
-      if (field.toLowerCase() === 'content-type') {
-        if (Array.isArray(value)) {
-          throw new TypeError('Content-Type cannot be set to an Array');
-        }
-        value = String(mime.contentType(value));
-      }
-
-      this.setHeader(field, value);
-    } else {
-      for (const key in field) {
-        this.set(key, field[key]);
-      }
-    }
-    return this;
-  };
-
-  (response as PolyfilledResponse<H3ServerResponse>).send ??= function send(
-    this: PolyfilledResponse<H3ServerResponse>,
-    body: any,
-  ) {
-    let chunk = body;
-    let encoding: BufferEncoding | undefined;
-    const req = this.req;
-
-    switch (typeof chunk) {
-      // string defaulting to html
-      case 'string': {
-        encoding = 'utf8';
-        const type = this.get('Content-Type');
-
-        if (typeof type === 'string') {
-          this.set('Content-Type', setCharset(type, 'utf-8'));
-        } else {
-          this.type('html');
-        }
-        break;
-      }
-      case 'boolean':
-      case 'number':
-      case 'object':
-        if (chunk === null) {
-          chunk = '';
-        } else if (ArrayBuffer.isView(chunk)) {
-          if (!this.get('Content-Type')) {
-            this.type('bin');
-          }
-        } else {
-          return this.json(chunk);
-        }
-        break;
-    }
-
-    // populate Content-Length
-    let len;
-    if (chunk !== undefined) {
-      if (Buffer.isBuffer(chunk)) {
-        // get length of Buffer
-        len = chunk.length;
-      } else {
-        // convert chunk to Buffer and calculate
-        encoding = undefined;
-        chunk = Buffer.from(chunk, encoding);
-        len = chunk.length;
-      }
-
-      this.set('Content-Length', len);
-    }
-
-    // strip irrelevant headers
-    if (204 === this.statusCode || 304 === this.statusCode) {
-      this.removeHeader('Content-Type');
-      this.removeHeader('Content-Length');
-      this.removeHeader('Transfer-Encoding');
-      chunk = '';
-    }
-
-    // alter headers for 205
-    if (this.statusCode === 205) {
-      this.set('Content-Length', '0');
-      this.removeHeader('Transfer-Encoding');
-      chunk = '';
-    }
-
-    if (req.method === 'HEAD') {
-      // skip body for HEAD
-      this.end();
-    } else {
-      // respond
-      if (encoding) this.end(chunk, encoding);
-      else this.end(chunk);
-    }
-
-    return this;
-  };
-
-  (response as PolyfilledResponse<H3ServerResponse>).json ??= function json(
-    this: PolyfilledResponse<H3ServerResponse>,
-    obj,
-  ) {
-    const body = JSON.stringify(obj);
-
-    // content-type
-    if (this.get('Content-Type') !== 'application/json') {
-      this.set('Content-Type', 'application/json');
-    }
-
-    return this.send(body);
-  };
+  polyfilledRes.contentType ??= polyfilledRes.type ??=
+    responseContentTypePolyfill;
+  polyfilledRes.get ??= responseGetPolyfill;
+  polyfilledRes.set ??= polyfilledRes.header = responseSetPolyfill;
+  polyfilledRes.send ??= responseSendPolyfill;
+  polyfilledRes.json ??= responseJsonPolyfill;
+  polyfilledRes.status ??= responseStatusPolyfill;
 
   // Initialize statusCode to 200 if not already set and headers not sent
   if (
-    !(response as PolyfilledResponse<H3ServerResponse>).headersSent &&
-    !(response as PolyfilledResponse<H3ServerResponse>).writableEnded &&
-    typeof (response as PolyfilledResponse<H3ServerResponse>).statusCode !==
-      'number'
+    !polyfilledRes.headersSent &&
+    !polyfilledRes.writableEnded &&
+    typeof polyfilledRes.statusCode !== 'number'
   ) {
-    (response as PolyfilledResponse<H3ServerResponse>).statusCode = 200;
+    polyfilledRes.statusCode = 200;
   }
-
-  (response as PolyfilledResponse<H3ServerResponse>).status ??= function status(
-    this: PolyfilledResponse<H3ServerResponse>,
-    code,
-  ) {
-    // Check if the status code is not an integer
-    if (!Number.isInteger(code)) {
-      throw new TypeError(
-        `Invalid status code: ${JSON.stringify(code)}. Status code must be an integer.`,
-      );
-    }
-    // Check if the status code is outside of Node's valid range
-    if (code < 100 || code > 999) {
-      throw new RangeError(
-        `Invalid status code: ${JSON.stringify(code)}. Status code must be greater than 99 and less than 1000.`,
-      );
-    }
-
-    if (!this.headersSent) {
-      this.statusCode = code;
-    }
-    return this;
-  };
 }

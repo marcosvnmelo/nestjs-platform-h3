@@ -61,8 +61,10 @@
   },
   "dependencies": {
     "@fastify/busboy": "catalog:",
+    "@types/body-parser": "catalog:",
     "@types/content-type": "catalog:",
     "@types/mime-types": "catalog:",
+    "body-parser": "catalog:",
     "content-type": "catalog:",
     "h3": "catalog:",
     "mime-types": "catalog:",

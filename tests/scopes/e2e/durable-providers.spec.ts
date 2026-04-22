@@ -1,0 +1,138 @@
+import type { App } from 'supertest/types.d.ts';
+import { afterAll, beforeAll, describe, expect, it } from '@rstest/core';
+import request from 'supertest';
+
+import { ContextIdFactory } from '@nestjs/core';
+import { Test } from '@nestjs/testing';
+
+import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
+import { DurableContextIdStrategy } from '../src/durable/durable-context-id.strategy.js';
+import { DurableModule } from '../src/durable/durable.module.ts';
+
+describe('Durable providers', () => {
+  let server: App;
+  let app: NestH3Application;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [DurableModule],
+    }).compile();
+
+    app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
+    server = app.getHttpServer();
+    await app.init();
+
+    ContextIdFactory.apply(new DurableContextIdStrategy());
+  });
+
+  describe('when service is durable', () => {
+    const performHttpCall = (
+      tenantId: number,
+      end: (err?: any) => void,
+      endpoint = '/durable',
+      opts: {
+        forceError: boolean;
+      } = { forceError: false },
+    ) =>
+      request(server)
+        .get(endpoint)
+        .set({ ['x-tenant-id']: String(tenantId) })
+        .set({ ['x-force-error']: opts.forceError ? 'true' : 'false' })
+        .end((err, res) => {
+          if (err) return end(err);
+          end(res);
+        });
+
+    it(`should share durable providers per tenant`, async () => {
+      let result: request.Response;
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(1, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 1');
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(1, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 2');
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(1, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 3');
+    });
+
+    it(`should create per-tenant DI sub-tree`, async () => {
+      let result: request.Response;
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(4, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 1');
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(5, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 1');
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(6, resolve),
+      );
+      expect(result.text).toBe('Hello world! Counter: 1');
+    });
+
+    it(`should register a custom per-tenant request payload`, async () => {
+      let result: request.Response;
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(1, resolve, '/durable/echo'),
+      );
+      expect(result.body).toEqual({ tenantId: '1' });
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(3, resolve, '/durable/echo'),
+      );
+      expect(result.body).toEqual({ tenantId: '3' });
+    });
+
+    it(`should return the same tenantId both from durable request scoped service and non-durable request scoped service`, async () => {
+      let result: request.Response;
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(1, resolve, '/durable/request-context'),
+      );
+      expect(result.body).toEqual({
+        durableService: '1',
+        nonDurableService: '1',
+      });
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(2, resolve, '/durable/request-context'),
+      );
+      expect(result.body).toEqual({
+        durableService: '2',
+        nonDurableService: '2',
+      });
+    });
+
+    it(`should not cache durable providers that throw errors`, async () => {
+      let result: request.Response;
+
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(10, resolve, '/durable/echo', { forceError: true }),
+      );
+
+      expect(result.statusCode).toBe(412);
+
+      // The second request should be successful
+      result = await new Promise<request.Response>((resolve) =>
+        performHttpCall(10, resolve, '/durable/echo'),
+      );
+
+      expect(result.body).toEqual({ tenantId: '10' });
+    });
+  });
+
+  afterAll(async () => {
+    ContextIdFactory['strategy'] = undefined;
+    await app.close();
+  });
+});

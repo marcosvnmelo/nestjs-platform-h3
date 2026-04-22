@@ -1,0 +1,68 @@
+import type { App } from 'supertest/types.d.ts';
+import type { StartedTestContainer } from 'testcontainers';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  it,
+} from '@rstest/core';
+import request from 'supertest';
+
+import type { MicroserviceOptions } from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
+import { Test } from '@nestjs/testing';
+
+import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
+import { RedisBroadcastController } from '../src/redis/redis-broadcast.controller.ts';
+import {
+  nestRedisOptions,
+  startRedisContainer,
+} from './test-infra/containers.ts';
+import { e2eInfraProvider } from './test-infra/e2e-providers.ts';
+
+describe('REDIS transport', () => {
+  let server: App;
+  let app: NestH3Application;
+  let container: StartedTestContainer;
+
+  beforeAll(async () => {
+    container = await startRedisContainer();
+  });
+  afterAll(async () => {
+    await container.stop();
+  });
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      controllers: [RedisBroadcastController],
+      providers: [e2eInfraProvider({ redis: nestRedisOptions(container) })],
+    }).compile();
+
+    app = module.createNestApplication<NestH3Application>(new H3Adapter());
+    server = app.getHttpServer();
+
+    const redis = nestRedisOptions(container);
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.REDIS,
+      options: redis,
+    });
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.REDIS,
+      options: redis,
+    });
+    await app.startAllMicroservices();
+    await app.init();
+  });
+
+  it(`Broadcast (2 subscribers)`, async () => {
+    await request(server).get('/broadcast').expect(200, '2');
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+});

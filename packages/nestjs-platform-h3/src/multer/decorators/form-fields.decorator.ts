@@ -22,7 +22,7 @@ import type { H3FormField } from '../interfaces/multer-options.interface.ts';
  * @publicApi
  */
 export const UploadedFields = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): H3FormField[] => {
+  (_data: unknown, ctx: ExecutionContext): H3FormField[] => {
     const request = ctx.switchToHttp().getRequest();
     return request.formFields || [];
   },
@@ -49,7 +49,10 @@ export const UploadedFields = createParamDecorator(
  * @publicApi
  */
 export const FormBody = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): Record<string, string | string[]> => {
+  (
+    _data: unknown,
+    ctx: ExecutionContext,
+  ): Record<string, string | string[]> => {
     const request = ctx.switchToHttp().getRequest();
     const fields: H3FormField[] = request.formFields || [];
 

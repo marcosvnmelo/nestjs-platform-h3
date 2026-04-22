@@ -1,0 +1,30 @@
+{
+  "name": "@marcosvnmelo/scopes-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rslib build",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
+    "@marcosvnmelo/testing-shared": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/microservices": "catalog:",
+    "@nestjs/testing": "catalog:",
+    "class-validator": "catalog:",
+    "supertest": "catalog:"
+  },
+  "devDependencies": {
+    "@rslib/core": "catalog:",
+    "@rstest/adapter-rslib": "catalog:",
+    "@types/node": "catalog:",
+    "@types/supertest": "catalog:",
+    "typescript": "catalog:"
+  }
+}

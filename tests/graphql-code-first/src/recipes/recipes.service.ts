@@ -1,0 +1,32 @@
+import { Injectable } from '@nestjs/common';
+
+import { NewRecipeInput } from './dto/new-recipe.input.js';
+import { RecipesArgs } from './dto/recipes.args.js';
+import { Recipe } from './models/recipe.js';
+
+@Injectable()
+export class RecipesService {
+  /**
+   * MOCK
+   * Put some real business logic here
+   * Left for demonstration purposes
+   */
+
+  async create(_data: NewRecipeInput): Promise<Recipe> {
+    return {
+      id: 3,
+    } as any;
+  }
+
+  async findOneById(_id: string): Promise<Recipe> {
+    return {} as any;
+  }
+
+  async findAll(_recipesArgs: RecipesArgs): Promise<Recipe[]> {
+    return [] as Recipe[];
+  }
+
+  async remove(_id: string): Promise<boolean> {
+    return true;
+  }
+}

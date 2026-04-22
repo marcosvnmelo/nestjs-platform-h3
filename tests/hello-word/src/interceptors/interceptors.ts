@@ -13,14 +13,14 @@ export const OVERRIDE_VALUE = 'overridden';
 
 @Injectable()
 export class OverrideInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(_context: ExecutionContext, _next: CallHandler): Observable<any> {
     return of(OVERRIDE_VALUE);
   }
 }
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(map((data) => ({ data })));
   }
 }

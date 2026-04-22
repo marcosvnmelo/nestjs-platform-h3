@@ -1,4 +1,16 @@
 {
   "enabled": true,
-  "words": ["marcosvnmelo", "rstest", "rslib", "rspack", "streamable", "srvx"]
+  "words": [
+    "marcosvnmelo",
+    "rstest",
+    "rslib",
+    "rspack",
+    "streamable",
+    "srvx",
+    "fastify",
+    "autocannon",
+    "supertest",
+    "typeorm",
+    "confluentinc"
+  ]
 }

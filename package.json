@@ -14,8 +14,9 @@
     "format:write": "prettier --write .",
     "lint": "pnpm --filter ...* run lint",
     "lint:fix": "pnpm --filter ...* run lint:fix",
-    "typecheck": "pnpm --filter ...* typecheck",
-    "release": "pnpm test && pnpm lint && pnpm format && pnpm --filter @marcosvnmelo/nestjs-platform-h3 run release"
+    "typecheck": "pnpm run build && pnpm --filter ...* typecheck",
+    "prerelease": "pnpm typecheck && pnpm test && pnpm lint && pnpm format",
+    "release": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run release"
   },
   "dependencies": {
     "@fastify/busboy": "catalog:",
@@ -29,15 +30,17 @@
     "srvx": "catalog:"
   },
   "devDependencies": {
+    "@apollo/server": "catalog:",
     "@eslint/js": "10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "4.7.1",
-    "@microsoft/api-extractor": "^7.58.2",
+    "@microsoft/api-extractor": "^7.58.7",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@rslib/core": "catalog:",
     "@rstest/adapter-rslib": "catalog:",
     "@rstest/core": "catalog:",
     "@types/node": "catalog:",
+    "class-validator": "catalog:",
     "eslint": "10.2.0",
     "prettier": "3.8.2",
     "quick-publish": "0.7.1",

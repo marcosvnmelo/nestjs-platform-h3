@@ -39,7 +39,8 @@ export type PolyfilledRequest<R extends H3ServerRequest> = R & {
   [$h3Event]: H3Event;
   // NOTE: Fields used by NestJS
   query: Record<string, string>;
-  params: Record<string, string>;
+  /** Route params; `path` may be string[] (suffix after global prefix params, Nest parity). */
+  params: Record<string, string | string[]>;
   body: unknown;
   file?: H3UploadedFile;
   files: H3UploadedFile[] | Record<string, H3UploadedFile[]>;
@@ -123,6 +124,16 @@ export interface NestH3Application<
    * @param config - CORS config
    */
   enableCors(config?: CorsConfig): void;
+
+  /**
+   * Reconfigures request body parser for the given type (e.g. `json`, `urlencoded`, or full MIME type).
+   * `rawBody` comes from `NestApplicationOptions.rawBody` at runtime.
+   *
+   * @param type - Parser id or `Content-Type` string
+   * @param options - `body-parser` options
+   * @see {@link H3Adapter.useBodyParser}
+   */
+  useBodyParser<T = any>(type: string, options?: T): this;
 
   /**
    * A wrapper function around native `h3.fetch()` method.

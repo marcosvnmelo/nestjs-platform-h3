@@ -6,7 +6,7 @@ import { UsersService } from './users.service.ts';
 export class UserByIdPipe implements PipeTransform<string> {
   constructor(private readonly usersService: UsersService) {}
 
-  transform(value: string, metadata: ArgumentMetadata) {
+  transform(value: string, _metadata: ArgumentMetadata) {
     return this.usersService.findById(value);
   }
 }

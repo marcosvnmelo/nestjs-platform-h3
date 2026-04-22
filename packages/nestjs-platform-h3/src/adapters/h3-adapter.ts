@@ -5,9 +5,11 @@ import * as https from 'node:https';
 import * as path from 'node:path';
 import { isPromise } from 'node:util/types';
 import type { H3Config, H3Event, HTTPMethod } from 'h3';
+import type { Socket } from 'node:net';
 import type { Writable } from 'node:stream';
 import type { ServerRequest } from 'srvx';
-import { fromNodeHandler, H3, handleCors, readBody, serveStatic } from 'h3';
+import bodyParser from 'body-parser';
+import { fromNodeHandler, H3, handleCors, serveStatic } from 'h3';
 import { toNodeHandler } from 'h3/node';
 
 import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
@@ -34,7 +36,7 @@ import { LegacyRouteConverter } from '@nestjs/core/router/legacy-route-converter
 import type {
   CorsConfig,
   CorsOptions,
-  CorsOptionsCallback,
+  CorsOptionsDelegate,
 } from '../interfaces/cors-options.interface.ts';
 import type {
   H3NodeHandler,
@@ -45,7 +47,11 @@ import type {
   PolyfilledResponse,
 } from '../interfaces/nest-h3-application.interface.ts';
 import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface.ts';
-import { setH3ParsedBody } from './utils/body.utils.ts';
+import {
+  applyExpressCompatibleBodyParsers,
+  getJsonBodyParserOptions,
+  getUrlencodedBodyParserOptions,
+} from './utils/body.utils.ts';
 import { setH3Event } from './utils/h3-event.utils.ts';
 import { copyHeadersFromEvent } from './utils/headers.utils.ts';
 import {
@@ -136,6 +142,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   declare protected readonly instance: H3;
   private readonly logger = new Logger(H3Adapter.name);
   private isHttp2 = false;
+  private readonly openConnections = new Set<Socket>();
   private corsConfig?: CorsConfig;
   private onRequestHook?: (
     req: PolyfilledRequest<H3ServerRequest>,
@@ -156,6 +163,15 @@ export class H3Adapter extends AbstractHttpAdapter<
     res: H3ServerResponse,
     next: (err?: Error) => void,
   ) => Promise<void>;
+
+  /**
+   * Pre-created body parsers for performance.
+   */
+  private bodyParsers?: {
+    jsonParser: ReturnType<typeof bodyParser.json>;
+    urlencodedParser: ReturnType<typeof bodyParser.urlencoded>;
+  };
+
   /**
    * Route registry mapping 'METHOD:path' to array of handlers.
    * Enables multiple versioned handlers for the same path.
@@ -166,6 +182,11 @@ export class H3Adapter extends AbstractHttpAdapter<
    * Prevents duplicate route registrations.
    */
   private readonly registeredPaths = new Set<string>();
+  /**
+   * Maps normalized route paths to their original route patterns for later retrieval.
+   * Used to extract remaining path segments after parameter matching.
+   */
+  private readonly routePatterns = new Map<string, string>();
 
   constructor(instanceOrOptions?: H3 | H3Config) {
     super(
@@ -175,10 +196,11 @@ export class H3Adapter extends AbstractHttpAdapter<
     );
 
     this.instance.use(async (event, next) => {
-      const [req, res] = extractNodeRuntimeFromEvent<
-        PolyfilledRequest<H3ServerRequest>,
-        PolyfilledResponse<H3ServerResponse>
-      >(event);
+      const runtime = event.runtime?.node;
+      if (!runtime) return;
+
+      const req = runtime.req as PolyfilledRequest<H3ServerRequest>;
+      const res = runtime.res as PolyfilledResponse<H3ServerResponse>;
 
       setH3Event(req, event);
       applyParamsToRequest(req, event);
@@ -192,38 +214,36 @@ export class H3Adapter extends AbstractHttpAdapter<
 
       if (this.onRequestHook) {
         await new Promise<void>((resolve, reject) => {
-          const done = (err?: Error) => {
-            if (err) reject(err);
-            else resolve();
-          };
-
-          const maybePromise = this.onRequestHook!.call(this, req, res, done);
-          if (isPromise(maybePromise)) maybePromise.then().catch(reject);
+          const maybePromise = this.onRequestHook!.call(
+            this,
+            req,
+            res,
+            (err?: Error) => {
+              if (err) reject(err);
+              else resolve();
+            },
+          );
+          if (isPromise(maybePromise)) maybePromise.then(resolve).catch(reject);
           else resolve();
         });
       }
 
       if (this.corsConfig !== undefined) {
-        const corsOptions = await new Promise<CorsOptions>(
-          (resolve, reject) => {
-            if (!isFunction(this.corsConfig)) {
-              return resolve(this.corsConfig!);
-            }
-
-            const callback: CorsOptionsCallback = (error, options) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(options);
-              }
-            };
-            this.corsConfig(req, callback);
-          },
-        );
+        let corsOptions: CorsOptions;
+        if (isFunction(this.corsConfig)) {
+          corsOptions = await new Promise<CorsOptions>((resolve, reject) => {
+            (this.corsConfig as CorsOptionsDelegate)(req, (error, options) => {
+              if (error) reject(error);
+              else resolve(options);
+            });
+          });
+        } else {
+          corsOptions = this.corsConfig;
+        }
 
         const corsResult = handleCors(event, corsOptions);
         copyHeadersFromEvent(event, res);
-        if (corsResult !== false) {
+        if (corsResult !== false && corsResult !== undefined) {
           return corsResult;
         }
       }
@@ -409,9 +429,8 @@ export class H3Adapter extends AbstractHttpAdapter<
     if (!prev) {
       response.setHeader(name, value);
     } else {
-      const newValue = Array.isArray(prev)
-        ? [...prev, value]
-        : [String(prev), value];
+      const newValue = Array.isArray(prev) ? prev : [String(prev)];
+      newValue.push(value);
       response.setHeader(name, newValue);
     }
   }
@@ -427,6 +446,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   }
 
   public close() {
+    this.closeOpenConnections();
     if (!this.httpServer) {
       return undefined;
     }
@@ -822,6 +842,33 @@ export class H3Adapter extends AbstractHttpAdapter<
       // HTTP/1.1
       this.httpServer = http.createServer(requestListener);
     }
+
+    if (options?.forceCloseConnections) {
+      this.trackOpenConnections();
+    }
+  }
+
+  /**
+   * Track TCP sockets so `close()` can destroy them when `forceCloseConnections` is enabled
+   * (mirrors @nestjs/platform-express — keeps `server.close()` from hanging on keep-alive/SSE).
+   */
+  private trackOpenConnections() {
+    if (!this.httpServer) {
+      return;
+    }
+    this.httpServer.on('connection', (socket) => {
+      this.openConnections.add(socket);
+      socket.on('close', () => {
+        this.openConnections.delete(socket);
+      });
+    });
+  }
+
+  private closeOpenConnections() {
+    for (const socket of this.openConnections) {
+      socket.destroy();
+      this.openConnections.delete(socket);
+    }
   }
 
   /**
@@ -837,17 +884,65 @@ export class H3Adapter extends AbstractHttpAdapter<
    * Parameters are part of the AbstractHttpAdapter interface contract.
    * The prefix parameter could be used to conditionally apply parsing based on path prefix.
    * The rawBody parameter could be used to configure raw body parsing.
-   * Currently, H3 adapter applies body parsing globally for POST, PUT, and PATCH requests.
-   * Multipart form data is skipped to allow interceptors to handle file uploads.
+   * Body parsing uses the same `body-parser` stack as the default Express adapter
+   * (`json` and `urlencoded({ extended: true })`). Multipart is skipped.
    */
   public registerParserMiddleware(_prefix?: string, rawBody?: boolean) {
+    // Pre-create body parsers if not already created by useBodyParser
+    this.bodyParsers ??= {
+      jsonParser: bodyParser.json(getJsonBodyParserOptions(rawBody)),
+      urlencodedParser: bodyParser.urlencoded(
+        getUrlencodedBodyParserOptions(rawBody),
+      ),
+    };
+
     this.instance.use(async (event) => {
-      const contentType = event.req.headers.get('Content-Type');
-      // Skip multipart/form-data to allow interceptors to handle file uploads
-      if (contentType && !contentType.includes('multipart/form-data')) {
-        setH3ParsedBody(await readBody(event), event, rawBody);
+      const method = event.req.method?.toUpperCase();
+      if (method === 'GET' || method === 'HEAD') {
+        return;
       }
+
+      const contentType = event.req.headers.get('Content-Type') ?? '';
+      if (contentType.includes('multipart/form-data')) {
+        return;
+      }
+      await applyExpressCompatibleBodyParsers(event, rawBody, this.bodyParsers);
     });
+  }
+
+  public useBodyParser(type: string, rawBody: boolean, options: any) {
+    if (!this.bodyParsers) {
+      this.bodyParsers = {
+        jsonParser: bodyParser.json(getJsonBodyParserOptions(rawBody)),
+        urlencodedParser: bodyParser.urlencoded(
+          getUrlencodedBodyParserOptions(rawBody),
+        ),
+      };
+    }
+
+    const parserAutoOptions: any = {
+      ...options,
+    };
+    if (parserAutoOptions.bodyLimit !== undefined) {
+      parserAutoOptions.limit = parserAutoOptions.bodyLimit;
+    }
+
+    if (type === 'json' || type === 'application/json') {
+      this.bodyParsers.jsonParser = bodyParser.json({
+        ...getJsonBodyParserOptions(rawBody),
+        ...parserAutoOptions,
+      });
+    } else if (
+      type === 'urlencoded' ||
+      type === 'application/x-www-form-urlencoded'
+    ) {
+      this.bodyParsers.urlencodedParser = bodyParser.urlencoded({
+        ...getUrlencodedBodyParserOptions(rawBody),
+        ...parserAutoOptions,
+      });
+    }
+
+    return this;
   }
 
   public getType(): string {
@@ -935,36 +1030,6 @@ export class H3Adapter extends AbstractHttpAdapter<
     this.registerRoute('ALL', path, handler);
   }
 
-  private getHandlersFactory(
-    path: string,
-  ): (method: HTTPMethod) => HandlerInfo[] {
-    return (method) => {
-      if (method !== 'HEAD') {
-        return this.routeMap.get(`${method}:${path}`) ?? [];
-      }
-
-      // HEAD requests can be handled separately or by GET
-      return [
-        ...(this.routeMap.get(`${method}:${path}`) ?? []),
-        ...(this.routeMap.get('GET:' + path) ?? []),
-      ].flat();
-    };
-  }
-
-  private getHandlersFromEvent(event: H3Event): HandlerInfo[] {
-    const method = event.req.method as HTTPMethod;
-    const getRoutes = event.context.matchedRoute?.meta?.getRoutes as ReturnType<
-      typeof this.getHandlersFactory
-    >;
-
-    if (!getRoutes) {
-      this.logger.warn('getRoutes() not found in matchedRoute.meta');
-      return [];
-    }
-
-    return getRoutes(method);
-  }
-
   /**
    * Registers a route handler using H3's native routing with handler chaining.
    * Uses H3's radix tree router for fast O(1) path matching.
@@ -993,6 +1058,9 @@ export class H3Adapter extends AbstractHttpAdapter<
 
     const routeKey = `${method}:${normalizedPath}`;
 
+    // Store original route pattern for later reference
+    this.routePatterns.set(normalizedPath, routePath);
+
     // Add handler to route map
     if (!this.routeMap.has(routeKey)) {
       this.routeMap.set(routeKey, []);
@@ -1019,58 +1087,79 @@ export class H3Adapter extends AbstractHttpAdapter<
     const routeKey = `${method}:${normalizedPath}`;
     this.registeredPaths.add(routeKey);
 
+    // Get original route pattern if stored
+    const originalPattern = this.routePatterns.get(normalizedPath);
+
     // Create chain handler that performs lazy lookup from route map
     // H3 expects lowercase HTTP methods
     this.instance.on(
       method === 'ALL' ? '' : method,
       normalizedPath,
       async (event) => {
-        // NOTE: Lazy lookup: get current handlers from map at request time
-        // This allows handlers registered after this point to be found
-        const handlers = this.getHandlersFromEvent(event);
-        if (handlers.length === 0) {
-          // No handlers for this route at this time - return 404
-          return $h3NotFound;
-        }
-
         const [req, res] = extractNodeRuntimeFromEvent(event);
 
         const method = event.req.method as HTTPMethod;
-        // Nest registers versioned routes in controller order (often ascending).
-        // For CUSTOM/HEADER/MEDIA_TYPE, highest matching version must win (Fastify parity).
-        // Reverse GET/... chains so later-registered (typically higher) handlers run first.
-        // HEAD: keep explicit HEAD handlers before GET fallback; reverse only GET segment.
-        let chain: HandlerInfo[] = handlers;
-        if (handlers.length > 1) {
-          if (method === 'HEAD') {
-            const headOnly = this.routeMap.get(`HEAD:${normalizedPath}`) ?? [];
-            const getOnly = this.routeMap.get(`GET:${normalizedPath}`) ?? [];
-            chain = [...headOnly, ...[...getOnly].reverse()];
-          } else {
-            chain = [...handlers].reverse();
-          }
-        }
+        if (method === 'HEAD') {
+          const headHandlers =
+            this.routeMap.get(`HEAD:${normalizedPath}`) ?? [];
+          const getHandlers = this.routeMap.get(`GET:${normalizedPath}`) ?? [];
 
-        // Chain through handlers (supports versioning via next() callback)
-        for (const handlerInfo of chain) {
-          // Stop if response is already sent (headers written)
-          if (res.headersSent || res.writableEnded) {
-            break;
+          if (headHandlers.length === 0 && getHandlers.length === 0) {
+            return $h3NotFound;
           }
 
-          const result = await this.invokeHandler(
-            handlerInfo.handler,
-            req,
-            res,
-          );
+          for (let idx = 0; idx < headHandlers.length; idx++) {
+            if (res.headersSent || res.writableEnded) {
+              break;
+            }
 
-          // Handler completed successfully - return result to H3
-          if (result !== $h3NextHandler) {
-            return result;
+            const result = await this.invokeHandler(
+              headHandlers[idx].handler,
+              req,
+              res,
+            );
+            if (result !== $h3NextHandler) {
+              return result;
+            }
           }
 
-          // Handler called next() or returned undefined - try next handler
-          // (version didn't match, or handler passed through)
+          // For GET fallback, run later registrations first (Fastify parity).
+          for (let idx = getHandlers.length - 1; idx >= 0; idx--) {
+            if (res.headersSent || res.writableEnded) {
+              break;
+            }
+
+            const result = await this.invokeHandler(
+              getHandlers[idx].handler,
+              req,
+              res,
+            );
+            if (result !== $h3NextHandler) {
+              return result;
+            }
+          }
+        } else {
+          const handlers =
+            this.routeMap.get(`${method}:${normalizedPath}`) ?? [];
+          if (handlers.length === 0) {
+            return $h3NotFound;
+          }
+
+          // Later registrations run first for versioned handlers.
+          for (let idx = handlers.length - 1; idx >= 0; idx--) {
+            if (res.headersSent || res.writableEnded) {
+              break;
+            }
+
+            const result = await this.invokeHandler(
+              handlers[idx].handler,
+              req,
+              res,
+            );
+            if (result !== $h3NextHandler) {
+              return result;
+            }
+          }
         }
 
         // No handler matched (all called next()) - response should be sent
@@ -1078,12 +1167,11 @@ export class H3Adapter extends AbstractHttpAdapter<
         if (!res.headersSent && !res.writableEnded) {
           return $h3NotFound;
         }
-        // Response was already sent by one of the handlers
         return $h3Handled;
       },
       {
         meta: {
-          getRoutes: this.getHandlersFactory(normalizedPath),
+          routePattern: originalPattern,
         },
       },
     );
@@ -1091,12 +1179,6 @@ export class H3Adapter extends AbstractHttpAdapter<
 
   /**
    * Invokes the actual NestJS handler and manages response lifecycle.
-   *
-   * Instead of calling res.end() directly, reply/end/redirect capture the
-   * response body. After the handler completes, the captured body is returned
-   * as an Response so H3/srvx can send it through its native pipeline
-   * (a single writeHead + write + end pass), eliminating the double-end
-   * overhead of the previous approach.
    *
    * @param handler - The NestJS route handler function
    * @param req - Node.js request (HTTP/1 or HTTP/2)
@@ -1107,62 +1189,54 @@ export class H3Adapter extends AbstractHttpAdapter<
     handler: Function,
     req: http.IncomingMessage | http2.Http2ServerRequest,
     res: http.ServerResponse | http2.Http2ServerResponse,
-  ) {
-    return new Promise<typeof $h3Handled | typeof $h3NextHandler>(
-      (resolve, reject) => {
-        let resolved = false;
+  ):
+    | typeof $h3Handled
+    | typeof $h3NextHandler
+    | Promise<typeof $h3Handled | typeof $h3NextHandler> {
+    let nextCalled = false;
+    let nextError: Error | undefined;
+    const next = (err?: Error) => {
+      nextCalled = true;
+      nextError = err;
+    };
 
-        const resolveWith = (value: any) => {
-          if (!resolved) {
-            resolved = true;
-            resolve(value);
-          }
-        };
+    const result = handler(req, res, next);
 
-        // Fallback: wait for finish (stream cases where pipe calls res.end)
-        res.once('finish', () => resolveWith($h3Handled));
+    if (nextCalled) {
+      if (nextError) throw nextError;
+      return $h3NextHandler;
+    }
 
-        // next() callback for version filtering
-        const next = (err?: Error) => {
-          if (resolved) return;
-          resolved = true;
-          if (err) {
-            reject(err);
-          } else {
-            resolve($h3NextHandler); // Continue to next handler (version didn't match)
-          }
-        };
+    if (!isPromise(result)) {
+      if (result === $h3NextHandler) return $h3NextHandler;
+      if (res.writableEnded) return $h3Handled;
+      return this._invokeHandlerAsync(res);
+    }
 
-        const checkCapture = () => {
-          if (resolved) return;
-          if (res.writableEnded || res.headersSent) {
-            // Response was sent directly (stream, @Res() decorator, etc.)
-            resolveWith($h3Handled);
-          }
-          // else: wait for 'finish' event (rare edge case)
-        };
+    return this._invokeHandlerPromise(result, res);
+  }
 
-        try {
-          const result = handler(req, res, next);
+  private async _invokeHandlerPromise(
+    result: Promise<any>,
+    res: http.ServerResponse | http2.Http2ServerResponse,
+  ): Promise<typeof $h3Handled | typeof $h3NextHandler> {
+    const val = await result;
 
-          if (isPromise(result)) {
-            result.then(checkCapture).catch((err: Error) => {
-              if (!resolved) {
-                resolved = true;
-                reject(err);
-              }
-            });
-          } else {
-            checkCapture();
-          }
-        } catch (err) {
-          if (!resolved) {
-            resolved = true;
-            reject(err as Error);
-          }
-        }
-      },
-    );
+    if (val === $h3NextHandler) return $h3NextHandler;
+    if (res.writableEnded) return $h3Handled;
+    return this._invokeHandlerAsync(res);
+  }
+
+  private _invokeHandlerAsync(
+    res: http.ServerResponse | http2.Http2ServerResponse,
+  ): Promise<typeof $h3Handled | typeof $h3NextHandler> {
+    return new Promise<typeof $h3Handled | typeof $h3NextHandler>((resolve) => {
+      if (res.writableEnded) {
+        resolve($h3Handled);
+        return;
+      }
+      res.once('finish', () => resolve($h3Handled));
+    });
   }
 
   /**

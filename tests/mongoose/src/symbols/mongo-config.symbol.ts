@@ -1,0 +1,1 @@
+export const $MONGOOSE_OPTIONS = Symbol.for('TEST_CONTAINER_MONGOOSE_OPTIONS');

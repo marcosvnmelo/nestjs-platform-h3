@@ -1,45 +1,95 @@
+# cspell:disable
 packages:
   - packages/*
   - tests/*
+  - tests/nest-application/*
   - tools/*
+allowBuilds:
+  '@apollo/protobufjs': false
+  '@confluentinc/kafka-javascript': true
+  '@nestjs/core': false
+  core-js: false
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
 
 catalog:
   # Core framework
 
   # Utilities
+
+  # Dev dependencies
+  '@apollo/server': '5.5.0'
+  '@confluentinc/kafka-javascript': '1.9.0'
   '@fastify/busboy': '3.2.0'
+  '@grpc/grpc-js': '1.14.3'
+  '@grpc/proto-loader': '0.8.0'
+  '@nestjs/apollo': '13.3.0'
   '@nestjs/common': '11.1.19'
   '@nestjs/core': '11.1.19'
+  '@nestjs/graphql': '13.3.0'
+  '@nestjs/mapped-types': '2.1.0'
+  '@nestjs/microservices': '11.1.19'
+  '@nestjs/mongoose': '11.0.4'
   '@nestjs/platform-express': '11.1.19'
   '@nestjs/platform-fastify': '11.1.19'
+  '@nestjs/platform-socket.io': '11.1.19'
+  '@nestjs/platform-ws': '11.1.19'
   '@nestjs/testing': '11.1.19'
+  '@nestjs/typeorm': '11.0.0'
+  '@nestjs/websockets': '11.1.19'
 
   # Build tools
   '@rslib/core': '0.21.0'
   '@rstest/adapter-rslib': '^0.2.2'
   '@rstest/core': '^0.9.7'
-
-  # Dev dependencies
+  '@testcontainers/kafka': '11.14.0'
+  '@testcontainers/nats': '11.14.0'
+  '@types/amqplib': '0.10.8'
   '@types/autocannon': '7.12.7'
+  '@types/body-parser': 1.19.6
   '@types/content-type': ^1.1.9
   '@types/express': '5.0.6'
   '@types/mime-types': ^3.0.1
-  '@types/node': '^24'
+  '@types/node': '25.6.0'
   '@types/supertest': '7.2.0'
+  '@types/ws': '8.18.1'
+  amqp-connection-manager: '5.0.0'
+  amqplib: '0.10.9'
   autocannon: '8.0.0'
-  class-validator: ^0.15.1
-  content-type: ^1.0.5
 
   # HTTP servers
+  body-parser: 2.2.2
+  class-transformer: '0.5.1'
+  class-validator: '0.15.1'
+  content-type: '^1.0.5'
+  eventsource: '4.1.0'
   express: '5.2.1'
   fastify: '5.8.4'
+  graphql: '16.13.2'
+  graphql-subscriptions: '3.0.0'
   h3: '2.0.1-rc.20'
+  ioredis: '5.9.3'
+  jiti: '2.6.1'
+  kafkajs: '2.2.4'
   mime-types: ^3.0.2
+  mongoose: '9.5.0'
+  mqtt: '5.15.1'
+  mysql2: '3.22.2'
+  nats: '2.29.3'
   path-to-regexp: '8.4.2'
   reflect-metadata: '^0.2.2'
   rxjs: '7.8.2'
+  socket.io: '4.8.3'
+  socket.io-client: '4.8.3'
   srvx: ^0.11.15
   supertest: '^7.2.2'
+  testcontainers: '11.14.0'
+  typeorm: '0.3.28'
   typescript: '5.9.3'
+  ws: '8.20.0'
+overrides:
+  '@apollo/server': '$@apollo/server'
+  class-validator: '$class-validator'
 patchedDependencies:
   quick-publish: patches/quick-publish.patch

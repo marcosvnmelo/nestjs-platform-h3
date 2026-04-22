@@ -6,6 +6,7 @@ You are an expert in JavaScript, Rspack, Rsbuild, Rslib, and library development
 
 - `pnpm run build` - Build the library for production
 - `pnpm run dev` - Turn on watch mode, watch for changes and rebuild the library
+- `pnpm run typecheck` - Builds the library first, then `tsc` across the workspace (downstream packages use `dist` types from `package.json` exports)
 
 ## Docs
 

@@ -5,16 +5,16 @@ import {
   H3ServerResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
 
-import { AppV1Controller } from './app-v1.controller.js';
-import { AppV2Controller } from './app-v2.controller.js';
-import { MiddlewareController } from './middleware.controller.js';
-import { MultipleMiddlewareVersionController } from './multiple-middleware.controller.js';
-import { MultipleVersionController } from './multiple.controller.js';
-import { VersionNeutralMiddlewareController } from './neutral-middleware.controller.js';
-import { VersionNeutralController } from './neutral.controller.js';
-import { NoVersioningController } from './no-versioning.controller.js';
-import { OverridePartialController } from './override-partial.controller.js';
-import { OverrideController } from './override.controller.js';
+import { AppV1Controller } from './app-v1.controller.ts';
+import { AppV2Controller } from './app-v2.controller.ts';
+import { MiddlewareController } from './middleware.controller.ts';
+import { MultipleMiddlewareVersionController } from './multiple-middleware.controller.ts';
+import { MultipleVersionController } from './multiple.controller.ts';
+import { VersionNeutralMiddlewareController } from './neutral-middleware.controller.ts';
+import { VersionNeutralController } from './neutral.controller.ts';
+import { NoVersioningController } from './no-versioning.controller.ts';
+import { OverridePartialController } from './override-partial.controller.ts';
+import { OverrideController } from './override.controller.ts';
 
 @Module({
   imports: [],

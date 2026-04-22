@@ -8,23 +8,21 @@ import type {
   H3ServerRequest,
   NestH3Application,
 } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
 
 describe('Custom Versioning', () => {
   const extractor = ((request: H3ServerRequest): string | string[] => {
-    const versions = (
-      typeof request.headers['Accept'] === 'string'
-        ? request.headers['Accept'].split(',')
-        : request.headers['Accept']
-    )
-      ?.map((header) => header.match(/v(\d+\.?\d*)\+json$/))
+    const versions = [request.headers['accept'] ?? '']
+      .flatMap((v) => v.split(','))
+      .map((header) => header.match(/v(\d+\.?\d*)\+json$/))
       .filter((match) => match && match.length)
       .map((matchArray) => matchArray![1])
       .sort()
       .reverse();
 
-    return versions!;
+    return versions;
   }) as (request: unknown) => string | string[];
   let app: NestH3Application;
 
@@ -35,7 +33,7 @@ describe('Custom Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.CUSTOM,
         extractor,
@@ -399,7 +397,7 @@ describe('Custom Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.CUSTOM,
         extractor,

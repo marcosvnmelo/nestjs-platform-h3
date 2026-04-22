@@ -976,6 +976,8 @@ export class H3Adapter extends AbstractHttpAdapter<
    * - On subsequent registrations: adds to route map, existing chain handler finds it
    * - Lazy lookup pattern: chain handler queries route map at request time
    * - Supports version filtering via next() callback mechanism
+   * - Multiple handlers same path: chain runs in reverse registration order so
+   *   later routes (typically higher API versions) match first (Fastify parity)
    *
    * @param method - HTTP method (GET, POST, etc.)
    * @param routePath - The route path pattern
@@ -1033,8 +1035,24 @@ export class H3Adapter extends AbstractHttpAdapter<
 
         const [req, res] = extractNodeRuntimeFromEvent(event);
 
+        const method = event.req.method as HTTPMethod;
+        // Nest registers versioned routes in controller order (often ascending).
+        // For CUSTOM/HEADER/MEDIA_TYPE, highest matching version must win (Fastify parity).
+        // Reverse GET/... chains so later-registered (typically higher) handlers run first.
+        // HEAD: keep explicit HEAD handlers before GET fallback; reverse only GET segment.
+        let chain: HandlerInfo[] = handlers;
+        if (handlers.length > 1) {
+          if (method === 'HEAD') {
+            const headOnly = this.routeMap.get(`HEAD:${normalizedPath}`) ?? [];
+            const getOnly = this.routeMap.get(`GET:${normalizedPath}`) ?? [];
+            chain = [...headOnly, ...[...getOnly].reverse()];
+          } else {
+            chain = [...handlers].reverse();
+          }
+        }
+
         // Chain through handlers (supports versioning via next() callback)
-        for (const handlerInfo of handlers) {
+        for (const handlerInfo of chain) {
           // Stop if response is already sent (headers written)
           if (res.headersSent || res.writableEnded) {
             break;
@@ -1201,10 +1219,6 @@ export class H3Adapter extends AbstractHttpAdapter<
             return handler(req, res, next);
           }
         } else if (isString(version)) {
-          // Known limitation: if there are multiple versions supported across separate
-          // handlers/controllers, we can't select the highest matching handler.
-          // Since this code is evaluated per-handler, we can't see if the highest
-          // specified version exists in a different handler.
           if (
             Array.isArray(extractedVersion) &&
             extractedVersion.includes(version)

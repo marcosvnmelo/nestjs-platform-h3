@@ -5,6 +5,8 @@
   "scripts": {
     "build": "rslib build",
     "benchmark": "pnpm run build && node ./dist/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

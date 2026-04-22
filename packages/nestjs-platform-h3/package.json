@@ -1,0 +1,77 @@
+{
+  "name": "@marcosvnmelo/nestjs-platform-h3",
+  "description": "A H3 adapter for NestJS framework",
+  "version": "11.1.19-1",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcosvnmelo/nestjs-platform-h3"
+  },
+  "keywords": [
+    "typescript",
+    "library",
+    "nestjs",
+    "h3",
+    "platform"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./adapter/utils": {
+      "types": "./dist/adapters/utils/index.d.ts",
+      "import": "./dist/adapters/utils/index.js",
+      "default": "./dist/adapters/utils/index.js"
+    }
+  },
+  "testExports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./adapter/utils": {
+      "types": "./src/adapters/utils/index.ts",
+      "import": "./src/adapters/utils/index.ts",
+      "default": "./src/adapters/utils/index.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm run build",
+    "typecheck": "tsc --noEmit",
+    "release": "quick-publish"
+  },
+  "dependencies": {
+    "@fastify/busboy": "catalog:",
+    "@types/content-type": "catalog:",
+    "@types/mime-types": "catalog:",
+    "content-type": "catalog:",
+    "h3": "catalog:",
+    "mime-types": "catalog:",
+    "path-to-regexp": "catalog:",
+    "rxjs": "catalog:",
+    "srvx": "catalog:"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0"
+  }
+}

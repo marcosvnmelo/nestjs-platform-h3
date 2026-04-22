@@ -13,6 +13,11 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
     "@nestjs/common": "catalog:",

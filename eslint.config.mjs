@@ -11,20 +11,8 @@ export default defineConfig([
   {
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.eslint.json'],
+        project: true,
       },
-    },
-  },
-  {
-    files: ['scripts/**/*.mjs'],
-    languageOptions: {
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        URL: 'readonly',
-      },
-      ecmaVersion: 'latest',
-      sourceType: 'module',
     },
   },
   {

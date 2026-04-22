@@ -6,6 +6,8 @@
     "build": "rslib build",
     "test": "rstest",
     "test:watch": "rstest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

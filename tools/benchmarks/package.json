@@ -1,5 +1,5 @@
 {
-  "name": "@marcosvnmelo/nestjs-platform-h3-benchmark",
+  "name": "@marcosvnmelo/benchmark",
   "private": true,
   "type": "module",
   "scripts": {

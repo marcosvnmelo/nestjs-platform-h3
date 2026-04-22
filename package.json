@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run dev",
     "build": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run build",
-    "benchmark": "pnpm --filter @marcosvnmelo/nestjs-platform-h3-benchmark run benchmark",
+    "benchmark": "pnpm --filter @marcosvnmelo/benchmark run benchmark",
     "test": "pnpm --filter ...* run test",
     "test:watch": "pnpm --filter ...* run test:watch",
     "format": "prettier --check .",

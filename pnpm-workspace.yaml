@@ -1,7 +1,7 @@
 packages:
-  - benchmark
   - packages/*
   - tests/*
+  - tools/*
 
 catalog:
   # Core framework

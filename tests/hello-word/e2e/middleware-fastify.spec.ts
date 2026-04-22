@@ -1,3 +1,6 @@
+import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
+import request from 'supertest';
+
 import {
   Controller,
   Get,
@@ -10,18 +13,18 @@ import {
   Req,
   RequestMethod,
 } from '@nestjs/common';
-import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
-import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+import { Test } from '@nestjs/testing';
+
 import type {
   H3ServerRequest,
   H3ServerResponse,
   NestH3Application,
   PolyfilledResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
-import { Test } from '@nestjs/testing';
-import request from 'supertest';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
+
 import { AppModule } from '../src/app.module.ts';
-import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
 
 describe('Middleware (H3Adapter)', () => {
   let app: NestH3Application;
@@ -70,7 +73,7 @@ describe('Middleware (H3Adapter)', () => {
     @Controller(QUERY_VALUE)
     class TestQueryController {
       @Get()
-      [QUERY_VALUE](@Query('test') test: string) {
+      queryValue(@Query('test') test: string) {
         return test;
       }
     }

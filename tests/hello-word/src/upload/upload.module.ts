@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
-import * as os from 'os';
 import * as path from 'node:path';
+import * as os from 'os';
 
 import {
   Controller,

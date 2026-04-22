@@ -14,7 +14,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 
 import {
+  H3Adapter,
   H3ServerResponse,
+  NestH3Application,
   PolyfilledResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
 
@@ -82,7 +84,7 @@ describe('Interceptors', () => {
   it(`should transform response (sync)`, async () => {
     app = (
       await createTestModule(new OverrideInterceptor())
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer()).get('/hello').expect(200, RETURN_VALUE);
@@ -91,7 +93,7 @@ describe('Interceptors', () => {
   it(`should map response`, async () => {
     app = (
       await createTestModule(new TransformInterceptor())
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())
@@ -102,7 +104,7 @@ describe('Interceptors', () => {
   it(`should map response (async)`, async () => {
     app = (
       await createTestModule(new TransformInterceptor())
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())
@@ -113,7 +115,7 @@ describe('Interceptors', () => {
   it(`should map response (stream)`, async () => {
     app = (
       await createTestModule(new TransformInterceptor())
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())
@@ -124,7 +126,7 @@ describe('Interceptors', () => {
   it(`should modify response status`, async () => {
     app = (
       await createTestModule(new StatusInterceptor(400))
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())
@@ -139,7 +141,7 @@ describe('Interceptors', () => {
 
     app = (
       await createTestModule(new HeaderInterceptor(customHeaders))
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())

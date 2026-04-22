@@ -17,8 +17,10 @@ import { CustomVersioningOptions } from '@nestjs/common/interfaces/index.js';
 import { Test } from '@nestjs/testing';
 
 import {
+  H3Adapter,
   H3ServerRequest,
   H3ServerResponse,
+  NestH3Application,
   PolyfilledResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
 
@@ -174,7 +176,7 @@ async function createAppWithVersioning(
     await Test.createTestingModule({
       imports: [TestModule],
     }).compile()
-  ).createNestApplication();
+  ).createNestApplication<NestH3Application>(new H3Adapter());
 
   app.enableVersioning(versioningOptions);
   if (beforeInit) {

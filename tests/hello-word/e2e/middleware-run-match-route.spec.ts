@@ -13,10 +13,12 @@ import {
 import { Test } from '@nestjs/testing';
 
 import {
+  H3Adapter,
   H3ServerRequest,
   H3ServerResponse,
+  NestH3Application,
   PolyfilledResponse,
-} from '../../dist/index.js';
+} from '@marcosvnmelo/nestjs-platform-h3';
 
 /**
  * Number of times that the middleware was executed.
@@ -67,7 +69,7 @@ describe('Middleware (run on route match)', () => {
       await Test.createTestingModule({
         imports: [TestModule],
       }).compile()
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
   });

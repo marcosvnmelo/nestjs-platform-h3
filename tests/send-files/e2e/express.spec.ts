@@ -26,7 +26,7 @@ describe('Express FileSend', () => {
       imports: [AppModule],
     }).compile();
 
-    app = modRef.createNestApplication(new H3Adapter());
+    app = modRef.createNestApplication<NestH3Application>(new H3Adapter());
     await app.init();
   });
 

@@ -9,6 +9,8 @@ import {
 import { APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 
+import { H3Adapter, NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+
 import { AppModule } from '../src/app.module.ts';
 
 @Injectable()
@@ -41,7 +43,9 @@ describe('Guards', () => {
   });
 
   it(`should prevent access (unauthorized)`, async () => {
-    app = (await createTestModule(new AuthGuard())).createNestApplication();
+    app = (
+      await createTestModule(new AuthGuard())
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())
@@ -55,7 +59,9 @@ describe('Guards', () => {
 
   it(`should allow access when guard returns true`, async () => {
     const allowGuard = { canActivate: () => true };
-    app = (await createTestModule(allowGuard)).createNestApplication();
+    app = (
+      await createTestModule(allowGuard)
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
     await request(app.getHttpServer())

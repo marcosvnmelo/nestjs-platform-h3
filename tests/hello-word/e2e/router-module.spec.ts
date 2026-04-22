@@ -5,6 +5,8 @@ import { Controller, Get, INestApplication, Module } from '@nestjs/common';
 import { RouterModule, Routes } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 
+import { H3Adapter, NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+
 describe('RouterModule', () => {
   let app: INestApplication;
 
@@ -72,7 +74,7 @@ describe('RouterModule', () => {
       imports: [MainModule, AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
     await app.init();
   });
 

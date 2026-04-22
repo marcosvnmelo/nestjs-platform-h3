@@ -5,6 +5,7 @@ import { VersioningType } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
 
@@ -18,7 +19,7 @@ describe('Media Type Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.MEDIA_TYPE,
         key: 'v=',
@@ -346,7 +347,7 @@ describe('Media Type Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.MEDIA_TYPE,
         key: 'v=',

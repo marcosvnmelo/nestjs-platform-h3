@@ -1,5 +1,10 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 
+import {
+  H3ServerRequest,
+  H3ServerResponse,
+} from '@marcosvnmelo/nestjs-platform-h3';
+
 import { AppV1Controller } from './app-v1.controller.js';
 import { AppV2Controller } from './app-v2.controller.js';
 import { MiddlewareController } from './middleware.controller.js';
@@ -29,7 +34,9 @@ import { OverrideController } from './override.controller.js';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply((req, res) => res.end('Hello from middleware function!'))
+      .apply((_req: H3ServerRequest, res: H3ServerResponse) =>
+        res.end('Hello from middleware function!'),
+      )
       .forRoutes(
         MiddlewareController,
         MultipleMiddlewareVersionController,

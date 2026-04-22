@@ -22,7 +22,7 @@ describe('Default Versioning behavior', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning();
       await app.init();
     });

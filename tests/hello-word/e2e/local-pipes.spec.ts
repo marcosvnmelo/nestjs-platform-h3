@@ -5,6 +5,9 @@ import request from 'supertest';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
 import { AppModule } from '../src/app.module.ts';
 
 describe('Hello world (default adapter)', () => {
@@ -16,7 +19,7 @@ describe('Hello world (default adapter)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = module.createNestApplication();
+    app = module.createNestApplication<NestH3Application>(new H3Adapter());
     server = app.getHttpServer();
     await app.init();
   });

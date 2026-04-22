@@ -5,6 +5,7 @@ import { VersioningType } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
 
@@ -18,7 +19,7 @@ describe('URI Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.URI,
       });
@@ -189,7 +190,7 @@ describe('URI Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.URI,
         defaultVersion: '1',
@@ -361,7 +362,7 @@ describe('URI Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.setGlobalPrefix('api', { exclude: ['/foo/bar'] });
       app.enableVersioning({
         type: VersioningType.URI,
@@ -427,7 +428,7 @@ describe('URI Versioning', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication();
+      app = moduleRef.createNestApplication<NestH3Application>(new H3Adapter());
       app.enableVersioning({
         type: VersioningType.URI,
         defaultVersion: '1',

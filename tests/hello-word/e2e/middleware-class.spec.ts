@@ -13,10 +13,13 @@ import {
 import { Test } from '@nestjs/testing';
 
 import {
+  H3Adapter,
   H3ServerRequest,
   H3ServerResponse,
+  NestH3Application,
   PolyfilledResponse,
-} from '../../dist/index.js';
+} from '@marcosvnmelo/nestjs-platform-h3';
+
 import { AppModule } from '../src/app.module.ts';
 
 const INCLUDED_VALUE = 'test_included';
@@ -70,7 +73,7 @@ describe('Middleware (class)', () => {
       await Test.createTestingModule({
         imports: [TestModule],
       }).compile()
-    ).createNestApplication();
+    ).createNestApplication<NestH3Application>(new H3Adapter());
 
     await app.init();
   });

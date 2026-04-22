@@ -5,6 +5,9 @@ import type { INestApplication } from '@nestjs/common';
 import { ConsoleLogger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
 import { AppModule } from '../src/app.module.ts';
 
 describe('ForceConsole Option', () => {
@@ -31,10 +34,13 @@ describe('ForceConsole Option', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication({
-        forceConsole: true,
-        logger: ['log', 'error'],
-      });
+      app = moduleRef.createNestApplication<NestH3Application>(
+        new H3Adapter(),
+        {
+          forceConsole: true,
+          logger: ['log', 'error'],
+        },
+      );
 
       await app.init();
     });
@@ -99,10 +105,13 @@ describe('ForceConsole Option', () => {
         imports: [AppModule],
       }).compile();
 
-      app = moduleRef.createNestApplication({
-        logger: ['log', 'error'],
-        // forceConsole is not set, defaults to false
-      });
+      app = moduleRef.createNestApplication<NestH3Application>(
+        new H3Adapter(),
+        {
+          logger: ['log', 'error'],
+          // forceConsole is not set, defaults to false
+        },
+      );
 
       await app.init();
     });
@@ -149,9 +158,12 @@ describe('ForceConsole Option', () => {
         imports: [AppModule],
       }).compile();
 
-      const testApp = moduleRef.createNestApplication({
-        forceConsole: true,
-      });
+      const testApp = moduleRef.createNestApplication<NestH3Application>(
+        new H3Adapter(),
+        {
+          forceConsole: true,
+        },
+      );
 
       await testApp.init();
 

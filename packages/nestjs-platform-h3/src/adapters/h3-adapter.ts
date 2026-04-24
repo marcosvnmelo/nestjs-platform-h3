@@ -9,7 +9,7 @@ import type { Socket } from 'node:net';
 import type { Writable } from 'node:stream';
 import type { ServerRequest } from 'srvx';
 import bodyParser from 'body-parser';
-import { fromNodeHandler, H3, handleCors, serveStatic } from 'h3';
+import { H3, handleCors, serveStatic } from 'h3';
 import { toNodeHandler } from 'h3/node';
 
 import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
@@ -697,7 +697,18 @@ export class H3Adapter extends AbstractHttpAdapter<
   ): (path: string, callback: Function) => any {
     return (path: string, callback: Function) => {
       const h3Path = this.convertPathPattern(path);
-      const handler = fromNodeHandler(callback as H3NodeHandler);
+      const handler = async (event: H3Event) => {
+        const [req, res] = extractNodeRuntimeFromEvent(event);
+
+        const result = await this.invokeHandler(
+          callback as H3NodeHandler,
+          req,
+          res,
+        );
+        if (result !== $h3NextHandler) {
+          return result;
+        }
+      };
 
       // For root wildcard patterns that should match all paths,
       // register middleware for both root and wildcard patterns in H3

@@ -61,14 +61,14 @@ catalogs:
       specifier: 11.1.19
       version: 11.1.19
     '@rslib/core':
-      specifier: 0.21.0
-      version: 0.21.0
+      specifier: 0.21.3
+      version: 0.21.3
     '@rstest/adapter-rslib':
       specifier: ^0.2.2
       version: 0.2.2
     '@rstest/core':
-      specifier: ^0.9.7
-      version: 0.9.7
+      specifier: 0.9.9
+      version: 0.9.9
     '@testcontainers/kafka':
       specifier: 11.14.0
       version: 11.14.0
@@ -242,10 +242,10 @@ importers:
         version: 5.5.0(graphql@16.13.2)
       '@eslint/js':
         specifier: 10.0.1
-        version: 10.0.1(eslint@10.2.0(jiti@2.6.1))
+        version: 10.0.1(eslint@10.2.1(jiti@2.6.1))
       '@ianvs/prettier-plugin-sort-imports':
         specifier: 4.7.1
-        version: 4.7.1(prettier@3.8.2)
+        version: 4.7.1(prettier@3.8.3)
       '@microsoft/api-extractor':
         specifier: ^7.58.7
         version: 7.58.7(@types/node@25.6.0)
@@ -257,13 +257,13 @@ importers:
         version: 11.1.19(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.19)(@nestjs/platform-express@11.1.19)(@nestjs/websockets@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@rstest/core':
         specifier: 'catalog:'
-        version: 0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)
+        version: 0.9.9(core-js@3.47.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -271,11 +271,11 @@ importers:
         specifier: 0.15.1
         version: 0.15.1
       eslint:
-        specifier: 10.2.0
-        version: 10.2.0(jiti@2.6.1)
+        specifier: 10.2.1
+        version: 10.2.1(jiti@2.6.1)
       prettier:
-        specifier: 3.8.2
-        version: 3.8.2
+        specifier: 3.8.3
+        version: 3.8.3
       quick-publish:
         specifier: 0.7.1
         version: 0.7.1(patch_hash=65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d)
@@ -283,8 +283,8 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
       typescript-eslint:
-        specifier: 8.58.2
-        version: 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
+        specifier: 8.59.0
+        version: 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
 
   packages/nestjs-platform-h3:
     dependencies:
@@ -351,10 +351,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -409,10 +409,10 @@ importers:
         version: 5.5.0(graphql@16.13.2)
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -464,10 +464,10 @@ importers:
         version: 5.5.0(graphql@16.13.2)
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -504,10 +504,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -544,10 +544,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -599,10 +599,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/express':
         specifier: 'catalog:'
         version: 5.0.6
@@ -642,10 +642,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -712,10 +712,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@testcontainers/kafka':
         specifier: 'catalog:'
         version: 11.14.0
@@ -770,10 +770,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -813,10 +813,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -853,10 +853,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -893,10 +893,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -933,10 +933,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/express':
         specifier: 'catalog:'
         version: 5.0.6
@@ -985,10 +985,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1025,10 +1025,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/body-parser':
         specifier: 'catalog:'
         version: 1.19.6
@@ -1074,10 +1074,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1114,10 +1114,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1185,10 +1185,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1225,10 +1225,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1289,10 +1289,10 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
         specifier: 'catalog:'
-        version: 0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+        version: 0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -1341,7 +1341,7 @@ importers:
     devDependencies:
       '@rslib/core':
         specifier: 'catalog:'
-        version: 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+        version: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
       '@types/autocannon':
         specifier: 'catalog:'
         version: 7.12.7
@@ -1578,14 +1578,14 @@ packages:
     resolution: {integrity: sha512-bIH0IEkpgTAiU7h+MBg7aDhS8+hxVVO5LA3XdlP28aNNIWauI31z50Y5LWjkwbWbH/1i2UBE8H5qvA7gLcttWg==}
     engines: {node: '>=18.0.0'}
 
-  '@emnapi/core@1.8.1':
-    resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
+  '@emnapi/core@1.10.0':
+    resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
 
-  '@emnapi/runtime@1.8.1':
-    resolution: {integrity: sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg==}
+  '@emnapi/runtime@1.10.0':
+    resolution: {integrity: sha512-ewvYlk86xUoGI0zQRNq/mC+16R1QeDlKQy21Ki3oSYXNgLb45GV1P6A0M+/s6nyCuNDqe5VpaY84BzXGwVbwFA==}
 
-  '@emnapi/wasi-threads@1.1.0':
-    resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==}
+  '@emnapi/wasi-threads@1.2.1':
+    resolution: {integrity: sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==}
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -1804,8 +1804,8 @@ packages:
   '@mongodb-js/saslprep@1.4.8':
     resolution: {integrity: sha512-kpjr2jy2w71w0oqAMI8oibBmiF9lXxWkEQs5gMkW4hVE48bsqINGLxnCSYW62ck/NHXJQpQEfA9WlJ1sY0eqBg==}
 
-  '@napi-rs/wasm-runtime@1.1.2':
-    resolution: {integrity: sha512-sNXv5oLJ7ob93xkZ1XnxisYhGYXfaG9f65/ZgYuAu3qt7b3NadcOEhLvx28hv31PgX8SZJRYrAIPQilQmFpLVw==}
+  '@napi-rs/wasm-runtime@1.1.4':
+    resolution: {integrity: sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==}
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
@@ -2082,8 +2082,8 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@rsbuild/core@2.0.0-rc.1':
-    resolution: {integrity: sha512-eqxtRlQiFSm/ibCNGiPj8ozsGSNK91NY+GksmPuTCPmWQExGtPqM1V+s13UYeWZS6fYbMRs7NlQKD896e0QkKA==}
+  '@rsbuild/core@2.0.1':
+    resolution: {integrity: sha512-5TwUpb10Y+VYaYH8oLL/rfJGrhxrk16BiGzv101kzaMPT60MtOXgjEUTxztbjRuq0ifbtRJ/w7rsIZQ4VziWYg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2092,8 +2092,8 @@ packages:
       core-js:
         optional: true
 
-  '@rslib/core@0.21.0':
-    resolution: {integrity: sha512-cYNztIR9fiSV2GFb81aqfXMXYhGg2XN1fAEvNbhOVX1jqW6Xig6/LTW1sq6HNXT06Ai2sUAcx6y87nZtxOYxfg==}
+  '@rslib/core@0.21.3':
+    resolution: {integrity: sha512-3kyF273GQWIky4rAGD+Nkewlc7OraRwM2rG6wMJ19cYeomN0OKokVbk0vvfLAcQu43mtEO+dnZk6BchUoRmQOg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2105,64 +2105,64 @@ packages:
       typescript:
         optional: true
 
-  '@rspack/binding-darwin-arm64@2.0.0-rc.1':
-    resolution: {integrity: sha512-fYbeDDDg6QKZzXYt/J0/j0Qhr01wQLuISUsYnNhu5MLwdXVUSVcqz+CTqgF3d0EQVVn6FqLV63lbNRzUGfSq9g==}
+  '@rspack/binding-darwin-arm64@2.0.0':
+    resolution: {integrity: sha512-ICBHDKYyndFqljLhjxvKfWWZu39RJSH2jkSmbceXl0kmptLSE0cLWpvk+eGSzLqtxKN0jVchwCw+5P5mWCzwAw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-x64@2.0.0-rc.1':
-    resolution: {integrity: sha512-MvXi9kr8xXn1y0PD1WI/4YphRNOdbykJjKdEsAG4JxEVoERmhIHOTwKvUqlejajizAwlVZcxQl/FacoPLsKN5Q==}
+  '@rspack/binding-darwin-x64@2.0.0':
+    resolution: {integrity: sha512-YQ96LMmzIzhZt9cZWUDWXSxS9UWWHWoLxJyZ5f42DSaVPVelBg5ThbVORDwOP5QDA2xFXj60rVnmmcZLzg/aDA==}
     cpu: [x64]
     os: [darwin]
 
-  '@rspack/binding-linux-arm64-gnu@2.0.0-rc.1':
-    resolution: {integrity: sha512-j6WsHEwGSdUoiy4BsQBW0RjFl+MBzozdybSYhkiyVSoHlbm7CPt3XaaS3elH5YcwuLHORmVHPP91QhwWl9UFJg==}
+  '@rspack/binding-linux-arm64-gnu@2.0.0':
+    resolution: {integrity: sha512-Ufn33gzkIV7JY69k6vJQEdOzRvBqThIgH46pwXksHSMwRZp8IbJhXfyYIAVsRWCk8fXpr9t1nAvCDvJXT2EeyA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-arm64-musl@2.0.0-rc.1':
-    resolution: {integrity: sha512-MPoZE0aS8oH+Wr0R5tIYch8gbUwYYf4LsiGdP6enMKMTrmpJyOVGlhPHVSwsrFgBg7fjTGOuxHuibtsvDUdLOQ==}
+  '@rspack/binding-linux-arm64-musl@2.0.0':
+    resolution: {integrity: sha512-CZbvFKlNY9UC0C+Czz6i8JFCzGpuL9oX8gEqcJA1+84Y6eEEBH50UiTzeCewxKW3dOofkZdvT5vgNMXz6aMUmg==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-linux-x64-gnu@2.0.0-rc.1':
-    resolution: {integrity: sha512-gOlPCwtIg9GsFG/8ZdUyV5SyXDaGq2kmtXmyyFU7RO33MaalltNEBMf2hevRPj9z39eSzxwgJDonMOdx5Fo0Og==}
+  '@rspack/binding-linux-x64-gnu@2.0.0':
+    resolution: {integrity: sha512-dPjFGpoCvZfFpJBsWAUR+PR7mWYxpou6L026qIOpAVkz7WiTzErwKD3P1jVrpP4dM9yLb3fVE+PHHjTglhTJ4g==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-x64-musl@2.0.0-rc.1':
-    resolution: {integrity: sha512-K6Swk1rfP4z4b6bp84NlikGlUWMOPpIWCtlPr/W0TWgc2C/cd844oHdoIu7WtmOH7y9AwB5UG2bWpgFAVwykCw==}
+  '@rspack/binding-linux-x64-musl@2.0.0':
+    resolution: {integrity: sha512-4fgDTMWt0mJDiugdia2mdOjTbnm7yM1Drzl1JpPqlUlOr113byOhc+qgN57LURSGypz2yz/h/Zad7/UnVAxYJw==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-wasm32-wasi@2.0.0-rc.1':
-    resolution: {integrity: sha512-aa9oUTqOb1QjwsHVlMr5sV+7mcBI4MLQ/xhFO2CIEcfVnJIPl8XpKUbDEgqMwcFlzcgzKmHg5cVmIvd82BLgow==}
+  '@rspack/binding-wasm32-wasi@2.0.0':
+    resolution: {integrity: sha512-ANk73ZKtPrZf9gdtyRK2nQUfhi1uXoC5P2KF89pyVAE8+zcoLBnYtZGYpWa/cmNi5BcO5g4Z+v2l1UA3bUPLQQ==}
     cpu: [wasm32]
 
-  '@rspack/binding-win32-arm64-msvc@2.0.0-rc.1':
-    resolution: {integrity: sha512-+UxF0c7E9bE3siFbMHi+mmoeQJzcTKl1j3x+Y6MY/PJ3V70cU23wOaxMvmSsCyq2JNJBT2RCNZ9HaL+o3kReug==}
+  '@rspack/binding-win32-arm64-msvc@2.0.0':
+    resolution: {integrity: sha512-IHZFRtJ85ONbM+BCtF4TeYXS2Fu9X0IJS2phX1rPibYq9iEtHGfBt4cNlnsJPhbPAXVvi4Oli/yiLRJ1zxtCIg==}
     cpu: [arm64]
     os: [win32]
 
-  '@rspack/binding-win32-ia32-msvc@2.0.0-rc.1':
-    resolution: {integrity: sha512-gc0JdkdxSWo+o/b1qTCT6mZ3DrlGe32eW+Ps3xInxcG4UHjUG7hTDgFtOgVQ6VhQ8WMUXG+TQOz0CySVpYjsoQ==}
+  '@rspack/binding-win32-ia32-msvc@2.0.0':
+    resolution: {integrity: sha512-n4tbIqacq/FhNJflMlgZV50AeQFTLh5hnDS3v4W+rJWa3IW1VfgB0+XppdeW+Dqhw7QcMIsCmro01kwNdlXZDQ==}
     cpu: [ia32]
     os: [win32]
 
-  '@rspack/binding-win32-x64-msvc@2.0.0-rc.1':
-    resolution: {integrity: sha512-Dnj0jthyVUikf65MGEyZy3akshtSmR1xsp/Xr0h/NWTo5JFWHKAFNYFE+jFfY0uzC8e4IDcLQLYoFomqV1DsEg==}
+  '@rspack/binding-win32-x64-msvc@2.0.0':
+    resolution: {integrity: sha512-cJOgikIW2t3S+42TQZsv+DJriJt2m6lnUk+pUFu/fO93rrMvNrx8gfMxR8W5zDTreBX0cfMx2pw6EVmyi/YzsQ==}
     cpu: [x64]
     os: [win32]
 
-  '@rspack/binding@2.0.0-rc.1':
-    resolution: {integrity: sha512-rhJqtbyiRPOjTAZW0xTZFbOrS5yP5yL1SF0DPE9kvFfzePz30IqjMDMxL0KuhkDZd/M1eUINJyoqd8NTbR9wHw==}
+  '@rspack/binding@2.0.0':
+    resolution: {integrity: sha512-WA2f9eQpejkvf5Vrnf6wNCn1m8RT1p08NjgOZpKhsCzr0uBjWeRvGduawlrFFHZh/jPnWZTVaVdQ08FEAWbwGw==}
 
-  '@rspack/core@2.0.0-rc.1':
-    resolution: {integrity: sha512-OIfkYn05/IWtVIdZ8Y/a0y/k4ipzqfApxIZqnJM59G/bGwQKMBrLHpOMGgV2Wmq1j9UMXzF7ZtsFMUbYBhFb9A==}
+  '@rspack/core@2.0.0':
+    resolution: {integrity: sha512-WD1mJM9LbZ7Z399Rbv9dE3BNEV0+3sE5OzDdzV8hOxUb3mX++ynK5n9kil8w60B6nGdcKeV9ly5aN4PgqiwWUg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
@@ -2183,8 +2183,8 @@ packages:
       typescript:
         optional: true
 
-  '@rstest/core@0.9.7':
-    resolution: {integrity: sha512-y5ARfOucx+9GaK2gL3Eeu1MyJzkS2/OuJH6bURYMPY2cbkOqoobmZvuJF0mdTve+wHGyv+5wvGUMslEeLIO0Zw==}
+  '@rstest/core@0.9.9':
+    resolution: {integrity: sha512-AdlRgvyitoenjBTxlnYHr4rf71as96abmqVjmPXnfc0MyYk563AKMagHoWW5YMQKGCjRcrZx92dDRIUI0Z8Lyg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2371,63 +2371,63 @@ packages:
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
-  '@typescript-eslint/eslint-plugin@8.58.2':
-    resolution: {integrity: sha512-aC2qc5thQahutKjP+cl8cgN9DWe3ZUqVko30CMSZHnFEHyhOYoZSzkGtAI2mcwZ38xeImDucI4dnqsHiOYuuCw==}
+  '@typescript-eslint/eslint-plugin@8.59.0':
+    resolution: {integrity: sha512-HyAZtpdkgZwpq8Sz3FSUvCR4c+ScbuWa9AksK2Jweub7w4M3yTz4O11AqVJzLYjy/B9ZWPyc81I+mOdJU/bDQw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^8.58.2
+      '@typescript-eslint/parser': ^8.59.0
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
-  '@typescript-eslint/parser@8.58.2':
-    resolution: {integrity: sha512-/Zb/xaIDfxeJnvishjGdcR4jmr7S+bda8PKNhRGdljDM+elXhlvN0FyPSsMnLmJUrVG9aPO6dof80wjMawsASg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
-
-  '@typescript-eslint/project-service@8.58.2':
-    resolution: {integrity: sha512-Cq6UfpZZk15+r87BkIh5rDpi38W4b+Sjnb8wQCPPDDweS/LRCFjCyViEbzHk5Ck3f2QDfgmlxqSa7S7clDtlfg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: '>=4.8.4 <6.1.0'
-
-  '@typescript-eslint/scope-manager@8.58.2':
-    resolution: {integrity: sha512-SgmyvDPexWETQek+qzZnrG6844IaO02UVyOLhI4wpo82dpZJY9+6YZCKAMFzXb7qhx37mFK1QcPQ18tud+vo6Q==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/tsconfig-utils@8.58.2':
-    resolution: {integrity: sha512-3SR+RukipDvkkKp/d0jP0dyzuls3DbGmwDpVEc5wqk5f38KFThakqAAO0XMirWAE+kT00oTauTbzMFGPoAzB0A==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: '>=4.8.4 <6.1.0'
-
-  '@typescript-eslint/type-utils@8.58.2':
-    resolution: {integrity: sha512-Z7EloNR/B389FvabdGeTo2XMs4W9TjtPiO9DAsmT0yom0bwlPyRjkJ1uCdW1DvrrrYP50AJZ9Xc3sByZA9+dcg==}
+  '@typescript-eslint/parser@8.59.0':
+    resolution: {integrity: sha512-TI1XGwKbDpo9tRW8UDIXCOeLk55qe9ZFGs8MTKU6/M08HWTw52DD/IYhfQtOEhEdPhLMT26Ka/x7p70nd3dzDg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
-  '@typescript-eslint/types@8.58.2':
-    resolution: {integrity: sha512-9TukXyATBQf/Jq9AMQXfvurk+G5R2MwfqQGDR2GzGz28HvY/lXNKGhkY+6IOubwcquikWk5cjlgPvD2uAA7htQ==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/typescript-estree@8.58.2':
-    resolution: {integrity: sha512-ELGuoofuhhoCvNbQjFFiobFcGgcDCEm0ThWdmO4Z0UzLqPXS3KFvnEZ+SHewwOYHjM09tkzOWXNTv9u6Gqtyuw==}
+  '@typescript-eslint/project-service@8.59.0':
+    resolution: {integrity: sha512-Lw5ITrR5s5TbC19YSvlr63ZfLaJoU6vtKTHyB0GQOpX0W7d5/Ir6vUahWi/8Sps/nOukZQ0IB3SmlxZnjaKVnw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '>=4.8.4 <6.1.0'
 
-  '@typescript-eslint/utils@8.58.2':
-    resolution: {integrity: sha512-QZfjHNEzPY8+l0+fIXMvuQ2sJlplB4zgDZvA+NmvZsZv3EQwOcc1DuIU1VJUTWZ/RKouBMhDyNaBMx4sWvrzRA==}
+  '@typescript-eslint/scope-manager@8.59.0':
+    resolution: {integrity: sha512-UzR16Ut8IpA3Mc4DbgAShlPPkVm8xXMWafXxB0BocaVRHs8ZGakAxGRskF7FId3sdk9lgGD73GSFaWmWFDE4dg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/tsconfig-utils@8.59.0':
+    resolution: {integrity: sha512-91Sbl3s4Kb3SybliIY6muFBmHVv+pYXfybC4Oolp3dvk8BvIE3wOPc+403CWIT7mJNkfQRGtdqghzs2+Z91Tqg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '>=4.8.4 <6.1.0'
+
+  '@typescript-eslint/type-utils@8.59.0':
+    resolution: {integrity: sha512-3TRiZaQSltGqGeNrJzzr1+8YcEobKH9rHnqIp/1psfKFmhRQDNMGP5hBufanYTGznwShzVLs3Mz+gDN7HkWfXg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
-  '@typescript-eslint/visitor-keys@8.58.2':
-    resolution: {integrity: sha512-f1WO2Lx8a9t8DARmcWAUPJbu0G20bJlj8L4z72K00TMeJAoyLr/tHhI/pzYBLrR4dXWkcxO1cWYZEOX8DKHTqA==}
+  '@typescript-eslint/types@8.59.0':
+    resolution: {integrity: sha512-nLzdsT1gdOgFxxxwrlNVUBzSNBEEHJ86bblmk4QAS6stfig7rcJzWKqCyxFy3YRRHXDWEkb2NralA1nOYkkm/A==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/typescript-estree@8.59.0':
+    resolution: {integrity: sha512-O9Re9P1BmBLFJyikRbQpLku/QA3/AueZNO9WePLBwQrvkixTmDe8u76B6CYUAITRl/rHawggEqUGn5QIkVRLMw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '>=4.8.4 <6.1.0'
+
+  '@typescript-eslint/utils@8.59.0':
+    resolution: {integrity: sha512-I1R/K7V07XsMJ12Oaxg/O9GfrysGTmCRhvZJBv0RE0NcULMzjqVpR5kRRQjHsz3J/bElU7HwCO7zkqL+MSUz+g==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+      typescript: '>=4.8.4 <6.1.0'
+
+  '@typescript-eslint/visitor-keys@8.59.0':
+    resolution: {integrity: sha512-/uejZt4dSere1bx12WLlPfv8GktzcaDtuJ7s42/HEZ5zGj9oxRaD4bj7qwSunXkf+pbAhFt2zjpHYUiT5lHf0Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@whatwg-node/promise-helpers@1.3.2':
@@ -3151,8 +3151,8 @@ packages:
     resolution: {integrity: sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  eslint@10.2.0:
-    resolution: {integrity: sha512-+L0vBFYGIpSNIt/KWTpFonPrqYvgKw1eUI5Vn7mEogrQcWtWYtNQ7dNqC+px/J0idT3BAkiWrhfS7k+Tum8TUA==}
+  eslint@10.2.1:
+    resolution: {integrity: sha512-wiyGaKsDgqXvF40P8mDwiUp/KQjE1FdrIEJsM8PZ3XCiniTMXS3OHWWUe5FI5agoCnr8x4xPrTDZuxsBlNHl+Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     hasBin: true
     peerDependencies:
@@ -4226,8 +4226,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@3.8.2:
-    resolution: {integrity: sha512-8c3mgTe0ASwWAJK+78dpviD+A8EqhndQPUBpNUIPt6+xWlIigCwfN01lWr9MAede4uqXGTEKeQWTvzb3vjia0Q==}
+  prettier@3.8.3:
+    resolution: {integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -4419,8 +4419,8 @@ packages:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
 
-  rsbuild-plugin-dts@0.21.0:
-    resolution: {integrity: sha512-bnn0pTVEAUfW3vcXYuo6US9QAO2SqQT7wjBBUer4ZtQAbberPF8soBQZWicPVC1t8mZZeVzg/PR0DHqKE7Hthw==}
+  rsbuild-plugin-dts@0.21.3:
+    resolution: {integrity: sha512-8E3/npwRp99gc/Bl5bE1KKN5eIS2TQ3fuA7fBEk67R1RF7V4OtFKVI7mhk3X8zoH/9cclV9v909dguegZDgncw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@microsoft/api-extractor': ^7
@@ -4913,8 +4913,8 @@ packages:
       typeorm-aurora-data-api-driver:
         optional: true
 
-  typescript-eslint@8.58.2:
-    resolution: {integrity: sha512-V8iSng9mRbdZjl54VJ9NKr6ZB+dW0J3TzRXRGcSbLIej9jV86ZRtlYeTKDR/QLxXykocJ5icNzbsl2+5TzIvcQ==}
+  typescript-eslint@8.59.0:
+    resolution: {integrity: sha512-BU3ONW9X+v90EcCH9ZS6LMackcVtxRLlI3XrYyqZIwVSHIk7Qf7bFw1z0M9Q0IUxhTMZCf8piY9hTYaNEIASrw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
@@ -5384,25 +5384,25 @@ snapshots:
       - encoding
       - supports-color
 
-  '@emnapi/core@1.8.1':
+  '@emnapi/core@1.10.0':
     dependencies:
-      '@emnapi/wasi-threads': 1.1.0
+      '@emnapi/wasi-threads': 1.2.1
       tslib: 2.8.1
     optional: true
 
-  '@emnapi/runtime@1.8.1':
-    dependencies:
-      tslib: 2.8.1
-    optional: true
-
-  '@emnapi/wasi-threads@1.1.0':
+  '@emnapi/runtime@1.10.0':
     dependencies:
       tslib: 2.8.1
     optional: true
 
-  '@eslint-community/eslint-utils@4.9.1(eslint@10.2.0(jiti@2.6.1))':
+  '@emnapi/wasi-threads@1.2.1':
     dependencies:
-      eslint: 10.2.0(jiti@2.6.1)
+      tslib: 2.8.1
+    optional: true
+
+  '@eslint-community/eslint-utils@4.9.1(eslint@10.2.1(jiti@2.6.1))':
+    dependencies:
+      eslint: 10.2.1(jiti@2.6.1)
       eslint-visitor-keys: 3.4.3
 
   '@eslint-community/regexpp@4.12.2': {}
@@ -5423,9 +5423,9 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/js@10.0.1(eslint@10.2.0(jiti@2.6.1))':
+  '@eslint/js@10.0.1(eslint@10.2.1(jiti@2.6.1))':
     optionalDependencies:
-      eslint: 10.2.0(jiti@2.6.1)
+      eslint: 10.2.1(jiti@2.6.1)
 
   '@eslint/object-schema@3.0.5': {}
 
@@ -5547,13 +5547,13 @@ snapshots:
 
   '@hutson/parse-repository-url@3.0.2': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.2)':
+  '@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.3)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.0
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
-      prettier: 3.8.2
+      prettier: 3.8.3
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
@@ -5653,10 +5653,10 @@ snapshots:
     dependencies:
       sparse-bitfield: 3.0.3
 
-  '@napi-rs/wasm-runtime@1.1.2(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)':
+  '@napi-rs/wasm-runtime@1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
-      '@emnapi/core': 1.8.1
-      '@emnapi/runtime': 1.8.1
+      '@emnapi/core': 1.10.0
+      '@emnapi/runtime': 1.10.0
       '@tybys/wasm-util': 0.10.1
     optional: true
 
@@ -5901,106 +5901,93 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@rsbuild/core@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)':
+  '@rsbuild/core@2.0.1(core-js@3.47.0)':
     dependencies:
-      '@rspack/core': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@swc/helpers@0.5.21)
+      '@rspack/core': 2.0.0(@swc/helpers@0.5.21)
       '@swc/helpers': 0.5.21
     optionalDependencies:
       core-js: 3.47.0
     transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
       - '@module-federation/runtime-tools'
 
-  '@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)':
+  '@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)':
     dependencies:
-      '@rsbuild/core': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)
-      rsbuild-plugin-dts: 0.21.0(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(@rsbuild/core@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)
+      '@rsbuild/core': 2.0.1(core-js@3.47.0)
+      rsbuild-plugin-dts: 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(@rsbuild/core@2.0.1(core-js@3.47.0))(typescript@5.9.3)
     optionalDependencies:
       '@microsoft/api-extractor': 7.58.7(@types/node@25.6.0)
       typescript: 5.9.3
     transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
       - '@module-federation/runtime-tools'
       - '@typescript/native-preview'
       - core-js
 
-  '@rspack/binding-darwin-arm64@2.0.0-rc.1':
+  '@rspack/binding-darwin-arm64@2.0.0':
     optional: true
 
-  '@rspack/binding-darwin-x64@2.0.0-rc.1':
+  '@rspack/binding-darwin-x64@2.0.0':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.0.0-rc.1':
+  '@rspack/binding-linux-arm64-gnu@2.0.0':
     optional: true
 
-  '@rspack/binding-linux-arm64-musl@2.0.0-rc.1':
+  '@rspack/binding-linux-arm64-musl@2.0.0':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.0.0-rc.1':
+  '@rspack/binding-linux-x64-gnu@2.0.0':
     optional: true
 
-  '@rspack/binding-linux-x64-musl@2.0.0-rc.1':
+  '@rspack/binding-linux-x64-musl@2.0.0':
     optional: true
 
-  '@rspack/binding-wasm32-wasi@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)':
+  '@rspack/binding-wasm32-wasi@2.0.0':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.2(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)
-    transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
+      '@emnapi/core': 1.10.0
+      '@emnapi/runtime': 1.10.0
+      '@napi-rs/wasm-runtime': 1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
-  '@rspack/binding-win32-arm64-msvc@2.0.0-rc.1':
+  '@rspack/binding-win32-arm64-msvc@2.0.0':
     optional: true
 
-  '@rspack/binding-win32-ia32-msvc@2.0.0-rc.1':
+  '@rspack/binding-win32-ia32-msvc@2.0.0':
     optional: true
 
-  '@rspack/binding-win32-x64-msvc@2.0.0-rc.1':
+  '@rspack/binding-win32-x64-msvc@2.0.0':
     optional: true
 
-  '@rspack/binding@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)':
+  '@rspack/binding@2.0.0':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': 2.0.0-rc.1
-      '@rspack/binding-darwin-x64': 2.0.0-rc.1
-      '@rspack/binding-linux-arm64-gnu': 2.0.0-rc.1
-      '@rspack/binding-linux-arm64-musl': 2.0.0-rc.1
-      '@rspack/binding-linux-x64-gnu': 2.0.0-rc.1
-      '@rspack/binding-linux-x64-musl': 2.0.0-rc.1
-      '@rspack/binding-wasm32-wasi': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)
-      '@rspack/binding-win32-arm64-msvc': 2.0.0-rc.1
-      '@rspack/binding-win32-ia32-msvc': 2.0.0-rc.1
-      '@rspack/binding-win32-x64-msvc': 2.0.0-rc.1
-    transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
+      '@rspack/binding-darwin-arm64': 2.0.0
+      '@rspack/binding-darwin-x64': 2.0.0
+      '@rspack/binding-linux-arm64-gnu': 2.0.0
+      '@rspack/binding-linux-arm64-musl': 2.0.0
+      '@rspack/binding-linux-x64-gnu': 2.0.0
+      '@rspack/binding-linux-x64-musl': 2.0.0
+      '@rspack/binding-wasm32-wasi': 2.0.0
+      '@rspack/binding-win32-arm64-msvc': 2.0.0
+      '@rspack/binding-win32-ia32-msvc': 2.0.0
+      '@rspack/binding-win32-x64-msvc': 2.0.0
 
-  '@rspack/core@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@swc/helpers@0.5.21)':
+  '@rspack/core@2.0.0(@swc/helpers@0.5.21)':
     dependencies:
-      '@rspack/binding': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)
+      '@rspack/binding': 2.0.0
     optionalDependencies:
       '@swc/helpers': 0.5.21
-    transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
 
-  '@rstest/adapter-rslib@0.2.2(@rslib/core@0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3)':
+  '@rstest/adapter-rslib@0.2.2(@rslib/core@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3))(@rstest/core@0.9.9(core-js@3.47.0))(typescript@5.9.3)':
     dependencies:
-      '@rslib/core': 0.21.0(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
-      '@rstest/core': 0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)
+      '@rslib/core': 0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(core-js@3.47.0)(typescript@5.9.3)
+      '@rstest/core': 0.9.9(core-js@3.47.0)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@rstest/core@0.9.7(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)':
+  '@rstest/core@0.9.9(core-js@3.47.0)':
     dependencies:
-      '@rsbuild/core': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)
+      '@rsbuild/core': 2.0.1(core-js@3.47.0)
       '@types/chai': 5.2.3
       tinypool: 2.1.0
     transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
       - '@module-federation/runtime-tools'
       - core-js
 
@@ -6226,15 +6213,15 @@ snapshots:
     dependencies:
       '@types/node': 25.6.0
 
-  '@typescript-eslint/eslint-plugin@8.58.2(@typescript-eslint/parser@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/eslint-plugin@8.59.0(@typescript-eslint/parser@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3))(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/scope-manager': 8.58.2
-      '@typescript-eslint/type-utils': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.58.2
-      eslint: 10.2.0(jiti@2.6.1)
+      '@typescript-eslint/parser': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/scope-manager': 8.59.0
+      '@typescript-eslint/type-utils': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.59.0
+      eslint: 10.2.1(jiti@2.6.1)
       ignore: 7.0.5
       natural-compare: 1.4.0
       ts-api-utils: 2.5.0(typescript@5.9.3)
@@ -6242,56 +6229,56 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/parser@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.58.2
-      '@typescript-eslint/types': 8.58.2
-      '@typescript-eslint/typescript-estree': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.58.2
+      '@typescript-eslint/scope-manager': 8.59.0
+      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.59.0
       debug: 4.4.3
-      eslint: 10.2.0(jiti@2.6.1)
+      eslint: 10.2.1(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.58.2(typescript@5.9.3)':
+  '@typescript-eslint/project-service@8.59.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/types': 8.58.2
+      '@typescript-eslint/tsconfig-utils': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/types': 8.59.0
       debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/scope-manager@8.58.2':
+  '@typescript-eslint/scope-manager@8.59.0':
     dependencies:
-      '@typescript-eslint/types': 8.58.2
-      '@typescript-eslint/visitor-keys': 8.58.2
+      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/visitor-keys': 8.59.0
 
-  '@typescript-eslint/tsconfig-utils@8.58.2(typescript@5.9.3)':
+  '@typescript-eslint/tsconfig-utils@8.59.0(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/type-utils@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/type-utils@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/types': 8.58.2
-      '@typescript-eslint/typescript-estree': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
       debug: 4.4.3
-      eslint: 10.2.0(jiti@2.6.1)
+      eslint: 10.2.1(jiti@2.6.1)
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/types@8.58.2': {}
+  '@typescript-eslint/types@8.59.0': {}
 
-  '@typescript-eslint/typescript-estree@8.58.2(typescript@5.9.3)':
+  '@typescript-eslint/typescript-estree@8.59.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/project-service': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/tsconfig-utils': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/types': 8.58.2
-      '@typescript-eslint/visitor-keys': 8.58.2
+      '@typescript-eslint/project-service': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/tsconfig-utils': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/visitor-keys': 8.59.0
       debug: 4.4.3
       minimatch: 10.2.5
       semver: 7.7.4
@@ -6301,20 +6288,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)':
+  '@typescript-eslint/utils@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@10.2.0(jiti@2.6.1))
-      '@typescript-eslint/scope-manager': 8.58.2
-      '@typescript-eslint/types': 8.58.2
-      '@typescript-eslint/typescript-estree': 8.58.2(typescript@5.9.3)
-      eslint: 10.2.0(jiti@2.6.1)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@10.2.1(jiti@2.6.1))
+      '@typescript-eslint/scope-manager': 8.59.0
+      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
+      eslint: 10.2.1(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/visitor-keys@8.58.2':
+  '@typescript-eslint/visitor-keys@8.59.0':
     dependencies:
-      '@typescript-eslint/types': 8.58.2
+      '@typescript-eslint/types': 8.59.0
       eslint-visitor-keys: 5.0.1
 
   '@whatwg-node/promise-helpers@1.3.2':
@@ -7070,9 +7057,9 @@ snapshots:
 
   eslint-visitor-keys@5.0.1: {}
 
-  eslint@10.2.0(jiti@2.6.1):
+  eslint@10.2.1(jiti@2.6.1):
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@10.2.0(jiti@2.6.1))
+      '@eslint-community/eslint-utils': 4.9.1(eslint@10.2.1(jiti@2.6.1))
       '@eslint-community/regexpp': 4.12.2
       '@eslint/config-array': 0.23.5
       '@eslint/config-helpers': 0.5.5
@@ -8162,7 +8149,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@3.8.2: {}
+  prettier@3.8.3: {}
 
   pretty-bytes@5.6.0: {}
 
@@ -8361,10 +8348,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  rsbuild-plugin-dts@0.21.0(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(@rsbuild/core@2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0))(typescript@5.9.3):
+  rsbuild-plugin-dts@0.21.3(@microsoft/api-extractor@7.58.7(@types/node@25.6.0))(@rsbuild/core@2.0.1(core-js@3.47.0))(typescript@5.9.3):
     dependencies:
       '@ast-grep/napi': 0.37.0
-      '@rsbuild/core': 2.0.0-rc.1(@emnapi/core@1.8.1)(@emnapi/runtime@1.8.1)(core-js@3.47.0)
+      '@rsbuild/core': 2.0.1(core-js@3.47.0)
     optionalDependencies:
       '@microsoft/api-extractor': 7.58.7(@types/node@25.6.0)
       typescript: 5.9.3
@@ -8909,13 +8896,13 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  typescript-eslint@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3):
+  typescript-eslint@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 8.58.2(@typescript-eslint/parser@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/parser': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/typescript-estree': 8.58.2(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@5.9.3)
-      eslint: 10.2.0(jiti@2.6.1)
+      '@typescript-eslint/eslint-plugin': 8.59.0(@typescript-eslint/parser@8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3))(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.59.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
+      eslint: 10.2.1(jiti@2.6.1)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color

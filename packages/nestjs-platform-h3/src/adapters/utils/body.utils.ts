@@ -90,20 +90,15 @@ export async function applyExpressCompatibleBodyParsers(
   const urlencodedParser =
     parsers?.urlencodedParser ??
     bodyParser.urlencoded(getUrlencodedBodyParserOptions(rawBody));
-  const h3req = extractNodeRequestFromEvent(event);
-  const h3res = extractNodeResponseFromEvent(event);
-  const nodeReq = h3req as unknown as IncomingMessage;
-  const nodeRes = h3res as unknown as ServerResponse;
+
+  const req = extractNodeRequestFromEvent(event);
+  const res = extractNodeResponseFromEvent(event);
+
   await runBodyParsersInSequence(
-    nodeReq,
-    nodeRes,
+    req as IncomingMessage,
+    res as ServerResponse,
     jsonParser,
     urlencodedParser,
-  );
-  setH3ParsedBody(
-    (h3req as PolyfilledRequest<H3ServerRequest>).body,
-    event,
-    rawBody,
   );
 }
 

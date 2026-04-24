@@ -908,7 +908,7 @@ export class H3Adapter extends AbstractHttpAdapter<
     };
 
     this.instance.use(async (event) => {
-      const method = event.req.method?.toUpperCase();
+      const method = event.req.method;
       if (method === 'GET' || method === 'HEAD') {
         return;
       }

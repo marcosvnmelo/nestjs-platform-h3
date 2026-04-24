@@ -1,3 +1,21 @@
+## [11.1.19-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-1...v11.1.19-2) (2026-04-24)
+
+
+### Bug Fixes
+
+* solve multiple errors from tests ([bd287a5](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/bd287a549b28d01bf7f6c8ad923007039e78f184))
+
+
+### Features
+
+* enhance H3Adapter to support reverse route handling for versioned routes ([6a4bb3c](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/6a4bb3cb6764ca7250e73a2d7dd3f9bc6d11830a))
+
+
+
+## [11.1.19-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.18-6...v11.1.19-1) (2026-04-13)
+
+
+
 ## [11.1.19-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.1-9.0...v11.1.19-1) (2026-04-13)
 
 

@@ -1,31 +1,19 @@
-import 'reflect-metadata';
-
-import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Result } from 'autocannon';
-import type { AddressInfo } from 'node:net';
+import type { ChildProcess } from 'node:child_process';
 import autocannon from 'autocannon';
-import express from 'express';
-import fastify from 'fastify';
-import { H3 } from 'h3';
-import { toNodeHandler } from 'h3/node';
 
-import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Controller, Get, Module } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import { FastifyAdapter } from '@nestjs/platform-fastify';
-
-import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
-import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
-
-interface Closable {
+interface ServerProcess {
   url: string;
-  close: () => Promise<void>;
+  pid: ChildProcess;
 }
 
 interface BenchmarkCase {
   name: string;
-  start: () => Promise<Closable>;
+  scriptPath: string;
 }
 
 interface BenchmarkStats {
@@ -52,160 +40,40 @@ interface BenchmarkAggregate {
   totalTimeouts: number;
 }
 
-class BenchmarkController {
-  hello() {
-    return 'ok';
-  }
-}
-
-class BenchmarkModule {}
-
-Controller()(BenchmarkController);
-Get('hello')(
-  BenchmarkController.prototype,
-  'hello',
-  Object.getOwnPropertyDescriptor(BenchmarkController.prototype, 'hello')!,
-);
-
-Module({
-  controllers: [BenchmarkController],
-})(BenchmarkModule);
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const SERVERS_DIR = path.join(SCRIPT_DIR, 'servers');
 
 const BENCHMARK_OPTIONS = {
   duration: parseIntegerArg('duration', 10),
-  connections: parseIntegerArg('connections', 100),
+  connections: parseIntegerArg('connections', 10),
   pipelining: parseIntegerArg('pipelining', 1),
   warmupSeconds: parseIntegerArg('warmup', 2),
-  runs: parseIntegerArg('runs', 5),
+  runs: parseIntegerArg('runs', 3),
   nestBodyParser: parseBooleanArg('nest-body-parser', true),
+  serverReadyMs: parseIntegerArg('server-ready-timeout', 120_000),
 };
 
 const cases: BenchmarkCase[] = [
   {
     name: 'Pure Express',
-    start: async () => {
-      const app = express();
-      if (BENCHMARK_OPTIONS.nestBodyParser) {
-        app.use(express.json());
-        app.use(express.urlencoded({ extended: true }));
-      }
-      app.get('/hello', (_req, res) => {
-        res.send('ok');
-      });
-
-      const server = app.listen(0, '127.0.0.1');
-      await waitForListen(server);
-
-      const address = server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: () => closeHttpServer(server),
-      };
-    },
+    scriptPath: path.join(SERVERS_DIR, 'express-server.js'),
   },
   {
     name: 'Nest Express',
-    start: async () => {
-      const app = await NestFactory.create(
-        BenchmarkModule,
-        new ExpressAdapter(),
-        {
-          logger: false,
-          bodyParser: BENCHMARK_OPTIONS.nestBodyParser,
-        },
-      );
-
-      await app.listen(0, '127.0.0.1');
-
-      const server = app.getHttpServer();
-      const address = server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: async () => {
-          await app.close();
-        },
-      };
-    },
+    scriptPath: path.join(SERVERS_DIR, 'nest-express-server.js'),
   },
   {
     name: 'Pure Fastify',
-    start: async () => {
-      const app = fastify({ logger: false });
-      app.get('/hello', () => 'ok');
-      await app.listen({ port: 0, host: '127.0.0.1' });
-
-      const address = app.server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: async () => {
-          await app.close();
-        },
-      };
-    },
+    scriptPath: path.join(SERVERS_DIR, 'fastify-server.js'),
   },
   {
     name: 'Nest Fastify',
-    start: async () => {
-      const app = await NestFactory.create<NestFastifyApplication>(
-        BenchmarkModule,
-        new FastifyAdapter(),
-        {
-          logger: false,
-          bodyParser: BENCHMARK_OPTIONS.nestBodyParser,
-        },
-      );
-      await app.listen(0, '127.0.0.1');
-
-      const server = app.getHttpServer();
-      const address = server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: async () => {
-          await app.close();
-        },
-      };
-    },
+    scriptPath: path.join(SERVERS_DIR, 'nest-fastify-server.js'),
   },
-  {
-    name: 'Pure H3',
-    start: async () => {
-      const app = new H3();
-      app.get('/hello', () => 'ok');
-
-      const server = createServer(toNodeHandler(app));
-      server.listen(0, '127.0.0.1');
-      await waitForListen(server);
-
-      const address = server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: () => closeHttpServer(server),
-      };
-    },
-  },
+  { name: 'Pure H3', scriptPath: path.join(SERVERS_DIR, 'h3-server.js') },
   {
     name: 'Nest H3 Adapter',
-    start: async () => {
-      const app = await NestFactory.create<NestH3Application>(
-        BenchmarkModule,
-        new H3Adapter(),
-        {
-          logger: false,
-          bodyParser: BENCHMARK_OPTIONS.nestBodyParser,
-        },
-      );
-
-      await app.listen(0, '127.0.0.1');
-
-      const server = app.getHttpServer();
-      const address = server.address() as AddressInfo;
-      return {
-        url: `http://127.0.0.1:${address.port}`,
-        close: async () => {
-          await app.close();
-        },
-      };
-    },
+    scriptPath: path.join(SERVERS_DIR, 'nest-h3-server.js'),
   },
 ];
 
@@ -233,16 +101,16 @@ async function run() {
 
     for (const benchCase of runCases) {
       console.log(`\n→ ${benchCase.name}`);
-      const target = await benchCase.start();
+      const server = await startServer(benchCase);
 
       try {
-        await runAutocannon(`${target.url}/hello`, {
+        await runAutocannon(`${server.url}/hello`, {
           duration: BENCHMARK_OPTIONS.warmupSeconds,
           connections: BENCHMARK_OPTIONS.connections,
           pipelining: BENCHMARK_OPTIONS.pipelining,
         });
 
-        const result = await runAutocannon(`${target.url}/hello`, {
+        const result = await runAutocannon(`${server.url}/hello`, {
           duration: BENCHMARK_OPTIONS.duration,
           connections: BENCHMARK_OPTIONS.connections,
           pipelining: BENCHMARK_OPTIONS.pipelining,
@@ -252,7 +120,7 @@ async function run() {
         results.push(stats);
         printRunStats(stats);
       } finally {
-        await target.close();
+        await killServer(server);
       }
     }
   }
@@ -317,6 +185,143 @@ function printPairComparison(
     `- req/s median: ${pure.requestsPerSecMedian.toFixed(2)} vs ${nest.requestsPerSecMedian.toFixed(2)}`,
   );
   console.log(`- delta: ${sign}${delta.toFixed(2)}%`);
+}
+
+async function startServer(benchCase: BenchmarkCase): Promise<ServerProcess> {
+  const args = [
+    benchCase.scriptPath,
+    `--nest-body-parser=${BENCHMARK_OPTIONS.nestBodyParser}`,
+  ];
+
+  const child = spawn(process.execPath, args, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: process.env,
+    detached: false,
+  });
+
+  if (child.stdout) child.stdout.setEncoding('utf8');
+  if (child.stderr) child.stderr.setEncoding('utf8');
+
+  child.stderr?.on('data', (chunk) => {
+    process.stderr.write(chunk);
+  });
+
+  child.on('exit', (code, signal) => {
+    if (code !== null && code !== 0 && !signal) {
+      console.error(`${benchCase.name} exited with code ${code}`);
+    }
+  });
+
+  child.on('error', (error) => {
+    console.error(`${benchCase.name} spawn error:`, error);
+  });
+
+  const url = await waitForServerUrl(
+    child,
+    benchCase.name,
+    BENCHMARK_OPTIONS.serverReadyMs,
+  );
+  return { url, pid: child };
+}
+
+async function waitForServerUrl(
+  child: ChildProcess,
+  name: string,
+  timeoutMs: number,
+): Promise<string> {
+  const stream = (() => {
+    const out = child.stdout;
+    if (!out) {
+      throw new Error(`${name} has no stdout`);
+    }
+    return out;
+  })();
+
+  let buffer = '';
+  let settled = false;
+
+  return new Promise<string>((resolve, reject) => {
+    const timer = setTimeout(onTimeout, timeoutMs);
+
+    function cleanup() {
+      clearTimeout(timer);
+      stream.removeListener('data', listener);
+      child.removeListener('exit', onExit);
+    }
+
+    function onTimeout() {
+      if (!settled) {
+        settled = true;
+        cleanup();
+        reject(
+          new Error(
+            `Timed out waiting for ${name} listening line (${timeoutMs}ms)\nCaptured stdout segment:\n${buffer.slice(-2000)}`,
+          ),
+        );
+      }
+    }
+
+    timer.unref?.();
+
+    function listener(chunk: string) {
+      process.stdout.write(chunk);
+      buffer += chunk;
+      const match = buffer.match(/listening:\s+(https?:\/\/[^\s]+)/);
+      if (match?.[1] && !settled) {
+        settled = true;
+        cleanup();
+        resolve(match[1]);
+      }
+    }
+
+    function onExit(code: number | null, signal: NodeJS.Signals | null) {
+      if (!settled) {
+        settled = true;
+        cleanup();
+        reject(
+          new Error(
+            `${name} exited before ready (code=${code}, signal=${signal})\nCaptured stdout segment:\n${buffer.slice(-2000)}`,
+          ),
+        );
+      }
+    }
+
+    stream.addListener('data', listener);
+    child.once('exit', onExit);
+  });
+}
+
+async function killServer(server: ServerProcess): Promise<void> {
+  const pid = server.pid.pid;
+  if (pid === undefined) {
+    return;
+  }
+
+  if (server.pid.exitCode !== null || server.pid.signalCode !== null) {
+    return;
+  }
+
+  if (!server.pid.killed) {
+    server.pid.kill('SIGTERM');
+  }
+
+  await Promise.race([once(server.pid, 'exit'), delay(8000)]);
+
+  if (server.pid.exitCode === null && server.pid.signalCode === null) {
+    try {
+      process.kill(pid, 'SIGKILL');
+    } catch {
+      // Already dead / invalid pid as expected on races
+    }
+
+    await Promise.race([once(server.pid, 'exit'), delay(3000)]);
+  }
+}
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function toStats(name: string, result: Result, run: number): BenchmarkStats {
@@ -437,29 +442,6 @@ function runAutocannon(
         resolve(result);
       },
     );
-  });
-}
-
-function waitForListen(server: { once: Function; listening: boolean }) {
-  if (server.listening) {
-    return Promise.resolve();
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    server.once('listening', () => resolve());
-    server.once('error', (error: unknown) => reject(error));
-  });
-}
-
-function closeHttpServer(server: { close: Function }) {
-  return new Promise<void>((resolve, reject) => {
-    server.close((error: unknown) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve();
-    });
   });
 }
 

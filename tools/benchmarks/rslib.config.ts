@@ -4,6 +4,13 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      source: {
+        entry: {
+          'servers/h3-profiling-server': './src/servers/h3-profiling-server.ts',
+          'index': './src/index.ts',
+          'profiling': './src/profiling.ts',
+        },
+      },
     },
   ],
   tools: {

@@ -68,7 +68,7 @@ catalog:
   fastify: '5.8.4'
   graphql: '16.13.2'
   graphql-subscriptions: '3.0.0'
-  h3: '2.0.1-rc.20'
+  h3: '2.0.1-rc.21'
   ioredis: '5.9.3'
   jiti: '2.6.1'
   kafkajs: '2.2.4'

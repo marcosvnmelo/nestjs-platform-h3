@@ -7,10 +7,10 @@ import { isPromise } from 'node:util/types';
 import type { H3Config, H3Event, HTTPMethod } from 'h3';
 import type { Socket } from 'node:net';
 import type { Writable } from 'node:stream';
-import type { ServerRequest } from 'srvx';
+import type { NodeServerRequest, ServerRequest } from 'srvx';
 import bodyParser from 'body-parser';
 import { H3, handleCors, serveStatic } from 'h3';
-import { toNodeHandler } from 'h3/node';
+import { NodeRequest, sendNodeResponse } from 'srvx/node';
 
 import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
 import type { VersionValue } from '@nestjs/common/interfaces/version-options.interface.js';
@@ -200,8 +200,12 @@ export class H3Adapter extends AbstractHttpAdapter<
       const runtime = event.runtime?.node;
       if (!runtime) return;
 
-      const req = runtime.req as PolyfilledRequest<H3ServerRequest>;
-      const res = runtime.res as PolyfilledResponse<H3ServerResponse>;
+      const req = extractNodeRequestFromEvent(
+        event,
+      ) as PolyfilledRequest<NodeServerRequest>;
+      const res = extractNodeResponseFromEvent(
+        event,
+      ) as PolyfilledResponse<H3ServerResponse>;
 
       setH3Event(req, event);
 
@@ -780,6 +784,18 @@ export class H3Adapter extends AbstractHttpAdapter<
     }
   }
 
+  private createNodeHandler(): H3NodeHandler {
+    return async (req, res) => {
+      const webRes = await this.instance.fetch(new NodeRequest({ req, res }));
+
+      if (res.writableEnded || res.destroyed) {
+        return;
+      }
+
+      return sendNodeResponse(res, webRes);
+    };
+  }
+
   /**
    * Initialize the HTTP server with support for HTTP/1.1, HTTPS, and HTTP/2.
    *
@@ -806,7 +822,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       http2Options?: H3Http2Options | H3Http2CleartextOptions;
     },
   ) {
-    const requestListener = toNodeHandler(this.instance);
+    const requestListener = this.createNodeHandler();
 
     // Check for HTTP/2 options
     if (options?.http2Options?.http2) {

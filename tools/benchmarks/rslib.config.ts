@@ -19,11 +19,4 @@ export default defineConfig({
       },
     },
   ],
-  tools: {
-    rspack: {
-      resolve: {
-        exportsFields: ['testExports', '...'],
-      },
-    },
-  },
 });

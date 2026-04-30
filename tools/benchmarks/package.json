@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "pnpm -F @marcosvnmelo/nestjs-platform-h3 build",
     "build": "rslib build",
     "benchmark": "pnpm run build && node ./dist/benchmark.js",
     "benchmark:profile": "pnpm run build && node ./dist/profiling.js",

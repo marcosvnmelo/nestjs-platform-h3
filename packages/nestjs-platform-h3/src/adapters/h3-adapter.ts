@@ -60,6 +60,7 @@ import {
   extractNodeRequestFromEvent,
   extractNodeResponseFromEvent,
   extractNodeRuntimeFromEvent,
+  extractRemainingPath,
 } from './utils/node-runtime.utils.ts';
 import {
   $h3Handled,
@@ -203,8 +204,6 @@ export class H3Adapter extends AbstractHttpAdapter<
       const res = runtime.res as PolyfilledResponse<H3ServerResponse>;
 
       setH3Event(req, event);
-      applyParamsToRequest(req, event);
-      applyExpressPolyfills(res);
 
       if (this.onResponseHook) {
         res.on('finish', () => {
@@ -854,6 +853,17 @@ export class H3Adapter extends AbstractHttpAdapter<
       this.httpServer = http.createServer(requestListener);
     }
 
+    applyParamsToRequest(
+      this.isHttp2
+        ? http2.Http2ServerRequest.prototype
+        : http.IncomingMessage.prototype,
+    );
+    applyExpressPolyfills(
+      this.isHttp2
+        ? http2.Http2ServerResponse.prototype
+        : http.ServerResponse.prototype,
+    );
+
     if (options?.forceCloseConnections) {
       this.trackOpenConnections();
     }
@@ -1081,7 +1091,7 @@ export class H3Adapter extends AbstractHttpAdapter<
 
     // Register with H3 only once per method:path combination
     if (!this.registeredPaths.has(routeKey)) {
-      this.registerPath(method, normalizedPath);
+      this.registerPath(method, normalizedPath, routePath);
     }
 
     // Express semantics: HEAD should be implicitly handled by GET route.
@@ -1089,17 +1099,18 @@ export class H3Adapter extends AbstractHttpAdapter<
     if (method === 'GET') {
       const implicitHeadRouteKey = `HEAD:${normalizedPath}`;
       if (!this.registeredPaths.has(implicitHeadRouteKey)) {
-        this.registerPath('HEAD', normalizedPath);
+        this.registerPath('HEAD', normalizedPath, routePath);
       }
     }
   }
 
-  private registerPath(method: HTTPMethod | 'ALL', normalizedPath: string) {
+  private registerPath(
+    method: HTTPMethod | 'ALL',
+    normalizedPath: string,
+    originalPattern: string,
+  ) {
     const routeKey = `${method}:${normalizedPath}`;
     this.registeredPaths.add(routeKey);
-
-    // Get original route pattern if stored
-    const originalPattern = this.routePatterns.get(normalizedPath);
 
     // Create chain handler that performs lazy lookup from route map
     // H3 expects lowercase HTTP methods
@@ -1182,7 +1193,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       },
       {
         meta: {
-          routePattern: originalPattern,
+          remainingPath: extractRemainingPath(originalPattern),
         },
       },
     );

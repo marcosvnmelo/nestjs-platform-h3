@@ -2,30 +2,13 @@ import 'reflect-metadata';
 
 import type { AddressInfo } from 'node:net';
 
-import { Controller, Get, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
-class BenchmarkController {
-  hello() {
-    return 'ok';
-  }
-}
-
-class BenchmarkModule {}
-
-Controller()(BenchmarkController);
-Get('hello')(
-  BenchmarkController.prototype,
-  'hello',
-  Object.getOwnPropertyDescriptor(BenchmarkController.prototype, 'hello')!,
-);
-
-Module({
-  controllers: [BenchmarkController],
-})(BenchmarkModule);
+import { BenchmarkModule } from '../app/app.module.ts';
+import { parseBooleanArg } from '../utils/parse-args.utils.ts';
 
 const nestBodyParser = parseBooleanArg('nest-body-parser', true);
 
@@ -57,22 +40,4 @@ async function bootstrap() {
     await app.close();
     process.exit(0);
   });
-}
-
-function parseBooleanArg(name: string, defaultValue: boolean): boolean {
-  const prefix = `--${name}=`;
-  const value = process.argv.find((arg) => arg.startsWith(prefix));
-  if (!value) {
-    return defaultValue;
-  }
-
-  const raw = value.slice(prefix.length).toLowerCase();
-  if (raw === '1' || raw === 'true' || raw === 'on' || raw === 'yes') {
-    return true;
-  }
-  if (raw === '0' || raw === 'false' || raw === 'off' || raw === 'no') {
-    return false;
-  }
-
-  throw new Error(`Invalid value for --${name}: ${value.slice(prefix.length)}`);
 }

@@ -1,6 +1,7 @@
-import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import express from 'express';
+
+import { parseBooleanArg } from '../utils/parse-args.utils.ts';
 
 const app = express();
 const nestBodyParser = parseBooleanArg('nest-body-parser', true);
@@ -31,21 +32,3 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
-
-function parseBooleanArg(name: string, defaultValue: boolean): boolean {
-  const prefix = `--${name}=`;
-  const value = process.argv.find((arg) => arg.startsWith(prefix));
-  if (!value) {
-    return defaultValue;
-  }
-
-  const raw = value.slice(prefix.length).toLowerCase();
-  if (raw === '1' || raw === 'true' || raw === 'on' || raw === 'yes') {
-    return true;
-  }
-  if (raw === '0' || raw === 'false' || raw === 'off' || raw === 'no') {
-    return false;
-  }
-
-  throw new Error(`Invalid value for --${name}: ${value.slice(prefix.length)}`);
-}

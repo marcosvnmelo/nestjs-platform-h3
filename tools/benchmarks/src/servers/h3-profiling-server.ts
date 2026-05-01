@@ -5,11 +5,13 @@ import fs from 'node:fs/promises';
 import { Session } from 'node:inspector/promises';
 import type { AddressInfo } from 'node:net';
 
-import { Controller, Get, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
+import { BenchmarkModule } from '../app/app.module.ts';
+import { parseBooleanArg, parseStringArg } from '../utils/parse-args.utils.ts';
 
 function cpuProfiling() {
   let session: Session | undefined;
@@ -36,25 +38,6 @@ function cpuProfiling() {
     },
   };
 }
-
-class BenchmarkController {
-  hello() {
-    return 'ok';
-  }
-}
-
-class BenchmarkModule {}
-
-Controller()(BenchmarkController);
-Get('hello')(
-  BenchmarkController.prototype,
-  'hello',
-  Object.getOwnPropertyDescriptor(BenchmarkController.prototype, 'hello')!,
-);
-
-Module({
-  controllers: [BenchmarkController],
-})(BenchmarkModule);
 
 const now = Date.now();
 
@@ -109,35 +92,4 @@ async function bootstrapAndProfile() {
   await app.close();
   await cpuProfiler.stop(OPTIONS.profileOut);
   console.log(`Profile written: ${OPTIONS.profileOut}`);
-}
-
-function parseStringArg(name: string, defaultValue: string): string {
-  const prefix = `--${name}=`;
-  const value = process.argv.find((arg) => arg.startsWith(prefix));
-  if (!value) {
-    return defaultValue;
-  }
-  const raw = value.slice(prefix.length);
-  if (!raw) {
-    throw new Error(`Empty value for --${name}`);
-  }
-  return raw;
-}
-
-function parseBooleanArg(name: string, defaultValue: boolean): boolean {
-  const prefix = `--${name}=`;
-  const value = process.argv.find((arg) => arg.startsWith(prefix));
-  if (!value) {
-    return defaultValue;
-  }
-
-  const raw = value.slice(prefix.length).toLowerCase();
-  if (raw === '1' || raw === 'true' || raw === 'on' || raw === 'yes') {
-    return true;
-  }
-  if (raw === '0' || raw === 'false' || raw === 'off' || raw === 'no') {
-    return false;
-  }
-
-  throw new Error(`Invalid value for --${name}: ${value.slice(prefix.length)}`);
 }

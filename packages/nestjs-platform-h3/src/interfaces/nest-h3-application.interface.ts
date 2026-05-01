@@ -143,6 +143,12 @@ export interface NestH3Application<
   fetch(request: Request | ServerRequest): Promise<Response>;
 
   /**
+   * Injects Express polyfills directly into the request/response prototypes.
+   * Faster than injecting per-request, but can cause conflicts with other libraries.
+   */
+  enableUnsafePolyfills(): void;
+
+  /**
    * A wrapper function for H3 settings.
    * This is a no-op stub for Express compatibility.
    *

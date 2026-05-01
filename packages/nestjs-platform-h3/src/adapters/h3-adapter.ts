@@ -142,6 +142,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   declare protected readonly instance: H3;
   private readonly logger = new Logger(H3Adapter.name);
   private isHttp2 = false;
+  private isUnsafePolyfillsEnabled = false;
   private readonly openConnections = new Set<Socket>();
   private corsConfig?: CorsConfig;
   private onRequestHook?: (
@@ -206,8 +207,10 @@ export class H3Adapter extends AbstractHttpAdapter<
         event,
       ) as PolyfilledResponse<H3ServerResponse>;
 
-      applyParamsToRequest(req);
-      applyExpressPolyfills(res);
+      if (!this.isUnsafePolyfillsEnabled) {
+        applyParamsToRequest(req);
+        applyExpressPolyfills(res);
+      }
 
       setH3Event(req, event);
 
@@ -692,6 +695,21 @@ export class H3Adapter extends AbstractHttpAdapter<
 
     if (isPromise(maybePromise)) return maybePromise;
     return Promise.resolve(maybePromise);
+  }
+
+  public enableUnsafePolyfills() {
+    this.isUnsafePolyfillsEnabled = true;
+
+    applyParamsToRequest(
+      this.isHttp2
+        ? http2.Http2ServerRequest.prototype
+        : http.IncomingMessage.prototype,
+    );
+    applyExpressPolyfills(
+      this.isHttp2
+        ? http2.Http2ServerResponse.prototype
+        : http.ServerResponse.prototype,
+    );
   }
 
   /**

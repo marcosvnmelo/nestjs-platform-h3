@@ -59,7 +59,6 @@ import {
   applyParamsToRequest,
   extractNodeRequestFromEvent,
   extractNodeResponseFromEvent,
-  extractNodeRuntimeFromEvent,
   extractRemainingPath,
 } from './utils/node-runtime.utils.ts';
 import {
@@ -206,6 +205,9 @@ export class H3Adapter extends AbstractHttpAdapter<
       const res = extractNodeResponseFromEvent(
         event,
       ) as PolyfilledResponse<H3ServerResponse>;
+
+      applyParamsToRequest(req);
+      applyExpressPolyfills(res);
 
       setH3Event(req, event);
 
@@ -391,7 +393,8 @@ export class H3Adapter extends AbstractHttpAdapter<
     if (nextResult !== $h3NotFound) return nextResult;
 
     const result = await this.onNotFoundHook!(
-      ...extractNodeRuntimeFromEvent(event),
+      extractNodeRequestFromEvent(event),
+      extractNodeResponseFromEvent(event),
     );
 
     // Ensure not-found handler is treated as fully handled by H3.
@@ -701,7 +704,8 @@ export class H3Adapter extends AbstractHttpAdapter<
     return (path: string, callback: Function) => {
       const h3Path = this.convertPathPattern(path);
       const handler = async (event: H3Event) => {
-        const [req, res] = extractNodeRuntimeFromEvent(event);
+        const req = extractNodeRequestFromEvent(event);
+        const res = extractNodeResponseFromEvent(event);
 
         const result = await this.invokeHandler(
           callback as H3NodeHandler,
@@ -868,17 +872,6 @@ export class H3Adapter extends AbstractHttpAdapter<
       // HTTP/1.1
       this.httpServer = http.createServer(requestListener);
     }
-
-    applyParamsToRequest(
-      this.isHttp2
-        ? http2.Http2ServerRequest.prototype
-        : http.IncomingMessage.prototype,
-    );
-    applyExpressPolyfills(
-      this.isHttp2
-        ? http2.Http2ServerResponse.prototype
-        : http.ServerResponse.prototype,
-    );
 
     if (options?.forceCloseConnections) {
       this.trackOpenConnections();
@@ -1134,7 +1127,8 @@ export class H3Adapter extends AbstractHttpAdapter<
       method === 'ALL' ? '' : method,
       normalizedPath,
       async (event) => {
-        const [req, res] = extractNodeRuntimeFromEvent(event);
+        const req = extractNodeRequestFromEvent(event);
+        const res = extractNodeResponseFromEvent(event);
 
         const method = event.req.method as HTTPMethod;
         if (method === 'HEAD') {

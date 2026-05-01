@@ -137,11 +137,25 @@ export function applyParamsToRequest(req: H3ServerRequest) {
   Object.defineProperties(req, extendedRequestProps);
 }
 
+const COMMON_MIME_TYPES: Record<string, string> = {
+  html: 'text/html; charset=utf-8',
+  json: 'application/json; charset=utf-8',
+  txt: 'text/plain; charset=utf-8',
+  bin: 'application/octet-stream',
+};
+
 function setCharset(type: string, charset: string) {
-  if (!type || !charset) {
-    return type;
-  }
-  if (/;\s*charset=/i.test(type)) {
+  if (!type || !charset) return type;
+
+  // Extremely fast paths for common payloads
+  if (type === 'application/json')
+    return `application/json; charset=${charset}`;
+  if (type === 'text/html') return `text/html; charset=${charset}`;
+  if (type === 'text/plain') return `text/plain; charset=${charset}`;
+
+  // Faster than Regex execution
+  const lowerType = type.toLowerCase();
+  if (lowerType.includes('charset=')) {
     return type;
   }
 
@@ -164,10 +178,14 @@ const type = function (
   this: PolyfilledResponse<H3ServerResponse>,
   type: string,
 ) {
-  const ct =
-    type.indexOf('/') === -1
-      ? mime.contentType(type) || 'application/octet-stream'
-      : type;
+  let ct = type;
+  if (type.indexOf('/') === -1) {
+    // Check map before falling back to the slower mime library
+    ct =
+      COMMON_MIME_TYPES[type] ||
+      mime.contentType(type) ||
+      'application/octet-stream';
+  }
   return this.set('Content-Type', ct);
 };
 
@@ -295,7 +313,12 @@ const json = function (this: PolyfilledResponse<H3ServerResponse>, obj: any) {
     this.setHeader('Content-Type', 'application/json; charset=utf-8');
   }
 
-  return this.send(body);
+  // Calculate length and write directly to end the response, bypassing send()
+  const len = Buffer.byteLength(body, 'utf8');
+  this.setHeader('Content-Length', len);
+  this.end(body, 'utf8');
+
+  return this;
 };
 
 const status = function (

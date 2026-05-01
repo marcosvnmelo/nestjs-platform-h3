@@ -10,7 +10,10 @@ import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 import { BenchmarkModule } from '../app/app.module.ts';
 import { parseBooleanArg } from '../utils/parse-args.utils.ts';
 
-const nestBodyParser = parseBooleanArg('nest-body-parser', true);
+const OPTIONS = {
+  nestBodyParser: parseBooleanArg('nest-body-parser', true),
+  enableUnsafePolyfills: parseBooleanArg('enable-unsafe-polyfills', false),
+};
 
 await bootstrap();
 
@@ -20,9 +23,13 @@ async function bootstrap() {
     new H3Adapter(),
     {
       logger: false,
-      bodyParser: nestBodyParser,
+      bodyParser: OPTIONS.nestBodyParser,
     },
   );
+
+  if (OPTIONS.enableUnsafePolyfills) {
+    app.enableUnsafePolyfills();
+  }
 
   await app.listen(0, '127.0.0.1');
 

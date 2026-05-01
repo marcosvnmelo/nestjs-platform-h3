@@ -51,6 +51,7 @@ const OPTIONS = {
     'profile-out',
     `cpu-profile-${now}.server.cpuprofile`,
   ),
+  enableUnsafePolyfills: parseBooleanArg('enable-unsafe-polyfills', false),
 };
 
 await bootstrapAndProfile();
@@ -69,6 +70,10 @@ async function bootstrapAndProfile() {
   );
 
   await app.listen(0, '127.0.0.1');
+
+  if (OPTIONS.enableUnsafePolyfills) {
+    app.enableUnsafePolyfills();
+  }
 
   await bootstrapCpuProfiler.stop(OPTIONS.bootstrapProfileOut);
 

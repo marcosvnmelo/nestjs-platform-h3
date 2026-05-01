@@ -16,6 +16,7 @@ interface ServerProcess {
 interface BenchmarkCase {
   name: string;
   scriptPath: string;
+  args?: string[];
 }
 
 interface BenchmarkStats {
@@ -76,6 +77,11 @@ const cases: BenchmarkCase[] = [
   {
     name: 'Nest H3 Adapter',
     scriptPath: path.join(SERVERS_DIR, 'nest-h3-server.js'),
+  },
+  {
+    name: 'Nest H3 (Unsafe) Adapter',
+    scriptPath: path.join(SERVERS_DIR, 'nest-h3-server.js'),
+    args: ['--enable-unsafe-polyfills=true'],
   },
 ];
 
@@ -162,6 +168,7 @@ async function run() {
   printPairComparison(aggregates, 'Pure Express', 'Nest Express');
   printPairComparison(aggregates, 'Pure Fastify', 'Nest Fastify');
   printPairComparison(aggregates, 'Pure H3', 'Nest H3 Adapter');
+  printPairComparison(aggregates, 'Pure H3', 'Nest H3 (Unsafe) Adapter');
 }
 
 function printPairComparison(
@@ -193,6 +200,7 @@ async function startServer(benchCase: BenchmarkCase): Promise<ServerProcess> {
   const args = [
     benchCase.scriptPath,
     `--nest-body-parser=${BENCHMARK_OPTIONS.nestBodyParser}`,
+    ...(benchCase.args ?? []),
   ];
 
   const child = spawn(process.execPath, args, {

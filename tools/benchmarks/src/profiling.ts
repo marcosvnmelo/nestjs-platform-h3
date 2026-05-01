@@ -49,6 +49,7 @@ const BENCHMARK_OPTIONS = {
   pipelining: parseIntegerArg('pipelining', 1),
   warmupSeconds: parseIntegerArg('warmup', 2),
   label: parseStringArg('label', 'load'),
+  enableUnsafePolyfills: parseBooleanArg('enable-unsafe-polyfills', false),
 };
 
 await run();
@@ -64,6 +65,7 @@ async function run() {
         bootstrapProfileOut: BENCHMARK_OPTIONS.bootstrapProfileOut,
         profileOut: BENCHMARK_OPTIONS.profileOut,
         nestBodyParser: BENCHMARK_OPTIONS.nestBodyParser,
+        enableUnsafePolyfills: BENCHMARK_OPTIONS.enableUnsafePolyfills,
       });
       baseUrl = await waitForServerBaseUrl(
         serverChild,
@@ -127,12 +129,14 @@ function spawnProfilingServer(opts: {
   bootstrapProfileOut: string;
   profileOut: string;
   nestBodyParser: boolean;
+  enableUnsafePolyfills: boolean;
 }): ChildProcess {
   const args = [
     PROFILING_SERVER_SCRIPT,
     `--bootstrap-profile-out=${opts.bootstrapProfileOut}`,
     `--profile-out=${opts.profileOut}`,
     `--nest-body-parser=${opts.nestBodyParser}`,
+    `--enable-unsafe-polyfills=${opts.enableUnsafePolyfills}`,
   ];
 
   const child = spawn(process.execPath, args, {

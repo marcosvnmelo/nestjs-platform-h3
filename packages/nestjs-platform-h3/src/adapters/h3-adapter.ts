@@ -15,6 +15,7 @@ import { NodeRequest, sendNodeResponse } from 'srvx/node';
 import type { NestApplicationOptions, VersioningOptions } from '@nestjs/common';
 import type { VersionValue } from '@nestjs/common/interfaces/version-options.interface.js';
 import {
+  BadRequestException,
   HttpStatus,
   InternalServerErrorException,
   Logger,
@@ -362,8 +363,10 @@ export class H3Adapter extends AbstractHttpAdapter<
   }
 
   private async invokeErrorHandler(error: Error, event: H3Event) {
+    const mappedError = this.mapException(error);
+
     await this.onErrorHook!(
-      error,
+      mappedError as Error,
       extractNodeRequestFromEvent(event),
       extractNodeResponseFromEvent(event),
       (_err: any) => {
@@ -898,6 +901,18 @@ export class H3Adapter extends AbstractHttpAdapter<
 
     if (options?.forceCloseConnections) {
       this.trackOpenConnections();
+    }
+  }
+
+  public mapException(error: unknown): unknown {
+    switch (true) {
+      // SyntaxError is thrown by Express body-parser when given invalid JSON (#422, #430)
+      // URIError is thrown by Express when given a path parameter with an invalid percentage
+      // encoding, e.g. '%FF' (#8915)
+      case error instanceof SyntaxError || error instanceof URIError:
+        return new BadRequestException(error.message);
+      default:
+        return error;
     }
   }
 

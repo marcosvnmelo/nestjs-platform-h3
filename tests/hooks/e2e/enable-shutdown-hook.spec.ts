@@ -1,11 +1,19 @@
 import { spawnSync } from 'child_process';
-import { join } from 'path';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { describe, expect, it } from '@rstest/core';
 
 const nodeCmd = process.execPath;
+const require = createRequire(import.meta.url);
 
+function tsxCliPath(): string {
+  const pkgRoot = dirname(require.resolve('tsx/package.json'));
+  return join(pkgRoot, 'dist/cli.mjs');
+}
+
+/** TS via tsx; `jiti/register` + Nest → ERR_REQUIRE_ASYNC_MODULE on Node 24. */
 function spawnTsNode(...args: string[]) {
-  return spawnSync(nodeCmd, ['--import', 'jiti/register', ...args]);
+  return spawnSync(nodeCmd, [tsxCliPath(), ...args]);
 }
 
 describe('enableShutdownHooks', () => {

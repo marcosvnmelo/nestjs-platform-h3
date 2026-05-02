@@ -25,6 +25,7 @@
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
     "jiti": "catalog:",
+    "tsx": "4.21.0",
     "typescript": "catalog:"
   }
 }

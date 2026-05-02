@@ -1,0 +1,13 @@
+diff --git a/dist/drivers/apollo-base.driver.js b/dist/drivers/apollo-base.driver.js
+index dce5c2721dcd19c1387dd1c285903d56bdeb8ceb..5c1bcfb7ffe0a48994650da31e0711b5a574a595 100644
+--- a/dist/drivers/apollo-base.driver.js
++++ b/dist/drivers/apollo-base.driver.js
+@@ -117,7 +117,7 @@ class ApolloBaseDriver extends graphql_1.AbstractGraphQLDriver {
+                 : [drainHttpServerPlugin],
+         });
+         await server.start();
+-        app.use(path, expressMiddleware(server, {
++        httpAdapter.use(path, expressMiddleware(server, {
+             context: options.context,
+         }));
+         this.apolloServer = server;

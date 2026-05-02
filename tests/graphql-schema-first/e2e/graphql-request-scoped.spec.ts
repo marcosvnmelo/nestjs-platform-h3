@@ -12,8 +12,9 @@ import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 import { CatsRequestScopedService } from '../src/cats/cats-request-scoped.service.ts';
 import { CatsModule } from '../src/cats/cats.module.ts';
 
-// GraphQL libs only support Express and Fastify
-describe.skip('GraphQL request scoped', () => {
+// HACK: GraphQL libs only support Express and Fastify natively
+// Calling "app.setAdapterDisguise('express')" + "@nestjs/apollo" patch is required
+describe('GraphQL request scoped', () => {
   let app: NestH3Application;
 
   beforeEach(async () => {
@@ -29,7 +30,9 @@ describe.skip('GraphQL request scoped', () => {
       ],
     }).compile();
 
-    app = module.createNestApplication<NestH3Application>(new H3Adapter());
+    const adapter = new H3Adapter();
+    adapter.setAdapterDisguise('express');
+    app = module.createNestApplication<NestH3Application>(adapter);
     await app.init();
 
     const performHttpCall = (end: Function) =>

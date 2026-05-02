@@ -9,8 +9,9 @@ import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
 
-// GraphQL libs only support Express and Fastify
-describe.skip('GraphQL Pipes', () => {
+// HACK: GraphQL libs only support Express and Fastify natively
+// Calling "app.setAdapterDisguise('express')" + "@nestjs/apollo" patch is required
+describe('GraphQL Pipes', () => {
   let app: NestH3Application;
 
   beforeEach(async () => {
@@ -18,7 +19,9 @@ describe.skip('GraphQL Pipes', () => {
       imports: [AppModule],
     }).compile();
 
-    app = module.createNestApplication<NestH3Application>(new H3Adapter());
+    const adapter = new H3Adapter();
+    adapter.setAdapterDisguise('express');
+    app = module.createNestApplication<NestH3Application>(adapter);
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });

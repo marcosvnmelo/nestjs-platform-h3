@@ -13,10 +13,7 @@ import { RecipesModule } from './recipes/recipes.module.ts';
       driver: ApolloDriver,
       includeStacktraceInErrorResponses: false,
       installSubscriptionHandlers: true,
-      autoSchemaFile: join(
-        process.cwd(),
-        'integration/graphql-code-first/schema.gql',
-      ),
+      autoSchemaFile: join(process.cwd(), 'schema.gql'),
     }),
   ],
 })

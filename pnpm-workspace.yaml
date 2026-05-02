@@ -20,6 +20,7 @@ catalog:
 
   # Dev dependencies
   '@apollo/server': '5.5.0'
+  '@as-integrations/express5': '1.1.2'
   '@confluentinc/kafka-javascript': '1.9.0'
   '@fastify/busboy': '3.2.0'
   '@grpc/grpc-js': '1.14.3'
@@ -92,4 +93,5 @@ overrides:
   '@apollo/server': '$@apollo/server'
   class-validator: '$class-validator'
 patchedDependencies:
+  '@nestjs/apollo': patches/@nestjs__apollo.patch
   quick-publish: patches/quick-publish.patch

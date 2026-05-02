@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@as-integrations/express5": "catalog:",
     "@marcosvnmelo/nestjs-platform-h3": "workspace:*",
     "@marcosvnmelo/testing-shared": "workspace:*",
     "@nestjs/apollo": "catalog:",

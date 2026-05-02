@@ -4,15 +4,19 @@ import request from 'supertest';
 import { NestFactory } from '@nestjs/core';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AsyncClassApplicationModule } from '../src/async-options-class.module.ts';
 
-// GraphQL libs only support Express and Fastify
-describe.skip('GraphQL (async class)', () => {
+// HACK: GraphQL libs only support Express and Fastify natively
+// Calling "app.setAdapterDisguise('express')" + "@nestjs/apollo" patch is required
+describe('GraphQL (async class)', () => {
   let app: NestH3Application;
 
   beforeEach(async () => {
-    app = await NestFactory.create(AsyncClassApplicationModule, {
+    const adapter = new H3Adapter();
+    adapter.setAdapterDisguise('express');
+    app = await NestFactory.create(AsyncClassApplicationModule, adapter, {
       logger: false,
     });
     await app.init();

@@ -143,6 +143,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   private readonly logger = new Logger(H3Adapter.name);
   private isHttp2 = false;
   private isUnsafePolyfillsEnabled = false;
+  private adapterDisguise: 'express' | false = false;
   private readonly openConnections = new Set<Socket>();
   private corsConfig?: CorsConfig;
   private onRequestHook?: (
@@ -712,6 +713,10 @@ export class H3Adapter extends AbstractHttpAdapter<
     );
   }
 
+  public setAdapterDisguise(name: 'express' | false): void {
+    this.adapterDisguise = name ? 'express' : false;
+  }
+
   /**
    * The requestMethod parameter is part of the AbstractHttpAdapter interface contract.
    * H3 middleware uses instance.use() which doesn't filter by HTTP method (similar to Fastify).
@@ -994,7 +999,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   }
 
   public getType(): string {
-    return 'h3';
+    return this.adapterDisguise || 'h3';
   }
 
   public use(handler: Function): void;

@@ -149,6 +149,16 @@ export interface NestH3Application<
   enableUnsafePolyfills(): void;
 
   /**
+   * Sets the adapter disguise for the application.
+   * This can be used to bypass external libraries checking for adapter type.
+   *
+   * Note: This not ensures that the external library will work seamlessly with H3 Adapter.
+   *
+   * @param name - The disguise name
+   */
+  setAdapterDisguise(name: 'express' | false): void;
+
+  /**
    * A wrapper function for H3 settings.
    * This is a no-op stub for Express compatibility.
    *
@@ -215,7 +225,7 @@ export interface NestH3Application<
   /**
    * Returns the HTTP adapter type identifier.
    *
-   * @returns {string} Always returns 'h3'
+   * @returns {string} Always returns 'h3', unless `setAdapterDisguise()` is used
    */
   getType(): string;
 

@@ -53,6 +53,8 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm run build",

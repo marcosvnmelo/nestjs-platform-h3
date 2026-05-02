@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
+
 const SIGNAL = process.argv[2];
 const SIGNAL_TO_LISTEN = process.argv[3];
 const USE_GRACEFUL_EXIT = process.argv[4] === 'graceful';
@@ -29,7 +31,9 @@ class TestInjectable
 class AppModule {}
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { logger: false });
+  const app = await NestFactory.create(AppModule, new H3Adapter(), {
+    logger: false,
+  });
 
   const shutdownOptions = USE_GRACEFUL_EXIT ? { useProcessExit: true } : {};
 

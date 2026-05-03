@@ -1,3 +1,43 @@
+## [11.1.19-3](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-2...v11.1.19-3) (2026-05-03)
+
+
+### Bug Fixes
+
+* **h3-adapter:** map parser errors to BadRequest ([c599209](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/c5992090effb702d5861e878ba4d7b4d06aa2695))
+* prototype pollution ([6f0497a](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/6f0497afdfb1c2922cb6fd71aae67553639fc959))
+
+
+### Features
+
+* add unsafe polyfills option ([106a873](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/106a8734cb2dfff0f055d829de3c0565824ddcc5))
+* **benchmarks:** add unsafe polyfills to H3 bench harness ([d1d3877](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/d1d38775d0c41ece9420061c4e6dced6936ce136))
+* **benchmarks:** POST/GET toggle via --rest-method ([aa8987e](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/aa8987e8142f1aff6c1b2b722123e248d23077ca))
+* **h3:** add setAdapterDisguise for Express checks ([fdd5ced](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/fdd5ced17955df831f82282faa732e3c30df1e47))
+* **h3:** H3-native JSON parser ([dedf9cb](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/dedf9cb09c56c9f450f5efc7f1f8d153a5fdc659))
+
+
+### Performance Improvements
+
+* fix `res.end` double call ([ca56e72](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/ca56e72396470496ecd2ccb8642c86a44cb0f402))
+* **h3:** fast-path MIME typing and JSON bodies ([0ba3656](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/0ba365688de00595f1bb8a547a05102a6e8a21b1))
+* improve polyfills overhead ([be061e8](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/be061e8ed4a310dda700cda5071fbcdedfbdb747))
+
+
+
+## [11.1.19-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-1...v11.1.19-2) (2026-04-24)
+
+
+### Bug Fixes
+
+* solve multiple errors from tests ([bd287a5](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/bd287a549b28d01bf7f6c8ad923007039e78f184))
+
+
+### Features
+
+* enhance H3Adapter to support reverse route handling for versioned routes ([6a4bb3c](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/6a4bb3cb6764ca7250e73a2d7dd3f9bc6d11830a))
+
+
+
 ## [11.1.19-2](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-1...v11.1.19-2) (2026-04-24)
 
 

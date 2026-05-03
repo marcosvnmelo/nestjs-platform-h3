@@ -33,20 +33,12 @@ export function parseIntegerArg(name: string, defaultValue: number): number {
   return parsed;
 }
 
-export function parseOptionalStringArg(name: string): string | undefined {
-  const prefix = `--${name}=`;
-  const value = process.argv.find((arg) => arg.startsWith(prefix));
-  if (!value) {
-    return undefined;
-  }
-  const raw = value.slice(prefix.length);
-  if (!raw) {
-    throw new Error(`Empty value for --${name}`);
-  }
-  return raw;
-}
-
-export function parseStringArg(name: string, defaultValue: string): string {
+export function parseStringArg(name: string): string | undefined;
+export function parseStringArg(name: string, defaultValue: string): string;
+export function parseStringArg(
+  name: string,
+  defaultValue?: string,
+): string | undefined {
   const prefix = `--${name}=`;
   const value = process.argv.find((arg) => arg.startsWith(prefix));
   if (!value) {

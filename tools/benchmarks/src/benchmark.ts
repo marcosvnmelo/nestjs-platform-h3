@@ -5,43 +5,18 @@ import { fileURLToPath } from 'node:url';
 import type { Result } from 'autocannon';
 import type { ChildProcess } from 'node:child_process';
 
+import type {
+  BenchmarkAggregate,
+  BenchmarkCase,
+  BenchmarkStats,
+  ServerProcess,
+} from './types.ts';
 import { runAutocannon } from './utils/autocannon.utils.ts';
-import { parseBooleanArg, parseIntegerArg } from './utils/parse-args.utils.ts';
-
-interface ServerProcess {
-  url: string;
-  pid: ChildProcess;
-}
-
-interface BenchmarkCase {
-  name: string;
-  scriptPath: string;
-  args?: string[];
-}
-
-interface BenchmarkStats {
-  name: string;
-  run: number;
-  requestsPerSec: number;
-  latencyAvgMs: number;
-  latencyP99Ms: number;
-  throughputMbps: number;
-  errors: number;
-  timeouts: number;
-}
-
-interface BenchmarkAggregate {
-  name: string;
-  runs: number;
-  requestsPerSecMedian: number;
-  requestsPerSecP25: number;
-  requestsPerSecP75: number;
-  latencyAvgMedianMs: number;
-  latencyP99MedianMs: number;
-  throughputMedianMbps: number;
-  totalErrors: number;
-  totalTimeouts: number;
-}
+import {
+  parseBooleanArg,
+  parseIntegerArg,
+  parseStringArg,
+} from './utils/parse-args.utils.ts';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const SERVERS_DIR = path.join(SCRIPT_DIR, 'servers');

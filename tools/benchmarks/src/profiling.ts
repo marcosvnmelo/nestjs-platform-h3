@@ -4,11 +4,11 @@ import { fileURLToPath } from 'node:url';
 import type { Result } from 'autocannon';
 import type { ChildProcess } from 'node:child_process';
 
+import type { BenchmarkStats } from './types.ts';
 import { runAutocannon } from './utils/autocannon.utils.ts';
 import {
   parseBooleanArg,
   parseIntegerArg,
-  parseOptionalStringArg,
   parseStringArg,
 } from './utils/parse-args.utils.ts';
 
@@ -20,20 +20,12 @@ const PROFILING_SERVER_SCRIPT = fileURLToPath(
 
 const LISTENING_LINE = /Nest H3 server listening:\s+(https?:\/\/[^\s]+)/;
 
-interface BenchmarkStats {
-  name: string;
-  requestsPerSec: number;
-  latencyAvgMs: number;
-  latencyP99Ms: number;
-  throughputMbps: number;
-  errors: number;
-  timeouts: number;
-}
+type ProfileBenchmarkStats = Omit<BenchmarkStats, 'run'>;
 
 const now = Date.now();
 
 const BENCHMARK_OPTIONS = {
-  url: parseOptionalStringArg('url'),
+  url: parseStringArg('url'),
   serverReadyMs: parseIntegerArg('server-ready-timeout', 120_000),
   bootstrapProfileOut: parseStringArg(
     'bootstrap-profile-out',
@@ -55,7 +47,7 @@ const BENCHMARK_OPTIONS = {
 await run();
 
 async function run() {
-  const results: BenchmarkStats[] = [];
+  const results: ProfileBenchmarkStats[] = [];
   let serverChild: ChildProcess | undefined;
   let baseUrl = BENCHMARK_OPTIONS.url;
 
@@ -261,7 +253,7 @@ function delay(ms: number) {
   });
 }
 
-function toStats(name: string, result: Result): BenchmarkStats {
+function toStats(name: string, result: Result): ProfileBenchmarkStats {
   return {
     name,
     requestsPerSec: result.requests.average,
@@ -273,7 +265,7 @@ function toStats(name: string, result: Result): BenchmarkStats {
   };
 }
 
-function printRunStats(stats: BenchmarkStats) {
+function printRunStats(stats: ProfileBenchmarkStats) {
   console.log(
     [
       `req/s=${stats.requestsPerSec.toFixed(2)}`,

@@ -11,6 +11,12 @@ import type {
   BenchmarkStats,
   ServerProcess,
 } from './types.ts';
+import {
+  GET_PATH,
+  GET_REQUEST_OPTIONS,
+  POST_PATH,
+  POST_REQUEST_OPTIONS,
+} from './constants.ts';
 import { runAutocannon } from './utils/autocannon.utils.ts';
 import {
   parseBooleanArg,
@@ -29,6 +35,7 @@ const BENCHMARK_OPTIONS = {
   runs: parseIntegerArg('runs', 3),
   nestBodyParser: parseBooleanArg('nest-body-parser', true),
   serverReadyMs: parseIntegerArg('server-ready-timeout', 120_000),
+  restMethod: parseStringArg('rest-method', 'POST'),
 };
 
 const cases: BenchmarkCase[] = [
@@ -86,17 +93,28 @@ async function run() {
       console.log(`\n→ ${benchCase.name}`);
       const server = await startServer(benchCase);
 
+      const GET_URL = server.url + GET_PATH;
+      const POST_URL = server.url + POST_PATH;
+
+      const targetUrl =
+        BENCHMARK_OPTIONS.restMethod === 'GET' ? GET_URL : POST_URL;
+
       try {
-        await runAutocannon(`${server.url}/hello`, {
+        // Warmup
+        await runAutocannon(GET_URL, {
           duration: BENCHMARK_OPTIONS.warmupSeconds,
           connections: BENCHMARK_OPTIONS.connections,
           pipelining: BENCHMARK_OPTIONS.pipelining,
         });
 
-        const result = await runAutocannon(`${server.url}/hello`, {
+        const result = await runAutocannon(targetUrl, {
           duration: BENCHMARK_OPTIONS.duration,
           connections: BENCHMARK_OPTIONS.connections,
           pipelining: BENCHMARK_OPTIONS.pipelining,
+
+          ...(BENCHMARK_OPTIONS.restMethod === 'GET'
+            ? GET_REQUEST_OPTIONS
+            : POST_REQUEST_OPTIONS),
         });
 
         const stats = toStats(benchCase.name, result, runIndex);

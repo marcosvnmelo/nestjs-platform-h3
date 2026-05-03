@@ -14,6 +14,13 @@ if (nestBodyParser) {
 app.get('/hello', (_req, res) => {
   res.send('ok');
 });
+app.post('/all/:path', (req, res) => {
+  res.send({
+    params: req.params,
+    query: req.query,
+    body: req.body,
+  });
+});
 
 const server = app.listen(0, '127.0.0.1', () => {
   const address = server.address() as AddressInfo;

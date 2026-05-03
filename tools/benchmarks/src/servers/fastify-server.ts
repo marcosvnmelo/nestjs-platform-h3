@@ -4,6 +4,13 @@ import fastify from 'fastify';
 const app = fastify({ logger: false });
 
 app.get('/hello', () => 'ok');
+app.post('/all/:path', (req, res) => {
+  res.send({
+    params: req.params,
+    query: req.query,
+    body: req.body,
+  });
+});
 
 await app.listen({ port: 0, host: '127.0.0.1' });
 

@@ -8,15 +8,15 @@
     "dev": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run dev",
     "build": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run build",
     "benchmark": "pnpm --filter @marcosvnmelo/benchmark run benchmark",
-    "test": "pnpm --filter ...* run test",
-    "test:watch": "pnpm --filter ...* run test:watch",
+    "test": "pnpm --filter ...* --workspace-concurrency=1 run test",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "pnpm --filter ...* run lint",
     "lint:fix": "pnpm --filter ...* run lint:fix",
     "typecheck": "pnpm run build && pnpm --filter ...* typecheck",
     "prerelease": "pnpm typecheck && pnpm test && pnpm lint && pnpm format",
-    "release": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run release"
+    "release": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run release",
+    "release:quick": "pnpm --filter @marcosvnmelo/nestjs-platform-h3 run release"
   },
   "dependencies": {
     "@fastify/busboy": "catalog:",

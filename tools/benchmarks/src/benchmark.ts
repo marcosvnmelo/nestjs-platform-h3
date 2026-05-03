@@ -4,8 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Result } from 'autocannon';
 import type { ChildProcess } from 'node:child_process';
-import autocannon from 'autocannon';
 
+import { runAutocannon } from './utils/autocannon.utils.ts';
 import { parseBooleanArg, parseIntegerArg } from './utils/parse-args.utils.ts';
 
 interface ServerProcess {
@@ -426,31 +426,4 @@ function percentile(values: number[], p: number): number {
   if (lower === upper) return sorted[lower];
   const weight = index - lower;
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
-}
-
-function runAutocannon(
-  url: string,
-  options: {
-    duration: number;
-    connections: number;
-    pipelining: number;
-  },
-): Promise<Result> {
-  return new Promise((resolve, reject) => {
-    autocannon(
-      {
-        url,
-        duration: options.duration,
-        connections: options.connections,
-        pipelining: options.pipelining,
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(result);
-      },
-    );
-  });
 }

@@ -3,8 +3,8 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import type { Result } from 'autocannon';
 import type { ChildProcess } from 'node:child_process';
-import autocannon from 'autocannon';
 
+import { runAutocannon } from './utils/autocannon.utils.ts';
 import {
   parseBooleanArg,
   parseIntegerArg,
@@ -283,31 +283,4 @@ function printRunStats(stats: BenchmarkStats) {
       `timeouts=${stats.timeouts}`,
     ].join(' | '),
   );
-}
-
-function runAutocannon(
-  url: string,
-  options: {
-    duration: number;
-    connections: number;
-    pipelining: number;
-  },
-): Promise<Result> {
-  return new Promise((resolve, reject) => {
-    autocannon(
-      {
-        url,
-        duration: options.duration,
-        connections: options.connections,
-        pipelining: options.pipelining,
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(result);
-      },
-    );
-  });
 }

@@ -1,4 +1,3 @@
-import type { OptionsUrlencoded } from 'body-parser';
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
 import request from 'supertest';
 
@@ -69,7 +68,7 @@ describe('Body Parser (Express Application)', () => {
           rawBody: true,
           logger: false,
         })
-        .useBodyParser<OptionsUrlencoded>('urlencoded', {
+        .useBodyParser('urlencoded', {
           limit: Buffer.from(stringLimit).byteLength,
           extended: true,
         });

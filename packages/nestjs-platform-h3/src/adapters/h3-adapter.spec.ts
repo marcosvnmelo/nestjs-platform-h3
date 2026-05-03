@@ -29,6 +29,7 @@ describe('H3Adapter', () => {
         .mockReturnValue(urlencodedInstance as any);
       const useSpy = rs.spyOn(h3Instance, 'use');
       const h3Adapter = new H3Adapter(h3Instance);
+      h3Adapter.useBodyParser('json', false);
       useSpy.mockClear();
 
       h3Adapter.registerParserMiddleware();

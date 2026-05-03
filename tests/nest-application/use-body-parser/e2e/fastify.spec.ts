@@ -30,8 +30,8 @@ describe('Body Parser (Fastify Application)', () => {
           rawBody: true,
           logger: false,
         })
-        .useBodyParser('application/json', {
-          bodyLimit: Buffer.from(stringLimit).byteLength,
+        .useBodyParser('json', {
+          limit: Buffer.from(stringLimit).byteLength,
         });
 
       await app.init();
@@ -78,8 +78,8 @@ describe('Body Parser (Fastify Application)', () => {
           rawBody: true,
           logger: false,
         })
-        .useBodyParser('application/x-www-form-urlencoded', {
-          bodyLimit: Buffer.from(stringLimit).byteLength,
+        .useBodyParser('urlencoded', {
+          limit: Buffer.from(stringLimit).byteLength,
         });
 
       await app.init();

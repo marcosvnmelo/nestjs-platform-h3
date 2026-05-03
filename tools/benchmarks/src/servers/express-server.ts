@@ -1,10 +1,10 @@
 import type { AddressInfo } from 'node:net';
 import express from 'express';
 
-import { parseBooleanArg } from '../utils/parse-args.utils.ts';
+import { commonArgs } from '../constants/args.constants.ts';
 
 const app = express();
-const nestBodyParser = parseBooleanArg('nest-body-parser', true);
+const nestBodyParser = commonArgs.nestBodyParser;
 
 if (nestBodyParser) {
   app.use(express.json());

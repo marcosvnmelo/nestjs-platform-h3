@@ -1,69 +1,70 @@
-import { spawn } from 'node:child_process';
-import { once } from 'node:events';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import type { Result } from 'autocannon';
-import type { ChildProcess } from 'node:child_process';
+// cspell:ignore mbps mbit
 
-import type {
-  BenchmarkAggregate,
-  BenchmarkCase,
-  BenchmarkStats,
-  ServerProcess,
-} from './types.ts';
+import type { BenchmarkCase, BenchmarkStats } from './types.ts';
+import { commonArgs } from './constants/args.constants.ts';
 import {
   GET_PATH,
   GET_REQUEST_OPTIONS,
   POST_PATH,
   POST_REQUEST_OPTIONS,
-} from './constants.ts';
+} from './constants/route.constants.ts';
+import { ServerEnum } from './constants/server.constants.ts';
 import { runAutocannon } from './utils/autocannon.utils.ts';
 import {
-  parseBooleanArg,
-  parseIntegerArg,
-  parseStringArg,
-} from './utils/parse-args.utils.ts';
+  aggregateResults,
+  printPairComparison,
+  printRunStats,
+  shuffleCases,
+  toStats,
+} from './utils/benchmark.utils.ts';
+import { integerArg, parseArgs } from './utils/parse-args.utils.ts';
+import {
+  killServer,
+  scriptPath,
+  startServer,
+} from './utils/spawn-server.utils.ts';
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const SERVERS_DIR = path.join(SCRIPT_DIR, 'servers');
+const BENCHMARK_OPTIONS = parseArgs({
+  duration: commonArgs.duration,
+  connections: commonArgs.connections,
+  pipelining: commonArgs.pipelining,
+  warmupSeconds: commonArgs.warmupSeconds,
+  nestBodyParser: commonArgs.nestBodyParser,
+  serverReadyMs: commonArgs.serverReadyMs,
+  runs: integerArg('runs', 3),
 
-const BENCHMARK_OPTIONS = {
-  duration: parseIntegerArg('duration', 10),
-  connections: parseIntegerArg('connections', 10),
-  pipelining: parseIntegerArg('pipelining', 1),
-  warmupSeconds: parseIntegerArg('warmup', 2),
-  runs: parseIntegerArg('runs', 3),
-  nestBodyParser: parseBooleanArg('nest-body-parser', true),
-  serverReadyMs: parseIntegerArg('server-ready-timeout', 120_000),
-  restMethod: parseStringArg('rest-method', 'POST'),
-};
+  restMethod: commonArgs.restMethod,
+});
 
 const cases: BenchmarkCase[] = [
   {
     name: 'Pure Express',
-    scriptPath: path.join(SERVERS_DIR, 'express-server.js'),
+    scriptPath: scriptPath(ServerEnum.EXPRESS),
   },
   {
     name: 'Nest Express',
-    scriptPath: path.join(SERVERS_DIR, 'nest-express-server.js'),
+    scriptPath: scriptPath(ServerEnum.NEST_EXPRESS),
   },
   {
     name: 'Pure Fastify',
-    scriptPath: path.join(SERVERS_DIR, 'fastify-server.js'),
+    scriptPath: scriptPath(ServerEnum.FASTIFY),
   },
   {
     name: 'Nest Fastify',
-    scriptPath: path.join(SERVERS_DIR, 'nest-fastify-server.js'),
+    scriptPath: scriptPath(ServerEnum.NEST_FASTIFY),
   },
-  { name: 'Pure H3', scriptPath: path.join(SERVERS_DIR, 'h3-server.js') },
+  {
+    name: 'Pure H3',
+    scriptPath: scriptPath(ServerEnum.H3),
+  },
   {
     name: 'Nest H3 Adapter',
-    scriptPath: path.join(SERVERS_DIR, 'nest-h3-server.js'),
+    scriptPath: scriptPath(ServerEnum.NEST_H3),
   },
   {
     name: 'Nest H3 (Unsafe) Adapter',
-    scriptPath: path.join(SERVERS_DIR, 'nest-h3-server.js'),
-    args: ['--enable-unsafe-polyfills=true'],
+    scriptPath: scriptPath(ServerEnum.NEST_H3),
+    args: [commonArgs.enableUnsafePolyfills.format(true)],
   },
 ];
 
@@ -75,44 +76,44 @@ async function run() {
   console.log(
     [
       'Running benchmark with autocannon',
-      `duration=${BENCHMARK_OPTIONS.duration}s`,
-      `connections=${BENCHMARK_OPTIONS.connections}`,
-      `pipelining=${BENCHMARK_OPTIONS.pipelining}`,
-      `warmup=${BENCHMARK_OPTIONS.warmupSeconds}s`,
-      `runs=${BENCHMARK_OPTIONS.runs}`,
-      `nestBodyParser=${BENCHMARK_OPTIONS.nestBodyParser}`,
+      `duration=${BENCHMARK_OPTIONS.duration.value}s`,
+      `connections=${BENCHMARK_OPTIONS.connections.value}`,
+      `pipelining=${BENCHMARK_OPTIONS.pipelining.value}`,
+      `warmup=${BENCHMARK_OPTIONS.warmupSeconds.value}s`,
+      `runs=${BENCHMARK_OPTIONS.runs.value}`,
+      `nestBodyParser=${BENCHMARK_OPTIONS.nestBodyParser.value}`,
     ].join(' | '),
   );
 
-  for (let runIndex = 1; runIndex <= BENCHMARK_OPTIONS.runs; runIndex++) {
-    console.log(`\n=== Run ${runIndex}/${BENCHMARK_OPTIONS.runs} ===`);
+  for (let runIndex = 1; runIndex <= BENCHMARK_OPTIONS.runs.value; runIndex++) {
+    console.log(`\n=== Run ${runIndex}/${BENCHMARK_OPTIONS.runs.value} ===`);
     const runCases = shuffleCases(cases);
     console.log(`Order: ${runCases.map((entry) => entry.name).join(' -> ')}`);
 
     for (const benchCase of runCases) {
       console.log(`\n→ ${benchCase.name}`);
-      const server = await startServer(benchCase);
+      const server = await startServer(benchCase, BENCHMARK_OPTIONS);
 
       const GET_URL = server.url + GET_PATH;
       const POST_URL = server.url + POST_PATH;
 
       const targetUrl =
-        BENCHMARK_OPTIONS.restMethod === 'GET' ? GET_URL : POST_URL;
+        BENCHMARK_OPTIONS.restMethod.value === 'GET' ? GET_URL : POST_URL;
 
       try {
         // Warmup
         await runAutocannon(GET_URL, {
-          duration: BENCHMARK_OPTIONS.warmupSeconds,
-          connections: BENCHMARK_OPTIONS.connections,
-          pipelining: BENCHMARK_OPTIONS.pipelining,
+          duration: BENCHMARK_OPTIONS.warmupSeconds.value,
+          connections: BENCHMARK_OPTIONS.connections.value,
+          pipelining: BENCHMARK_OPTIONS.pipelining.value,
         });
 
         const result = await runAutocannon(targetUrl, {
-          duration: BENCHMARK_OPTIONS.duration,
-          connections: BENCHMARK_OPTIONS.connections,
-          pipelining: BENCHMARK_OPTIONS.pipelining,
+          duration: BENCHMARK_OPTIONS.duration.value,
+          connections: BENCHMARK_OPTIONS.connections.value,
+          pipelining: BENCHMARK_OPTIONS.pipelining.value,
 
-          ...(BENCHMARK_OPTIONS.restMethod === 'GET'
+          ...(BENCHMARK_OPTIONS.restMethod.value === 'GET'
             ? GET_REQUEST_OPTIONS
             : POST_REQUEST_OPTIONS),
         });
@@ -162,261 +163,4 @@ async function run() {
   printPairComparison(aggregates, 'Pure Fastify', 'Nest Fastify');
   printPairComparison(aggregates, 'Pure H3', 'Nest H3 Adapter');
   printPairComparison(aggregates, 'Pure H3', 'Nest H3 (Unsafe) Adapter');
-}
-
-function printPairComparison(
-  results: BenchmarkAggregate[],
-  pureName: string,
-  nestName: string,
-) {
-  const pure = results.find((item) => item.name === pureName);
-  const nest = results.find((item) => item.name === nestName);
-
-  if (!pure || !nest) {
-    return;
-  }
-
-  const delta =
-    ((nest.requestsPerSecMedian - pure.requestsPerSecMedian) /
-      pure.requestsPerSecMedian) *
-    100;
-  const sign = delta >= 0 ? '+' : '';
-
-  console.log(`\n${pureName} vs ${nestName}`);
-  console.log(
-    `- req/s median: ${pure.requestsPerSecMedian.toFixed(2)} vs ${nest.requestsPerSecMedian.toFixed(2)}`,
-  );
-  console.log(`- delta: ${sign}${delta.toFixed(2)}%`);
-}
-
-async function startServer(benchCase: BenchmarkCase): Promise<ServerProcess> {
-  const args = [
-    benchCase.scriptPath,
-    `--nest-body-parser=${BENCHMARK_OPTIONS.nestBodyParser}`,
-    ...(benchCase.args ?? []),
-  ];
-
-  const child = spawn(process.execPath, args, {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    env: process.env,
-    detached: false,
-  });
-
-  if (child.stdout) child.stdout.setEncoding('utf8');
-  if (child.stderr) child.stderr.setEncoding('utf8');
-
-  child.stderr?.on('data', (chunk) => {
-    process.stderr.write(chunk);
-  });
-
-  child.on('exit', (code, signal) => {
-    if (code !== null && code !== 0 && !signal) {
-      console.error(`${benchCase.name} exited with code ${code}`);
-    }
-  });
-
-  child.on('error', (error) => {
-    console.error(`${benchCase.name} spawn error:`, error);
-  });
-
-  const url = await waitForServerUrl(
-    child,
-    benchCase.name,
-    BENCHMARK_OPTIONS.serverReadyMs,
-  );
-  return { url, pid: child };
-}
-
-async function waitForServerUrl(
-  child: ChildProcess,
-  name: string,
-  timeoutMs: number,
-): Promise<string> {
-  const stream = (() => {
-    const out = child.stdout;
-    if (!out) {
-      throw new Error(`${name} has no stdout`);
-    }
-    return out;
-  })();
-
-  let buffer = '';
-  let settled = false;
-
-  return new Promise<string>((resolve, reject) => {
-    const timer = setTimeout(onTimeout, timeoutMs);
-
-    function cleanup() {
-      clearTimeout(timer);
-      stream.removeListener('data', listener);
-      child.removeListener('exit', onExit);
-    }
-
-    function onTimeout() {
-      if (!settled) {
-        settled = true;
-        cleanup();
-        reject(
-          new Error(
-            `Timed out waiting for ${name} listening line (${timeoutMs}ms)\nCaptured stdout segment:\n${buffer.slice(-2000)}`,
-          ),
-        );
-      }
-    }
-
-    timer.unref?.();
-
-    function listener(chunk: string) {
-      process.stdout.write(chunk);
-      buffer += chunk;
-      const match = buffer.match(/listening:\s+(https?:\/\/[^\s]+)/);
-      if (match?.[1] && !settled) {
-        settled = true;
-        cleanup();
-        resolve(match[1]);
-      }
-    }
-
-    function onExit(code: number | null, signal: NodeJS.Signals | null) {
-      if (!settled) {
-        settled = true;
-        cleanup();
-        reject(
-          new Error(
-            `${name} exited before ready (code=${code}, signal=${signal})\nCaptured stdout segment:\n${buffer.slice(-2000)}`,
-          ),
-        );
-      }
-    }
-
-    stream.addListener('data', listener);
-    child.once('exit', onExit);
-  });
-}
-
-async function killServer(server: ServerProcess): Promise<void> {
-  const pid = server.pid.pid;
-  if (pid === undefined) {
-    return;
-  }
-
-  if (server.pid.exitCode !== null || server.pid.signalCode !== null) {
-    return;
-  }
-
-  if (!server.pid.killed) {
-    server.pid.kill('SIGTERM');
-  }
-
-  await Promise.race([once(server.pid, 'exit'), delay(8000)]);
-
-  if (server.pid.exitCode === null && server.pid.signalCode === null) {
-    try {
-      process.kill(pid, 'SIGKILL');
-    } catch {
-      // Already dead / invalid pid as expected on races
-    }
-
-    await Promise.race([once(server.pid, 'exit'), delay(3000)]);
-  }
-}
-
-function delay(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-function toStats(name: string, result: Result, run: number): BenchmarkStats {
-  return {
-    name,
-    run,
-    requestsPerSec: result.requests.average,
-    latencyAvgMs: result.latency.average,
-    latencyP99Ms: result.latency.p99,
-    throughputMbps: (result.throughput.average * 8) / (1024 * 1024),
-    errors: result.errors,
-    timeouts: result.timeouts,
-  };
-}
-
-function printRunStats(stats: BenchmarkStats) {
-  console.log(
-    [
-      `run=${stats.run}`,
-      `req/s=${stats.requestsPerSec.toFixed(2)}`,
-      `lat(avg)=${stats.latencyAvgMs.toFixed(2)}ms`,
-      `lat(p99)=${stats.latencyP99Ms.toFixed(2)}ms`,
-      `errors=${stats.errors}`,
-      `timeouts=${stats.timeouts}`,
-    ].join(' | '),
-  );
-}
-
-function shuffleCases(entries: BenchmarkCase[]): BenchmarkCase[] {
-  const shuffled = [...entries];
-  for (let index = shuffled.length - 1; index > 0; index--) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [
-      shuffled[swapIndex],
-      shuffled[index],
-    ];
-  }
-  return shuffled;
-}
-
-function aggregateResults(results: BenchmarkStats[]): BenchmarkAggregate[] {
-  const grouped = new Map<string, BenchmarkStats[]>();
-  for (const result of results) {
-    const entries = grouped.get(result.name);
-    if (entries) {
-      entries.push(result);
-    } else {
-      grouped.set(result.name, [result]);
-    }
-  }
-
-  return [...grouped.entries()]
-    .map(([name, entries]) => ({
-      name,
-      runs: entries.length,
-      requestsPerSecMedian: percentile(
-        entries.map((entry) => entry.requestsPerSec),
-        0.5,
-      ),
-      requestsPerSecP25: percentile(
-        entries.map((entry) => entry.requestsPerSec),
-        0.25,
-      ),
-      requestsPerSecP75: percentile(
-        entries.map((entry) => entry.requestsPerSec),
-        0.75,
-      ),
-      latencyAvgMedianMs: percentile(
-        entries.map((entry) => entry.latencyAvgMs),
-        0.5,
-      ),
-      latencyP99MedianMs: percentile(
-        entries.map((entry) => entry.latencyP99Ms),
-        0.5,
-      ),
-      throughputMedianMbps: percentile(
-        entries.map((entry) => entry.throughputMbps),
-        0.5,
-      ),
-      totalErrors: entries.reduce((sum, entry) => sum + entry.errors, 0),
-      totalTimeouts: entries.reduce((sum, entry) => sum + entry.timeouts, 0),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function percentile(values: number[], p: number): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = (sorted.length - 1) * p;
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  if (lower === upper) return sorted[lower];
-  const weight = index - lower;
-  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 }

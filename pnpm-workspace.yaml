@@ -43,7 +43,7 @@ catalog:
   # Build tools
   '@rslib/core': '0.21.3'
   '@rstest/adapter-rslib': '^0.2.2'
-  '@rstest/core': '0.9.9'
+  '@rstest/core': '0.9.10'
   '@testcontainers/kafka': '11.14.0'
   '@testcontainers/nats': '11.14.0'
   '@types/amqplib': '0.10.8'

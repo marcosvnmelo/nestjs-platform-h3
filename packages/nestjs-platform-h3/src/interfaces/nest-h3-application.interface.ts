@@ -1,3 +1,4 @@
+import type bodyParser from 'body-parser';
 import type { H3, H3Event, NodeHandler, NodeMiddleware } from 'h3';
 import type * as http from 'http';
 import type * as http2 from 'http2';
@@ -133,7 +134,15 @@ export interface NestH3Application<
    * @param options - `body-parser` options
    * @see {@link H3Adapter.useBodyParser}
    */
-  useBodyParser<T = any>(type: string, options?: T): this;
+  useBodyParser<
+    T extends 'json' | 'urlencoded',
+    TOptions = T extends 'json'
+      ? bodyParser.OptionsJson
+      : bodyParser.OptionsUrlencoded,
+  >(
+    type: T,
+    options?: Omit<TOptions, 'verify'>,
+  ): this;
 
   /**
    * A wrapper function around native `h3.fetch()` method.

@@ -1,6 +1,7 @@
+import { buffer } from 'node:stream/consumers';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 import type { H3Event } from 'h3';
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import type http from 'node:http';
 import bodyParser from 'body-parser';
 
 import type { RawBodyRequest } from '@nestjs/common';
@@ -13,6 +14,9 @@ import {
   extractNodeRequestFromEvent,
   extractNodeResponseFromEvent,
 } from '../../adapters/utils/node-runtime.utils.ts';
+import { extractH3Event } from './h3-event.utils.ts';
+
+export type NextHandleFunction = ReturnType<typeof bodyParser.urlencoded>;
 
 /** Same as `getBodyParserOptions` in `@nestjs/platform-express` (raw body capture). */
 const verifyRawBody: NonNullable<OptionsJson['verify']> = (
@@ -30,9 +34,9 @@ const verifyRawBody: NonNullable<OptionsJson['verify']> = (
 export function getJsonBodyParserOptions(
   rawBody: boolean | undefined,
 ): OptionsJson {
-  let o: OptionsJson = {};
+  const o: OptionsJson = {};
   if (rawBody === true) {
-    o = { ...o, verify: verifyRawBody };
+    o.verify = verifyRawBody;
   }
   return o;
 }
@@ -40,26 +44,55 @@ export function getJsonBodyParserOptions(
 export function getUrlencodedBodyParserOptions(
   rawBody: boolean | undefined,
 ): OptionsUrlencoded {
-  let o: OptionsUrlencoded = { extended: true };
+  const o: OptionsUrlencoded = { extended: true };
   if (rawBody === true) {
-    o = { ...o, verify: verifyRawBody };
+    o.verify = verifyRawBody;
   }
   return o;
 }
 
+export function h3JsonParserFactory(
+  rawBody: boolean | undefined,
+): NextHandleFunction {
+  return async (req, res, next) => {
+    try {
+      const event = extractH3Event(req);
+
+      if (event.req.headers.get('content-type') !== 'application/json') {
+        next();
+        return;
+      }
+
+      let rawBodyBuffer: Buffer | undefined;
+
+      if (rawBody && event.req.body) {
+        rawBodyBuffer = await buffer(event.req.body);
+      }
+
+      if (rawBodyBuffer)
+        (req as PolyfilledRequest<H3ServerRequest>).body = JSON.parse(
+          rawBodyBuffer.toString() || '{}',
+        );
+      else
+        (req as PolyfilledRequest<H3ServerRequest>).body =
+          await event.req.json();
+
+      if (rawBodyBuffer) {
+        verifyRawBody(req, res, rawBodyBuffer, 'utf8');
+      }
+
+      next();
+    } catch {
+      next();
+    }
+  };
+}
+
 function runBodyParsersInSequence(
-  nodeReq: IncomingMessage,
-  nodeRes: ServerResponse,
-  jsonParser: (
-    req: IncomingMessage,
-    res: ServerResponse,
-    callback: (err?: any) => void,
-  ) => void,
-  urlencodedParser: (
-    req: IncomingMessage,
-    res: ServerResponse,
-    callback: (err?: any) => void,
-  ) => void,
+  nodeReq: http.IncomingMessage,
+  nodeRes: http.ServerResponse,
+  jsonParser: NextHandleFunction,
+  urlencodedParser: NextHandleFunction,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     jsonParser(nodeReq, nodeRes, (err) => {
@@ -81,8 +114,8 @@ export async function applyExpressCompatibleBodyParsers(
   event: H3Event,
   rawBody?: boolean,
   parsers?: {
-    jsonParser: ReturnType<typeof bodyParser.json>;
-    urlencodedParser: ReturnType<typeof bodyParser.urlencoded>;
+    jsonParser: NextHandleFunction;
+    urlencodedParser: NextHandleFunction;
   },
 ): Promise<void> {
   const jsonParser =
@@ -95,8 +128,8 @@ export async function applyExpressCompatibleBodyParsers(
   const res = extractNodeResponseFromEvent(event);
 
   await runBodyParsersInSequence(
-    req as IncomingMessage,
-    res as ServerResponse,
+    req as http.IncomingMessage,
+    res as http.ServerResponse,
     jsonParser,
     urlencodedParser,
   );

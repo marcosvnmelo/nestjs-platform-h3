@@ -48,10 +48,12 @@ import type {
   PolyfilledResponse,
 } from '../interfaces/nest-h3-application.interface.ts';
 import type { ServeStaticOptions } from '../interfaces/serve-static-options.interface.ts';
+import type { NextHandleFunction } from './utils/body.utils.ts';
 import {
   applyExpressCompatibleBodyParsers,
   getJsonBodyParserOptions,
   getUrlencodedBodyParserOptions,
+  h3JsonParserFactory,
 } from './utils/body.utils.ts';
 import { setH3Event } from './utils/h3-event.utils.ts';
 import { copyHeadersFromEvent } from './utils/headers.utils.ts';
@@ -171,8 +173,8 @@ export class H3Adapter extends AbstractHttpAdapter<
    * Pre-created body parsers for performance.
    */
   private bodyParsers?: {
-    jsonParser: ReturnType<typeof bodyParser.json>;
-    urlencodedParser: ReturnType<typeof bodyParser.urlencoded>;
+    jsonParser: NextHandleFunction;
+    urlencodedParser: NextHandleFunction;
   };
 
   /**
@@ -185,11 +187,6 @@ export class H3Adapter extends AbstractHttpAdapter<
    * Prevents duplicate route registrations.
    */
   private readonly registeredPaths = new Set<string>();
-  /**
-   * Maps normalized route paths to their original route patterns for later retrieval.
-   * Used to extract remaining path segments after parameter matching.
-   */
-  private readonly routePatterns = new Map<string, string>();
 
   constructor(instanceOrOptions?: H3 | H3Config) {
     super(
@@ -958,7 +955,7 @@ export class H3Adapter extends AbstractHttpAdapter<
   public registerParserMiddleware(_prefix?: string, rawBody?: boolean) {
     // Pre-create body parsers if not already created by useBodyParser
     this.bodyParsers ??= {
-      jsonParser: bodyParser.json(getJsonBodyParserOptions(rawBody)),
+      jsonParser: h3JsonParserFactory(rawBody),
       urlencodedParser: bodyParser.urlencoded(
         getUrlencodedBodyParserOptions(rawBody),
       ),
@@ -978,35 +975,28 @@ export class H3Adapter extends AbstractHttpAdapter<
     });
   }
 
-  public useBodyParser(type: string, rawBody: boolean, options: any) {
-    if (!this.bodyParsers) {
-      this.bodyParsers = {
-        jsonParser: bodyParser.json(getJsonBodyParserOptions(rawBody)),
-        urlencodedParser: bodyParser.urlencoded(
-          getUrlencodedBodyParserOptions(rawBody),
-        ),
-      };
-    }
-
-    const parserAutoOptions: any = {
-      ...options,
+  public useBodyParser<
+    T extends 'json' | 'urlencoded',
+    TOptions = T extends 'json'
+      ? bodyParser.OptionsJson
+      : bodyParser.OptionsUrlencoded,
+  >(type: T, rawBody: boolean, options?: Omit<TOptions, 'verify'>) {
+    this.bodyParsers ??= {
+      jsonParser: h3JsonParserFactory(rawBody),
+      urlencodedParser: bodyParser.urlencoded(
+        getUrlencodedBodyParserOptions(rawBody),
+      ),
     };
-    if (parserAutoOptions.bodyLimit !== undefined) {
-      parserAutoOptions.limit = parserAutoOptions.bodyLimit;
-    }
 
-    if (type === 'json' || type === 'application/json') {
+    if (type === 'json') {
       this.bodyParsers.jsonParser = bodyParser.json({
         ...getJsonBodyParserOptions(rawBody),
-        ...parserAutoOptions,
+        ...options,
       });
-    } else if (
-      type === 'urlencoded' ||
-      type === 'application/x-www-form-urlencoded'
-    ) {
+    } else if (type === 'urlencoded') {
       this.bodyParsers.urlencodedParser = bodyParser.urlencoded({
         ...getUrlencodedBodyParserOptions(rawBody),
-        ...parserAutoOptions,
+        ...options,
       });
     }
 
@@ -1125,9 +1115,6 @@ export class H3Adapter extends AbstractHttpAdapter<
     const normalizedPath = this.convertPathPattern(routePath);
 
     const routeKey = `${method}:${normalizedPath}`;
-
-    // Store original route pattern for later reference
-    this.routePatterns.set(normalizedPath, routePath);
 
     // Add handler to route map
     if (!this.routeMap.has(routeKey)) {

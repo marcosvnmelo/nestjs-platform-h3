@@ -42,9 +42,9 @@ describe('Fastify FileSend', () => {
       new Request('http://localhost:3000/file/buffer', {
         method: 'GET',
       }),
-    ).then((res) => {
+    ).then(async (res) => {
       expect(res.status).toBe(200);
-      expect(res.text()).resolves.toBe(readmeString);
+      await expect(res.text()).resolves.toBe(readmeString);
     });
   });
   /**

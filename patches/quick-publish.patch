@@ -1,13 +1,21 @@
 diff --git a/lib/commands.js b/lib/commands.js
-index e69ae7c84b05622d454d6df43c995a5d7373233c..2a9351e2a6c2b3842f5eaa6e2233eafca3cf1403 100644
+index e69ae7c84b05622d454d6df43c995a5d7373233c..af564d05428ccf8616211cb9c347d217f55fb874 100644
 --- a/lib/commands.js
 +++ b/lib/commands.js
-@@ -17,7 +17,7 @@ const bin = (name) => path_1.default.resolve(__dirname, `../node_modules/.bin/${
+@@ -16,13 +16,13 @@ const bin = (name) => path_1.default.resolve(__dirname, `../node_modules/.bin/${
+  * Internal inline commands
   */
  exports.COMMANDS = {
-     bumpVersion: (version) => `npm version ${version}`,
+-    bumpVersion: (version) => `npm version ${version}`,
 -    npmPublish: (tag) => `npm publish --tag=${tag}`,
++    bumpVersion: (version) => `pnpm version ${version}`,
 +    npmPublish: (tag) => `pnpm publish --no-git-checks --tag=${tag}`,
      gitAdd: (file) => `git add ${file}`,
      gitCommit: (message) => `git commit -m ${encodeURIComponent(message)}`,
      gitPush: () => 'git push',
+     gitPushTag: (tag) => `git push origin refs/tags/${tag}`,
+     changelog: () => `${bin('conventional-changelog')} -p angular -r 2 -i CHANGELOG.md -s`,
+-    depcost: () => `${bin('depcost')} --record --npm-client=npm`,
++    depcost: () => `${bin('depcost')} --record --npm-client=pnpm`,
+ };
+ //# sourceMappingURL=commands.js.map

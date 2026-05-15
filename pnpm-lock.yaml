@@ -200,7 +200,7 @@ overrides:
 
 patchedDependencies:
   '@nestjs/apollo': f952acb01c9c080ee13d50faedca7dc19dd4ff889d7330bb82f8b3803145a7cb
-  quick-publish: 65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d
+  quick-publish: e52515a12f333777beb23cef7555d4dc34805af972b432f81d7afb43f449455a
 
 importers:
 
@@ -275,7 +275,7 @@ importers:
         version: 3.8.3
       quick-publish:
         specifier: 0.7.1
-        version: 0.7.1(patch_hash=65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d)
+        version: 0.7.1(patch_hash=e52515a12f333777beb23cef7555d4dc34805af972b432f81d7afb43f449455a)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -8344,7 +8344,7 @@ snapshots:
 
   quick-lru@4.0.1: {}
 
-  quick-publish@0.7.1(patch_hash=65fc7faa90d16ed3dfcae03ae3c857efa16ff4a0c7ab4386c9c681c7eb4a242d):
+  quick-publish@0.7.1(patch_hash=e52515a12f333777beb23cef7555d4dc34805af972b432f81d7afb43f449455a):
     dependencies:
       cac: 6.7.14
       conventional-changelog-cli: 2.2.2

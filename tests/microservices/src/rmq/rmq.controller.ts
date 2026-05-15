@@ -41,7 +41,7 @@ export class RMQController {
       options: {
         urls: [this.rmqUrl],
         queue: 'test',
-        queueOptions: { durable: false },
+        queueOptions: { durable: true },
         socketOptions: { noDelay: true },
       },
     });
@@ -85,7 +85,7 @@ export class RMQController {
       options: {
         urls: [`amqp://127.0.0.1:59999`, this.rmqUrl],
         queue: 'test',
-        queueOptions: { durable: false },
+        queueOptions: { durable: true },
         socketOptions: { noDelay: true },
       },
     });

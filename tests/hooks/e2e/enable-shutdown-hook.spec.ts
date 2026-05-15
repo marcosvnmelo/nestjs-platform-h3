@@ -1,90 +1,76 @@
-import { spawnSync } from 'child_process';
-import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from '@rstest/core';
 
-const nodeCmd = process.execPath;
-const require = createRequire(import.meta.url);
-
-function tsxCliPath(): string {
-  const pkgRoot = dirname(require.resolve('tsx/package.json'));
-  return join(pkgRoot, 'dist/cli.mjs');
-}
-
-/** TS via tsx; `jiti/register` + Nest → ERR_REQUIRE_ASYNC_MODULE on Node 24. */
-function spawnTsNode(...args: string[]) {
-  return spawnSync(nodeCmd, [tsxCliPath(), ...args]);
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('enableShutdownHooks', () => {
-  it('should call the correct hooks if any shutdown signal gets invoked', () =>
-    new Promise<void>((done) => {
-      const result = spawnTsNode(
-        join(import.meta.dirname, '../src/enable-shutdown-hooks-main.ts'),
-        'SIGHUP',
-      );
+  const packageRoot = join(__dirname, '..');
+  const entrypoint = join(packageRoot, 'dist/enable-shutdown-hooks-main.js');
+
+  const runScript = (...args: string[]) =>
+    spawnSync(process.execPath, [entrypoint, ...args], {
+      env: {
+        cwd: packageRoot,
+        ...process.env,
+        TS_NODE_PROJECT: join(packageRoot, 'tsconfig.json'),
+      },
+    });
+
+  it('should call the correct hooks if any shutdown signal gets invoked', async () => {
+    await new Promise<void>((done) => {
+      const result = runScript('SIGHUP');
       const calls = result.stdout
         .toString()
         .split('\n')
         .map((call: string) => call.trim());
-      expect(calls[0]).toBe('beforeApplicationShutdown SIGHUP');
-      expect(calls[1]).toBe('onApplicationShutdown SIGHUP');
+      expect(calls[0]).to.equal('beforeApplicationShutdown SIGHUP');
+      expect(calls[1]).to.equal('onApplicationShutdown SIGHUP');
       done();
-    }));
+    });
+  });
 
-  it('should call the correct hooks if a specific shutdown signal gets invoked', () =>
-    new Promise<void>((done) => {
-      const result = spawnTsNode(
-        join(import.meta.dirname, '../src/enable-shutdown-hooks-main.ts'),
-        'SIGINT',
-        'SIGINT',
-      );
+  it('should call the correct hooks if a specific shutdown signal gets invoked', async () => {
+    await new Promise<void>((done) => {
+      const result = runScript('SIGINT', 'SIGINT');
       const calls = result.stdout
         .toString()
         .split('\n')
         .map((call: string) => call.trim());
-      expect(calls[0]).toBe('beforeApplicationShutdown SIGINT');
-      expect(calls[1]).toBe('onApplicationShutdown SIGINT');
+      expect(calls[0]).to.equal('beforeApplicationShutdown SIGINT');
+      expect(calls[1]).to.equal('onApplicationShutdown SIGINT');
       done();
-    }));
+    });
+  });
 
-  it('should ignore system signals which are not specified', () =>
-    new Promise<void>((done) => {
-      const result = spawnTsNode(
-        join(import.meta.dirname, '../src/enable-shutdown-hooks-main.ts'),
-        'SIGINT',
-        'SIGHUP',
-      );
-      expect(result.stdout.toString().trim()).toBe('');
+  it('should ignore system signals which are not specified', async () => {
+    await new Promise<void>((done) => {
+      const result = runScript('SIGINT', 'SIGHUP');
+      expect(result.stdout.toString().trim()).to.be.eq('');
       done();
-    }));
+    });
+  });
 
-  it('should ignore system signals if "enableShutdownHooks" was not called', () =>
-    new Promise<void>((done) => {
-      const result = spawnTsNode(
-        join(import.meta.dirname, '../src/enable-shutdown-hooks-main.ts'),
-        'SIGINT',
-        'NONE',
-      );
-      expect(result.stdout.toString().trim()).toBe('');
+  it('should ignore system signals if "enableShutdownHooks" was not called', async () => {
+    await new Promise<void>((done) => {
+      const result = runScript('SIGINT', 'NONE');
+      expect(result.stdout.toString().trim()).to.be.eq('');
       done();
-    }));
+    });
+  });
 
-  it('should call the correct hooks with useProcessExit option', () =>
-    new Promise<void>((done) => {
-      const result = spawnTsNode(
-        join(import.meta.dirname, '../src/enable-shutdown-hooks-main.ts'),
-        'SIGHUP',
-        'SIGHUP',
-        'graceful',
-      );
+  it('should call the correct hooks with useProcessExit option', async () => {
+    await new Promise<void>((done) => {
+      const result = runScript('SIGHUP', 'SIGHUP', 'graceful');
       const calls = result.stdout
         .toString()
         .split('\n')
         .map((call: string) => call.trim());
-      expect(calls[0]).toBe('beforeApplicationShutdown SIGHUP');
-      expect(calls[1]).toBe('onApplicationShutdown SIGHUP');
-      expect(result.status).toBe(0);
+      expect(calls[0]).to.equal('beforeApplicationShutdown SIGHUP');
+      expect(calls[1]).to.equal('onApplicationShutdown SIGHUP');
+      expect(result.status).to.equal(0);
       done();
-    }));
+    });
+  });
 });

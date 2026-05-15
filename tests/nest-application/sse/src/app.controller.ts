@@ -1,6 +1,14 @@
-import { interval, map, Observable } from 'rxjs';
+import { Type } from 'class-transformer';
+import { IsInt } from 'class-validator';
+import { interval, map, Observable, of } from 'rxjs';
 
-import { Controller, MessageEvent, Sse } from '@nestjs/common';
+import { Controller, MessageEvent, Query, Sse } from '@nestjs/common';
+
+class SseQueryDto {
+  @Type(() => Number)
+  @IsInt()
+  limit!: number;
+}
 
 @Controller()
 export class AppController {
@@ -9,5 +17,26 @@ export class AppController {
     return interval(1000).pipe(
       map(() => ({ data: { hello: 'world' } }) as MessageEvent),
     );
+  }
+
+  @Sse('sse/validated')
+  sseWithValidatedQuery(@Query() query: SseQueryDto): Observable<MessageEvent> {
+    return of({ data: { limit: query.limit } });
+  }
+
+  @Sse('sse/burst')
+  sseBurst(
+    @Query('n') n = '20',
+    @Query('size') size = '65536',
+  ): Observable<MessageEvent> {
+    const count = parseInt(n, 10);
+    const payload = 'X'.repeat(parseInt(size, 10));
+
+    return new Observable((subscriber) => {
+      for (let i = 0; i < count; i++) {
+        subscriber.next({ data: payload });
+      }
+      subscriber.complete();
+    });
   }
 }

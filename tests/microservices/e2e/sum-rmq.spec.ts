@@ -48,7 +48,7 @@ describe('RabbitMQ transport', () => {
       options: {
         urls: [nestRmqUrl(container)],
         queue: 'test',
-        queueOptions: { durable: false },
+        queueOptions: { durable: true },
         socketOptions: { noDelay: true },
       },
     });

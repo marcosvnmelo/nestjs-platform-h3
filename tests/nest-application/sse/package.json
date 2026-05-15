@@ -24,6 +24,7 @@
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/testing": "catalog:",
+    "class-transformer": "catalog:",
     "class-validator": "catalog:",
     "eventsource": "catalog:",
     "supertest": "catalog:"

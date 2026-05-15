@@ -6,7 +6,7 @@ import { Test } from '@nestjs/testing';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
-import { randomPort } from './utils.js';
+import { getAvailableIpv4Host, randomPort } from './utils.js';
 
 describe('Get URL (Fastify Application)', () => {
   let testModule: TestingModule;
@@ -24,29 +24,32 @@ describe('Get URL (Fastify Application)', () => {
 
   it('should be able to get the IPv4 address', async () => {
     const app = testModule.createNestApplication(new H3Adapter());
-    await app.listen(port, '127.0.0.1');
-    expect(await app.getUrl()).toEqual(`http://127.0.0.1:${port}`);
+    const host = await getAvailableIpv4Host();
+    await app.listen(port, host);
+    expect(await app.getUrl()).to.be.eql(`http://${host}:${port}`);
     await app.close();
   });
   it('should return 127.0.0.1 for 0.0.0.0', async () => {
     const app = testModule.createNestApplication(new H3Adapter());
     await app.listen(port, '0.0.0.0');
-    expect(await app.getUrl()).toEqual(`http://127.0.0.1:${port}`);
+    expect(await app.getUrl()).to.be.eql(`http://127.0.0.1:${port}`);
     await app.close();
   });
-  it('should return a loopback address in a callback (default bind)', async () => {
+  it('should return 127.0.0.1 even in a callback', () => {
     const app = testModule.createNestApplication(new H3Adapter());
     return app.listen(port, async () => {
-      expect(await app.getUrl()).toMatch(
-        new RegExp(`http://(\\[::1\\]|127\\.0\\.0\\.1):${port}`),
-      );
+      expect(await app.getUrl()).to.be.eql(`http://127.0.0.1:${port}`);
       await app.close();
     });
   });
   it('should throw an error for calling getUrl before listen', async () => {
     const app = testModule.createNestApplication(new H3Adapter());
-    await expect(app.getUrl()).rejects.toEqual(
-      'app.listen() needs to be called before calling app.getUrl()',
-    );
+    try {
+      await app.getUrl();
+    } catch (err) {
+      expect(err).to.be.eql(
+        'app.listen() needs to be called before calling app.getUrl()',
+      );
+    }
   });
 });

@@ -10,6 +10,7 @@ allowBuilds:
   '@nestjs/core': false
   core-js: false
   cpu-features: false
+  esbuild: false
   protobufjs: false
   ssh2: false
 
@@ -19,29 +20,29 @@ catalog:
   # Utilities
 
   # Dev dependencies
-  '@apollo/server': '5.5.0'
+  '@apollo/server': '5.5.1'
   '@as-integrations/express5': '1.1.2'
   '@confluentinc/kafka-javascript': '1.9.0'
   '@fastify/busboy': '3.2.0'
   '@grpc/grpc-js': '1.14.3'
-  '@grpc/proto-loader': '0.8.0'
-  '@nestjs/apollo': '13.3.0'
-  '@nestjs/common': '11.1.19'
-  '@nestjs/core': '11.1.19'
-  '@nestjs/graphql': '13.3.0'
-  '@nestjs/mapped-types': '2.1.0'
-  '@nestjs/microservices': '11.1.19'
+  '@grpc/proto-loader': '0.8.1'
+  '@nestjs/apollo': '13.4.0'
+  '@nestjs/common': '11.1.21'
+  '@nestjs/core': '11.1.21'
+  '@nestjs/graphql': '13.4.0'
+  '@nestjs/mapped-types': '2.1.1'
+  '@nestjs/microservices': '11.1.21'
   '@nestjs/mongoose': '11.0.4'
-  '@nestjs/platform-express': '11.1.19'
-  '@nestjs/platform-fastify': '11.1.19'
-  '@nestjs/platform-socket.io': '11.1.19'
-  '@nestjs/platform-ws': '11.1.19'
-  '@nestjs/testing': '11.1.19'
-  '@nestjs/typeorm': '11.0.0'
-  '@nestjs/websockets': '11.1.19'
+  '@nestjs/platform-express': '11.1.21'
+  '@nestjs/platform-fastify': '11.1.21'
+  '@nestjs/platform-socket.io': '11.1.21'
+  '@nestjs/platform-ws': '11.1.21'
+  '@nestjs/testing': '11.1.21'
+  '@nestjs/typeorm': '11.0.1'
+  '@nestjs/websockets': '11.1.21'
 
   # Build tools
-  '@rslib/core': '0.21.3'
+  '@rslib/core': '0.21.5'
   '@rstest/adapter-rslib': '^0.2.2'
   '@rstest/core': '0.9.10'
   '@testcontainers/kafka': '11.14.0'
@@ -52,11 +53,11 @@ catalog:
   '@types/content-type': ^1.1.9
   '@types/express': '5.0.6'
   '@types/mime-types': ^3.0.1
-  '@types/node': '25.6.0'
+  '@types/node': '25.8.0'
   '@types/supertest': '7.2.0'
   '@types/ws': '8.18.1'
   amqp-connection-manager: '5.0.0'
-  amqplib: '0.10.9'
+  amqplib: '2.0.1'
   autocannon: '8.0.0'
 
   # HTTP servers
@@ -66,17 +67,17 @@ catalog:
   content-type: '^1.0.5'
   eventsource: '4.1.0'
   express: '5.2.1'
-  fastify: '5.8.4'
-  graphql: '16.13.2'
+  fastify: '5.8.5'
+  graphql: '16.14.0'
   graphql-subscriptions: '3.0.0'
-  h3: '2.0.1-rc.21'
+  h3: '2.0.1-rc.22'
   ioredis: '5.9.3'
   jiti: '2.6.1'
   kafkajs: '2.2.4'
   mime-types: ^3.0.2
-  mongoose: '9.5.0'
+  mongoose: '9.6.2'
   mqtt: '5.15.1'
-  mysql2: '3.22.2'
+  mysql2: '3.22.3'
   nats: '2.29.3'
   path-to-regexp: '8.4.2'
   reflect-metadata: '^0.2.2'
@@ -86,12 +87,16 @@ catalog:
   srvx: ^0.11.15
   supertest: '^7.2.2'
   testcontainers: '11.14.0'
-  typeorm: '0.3.28'
+  typeorm: '0.3.29'
   typescript: '5.9.3'
-  ws: '8.20.0'
+  ws: '8.20.1'
 overrides:
   '@apollo/server': '$@apollo/server'
+  '@nestjs/common': '$@nestjs/common'
+  '@nestjs/core': '$@nestjs/core'
+  ansis: '4.3.0'
   class-validator: '$class-validator'
+  fast-json-stringify: '6.4.0'
 patchedDependencies:
   '@nestjs/apollo': patches/@nestjs__apollo.patch
   quick-publish: patches/quick-publish.patch

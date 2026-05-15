@@ -108,6 +108,19 @@ async function run() {
 
     const stats = toStats(serverName, result, 0);
     printRunStats(stats);
+
+    console.log('\nRaw results');
+    console.table([
+      {
+        'name': stats.name,
+        'req/s': stats.requestsPerSec.toFixed(2),
+        'lat(avg) ms': stats.latencyAvgMs.toFixed(2),
+        'lat(p99) ms': stats.latencyP99Ms.toFixed(2),
+        'mbit/s': stats.throughputMbps.toFixed(2),
+        'errors': stats.errors,
+        'timeouts': stats.timeouts,
+      },
+    ]);
   } finally {
     if (server) {
       await killServer(server);

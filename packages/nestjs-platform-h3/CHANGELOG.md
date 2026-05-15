@@ -1,3 +1,7 @@
+## [11.1.21-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-3...v11.1.21-1) (2026-05-15)
+
+
+
 ## [11.1.19-3](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-2...v11.1.19-3) (2026-05-03)
 
 

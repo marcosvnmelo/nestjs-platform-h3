@@ -76,18 +76,18 @@ await run();
 async function run() {
   const results: BenchmarkStats[] = [];
 
-  console.log(
-    [
-      'Running benchmark with autocannon',
-      `duration=${BENCHMARK_OPTIONS.duration.value}s`,
-      `connections=${BENCHMARK_OPTIONS.connections.value}`,
-      `pipelining=${BENCHMARK_OPTIONS.pipelining.value}`,
-      `warmup=${BENCHMARK_OPTIONS.warmupSeconds.value}s`,
-      `cooldown=${BENCHMARK_OPTIONS.caseCooldownMs.value}ms`,
-      `runs=${BENCHMARK_OPTIONS.runs.value}`,
-      `nestBodyParser=${BENCHMARK_OPTIONS.nestBodyParser.value}`,
-    ].join(' | '),
-  );
+  console.log('Running benchmark with autocannon');
+  console.table([
+    {
+      duration: `${BENCHMARK_OPTIONS.duration.value}s`,
+      connections: `${BENCHMARK_OPTIONS.connections.value}`,
+      pipelining: `${BENCHMARK_OPTIONS.pipelining.value}`,
+      warmup: `${BENCHMARK_OPTIONS.warmupSeconds.value}s`,
+      cooldown: `${BENCHMARK_OPTIONS.caseCooldownMs.value}ms`,
+      runs: `${BENCHMARK_OPTIONS.runs.value}`,
+      nestBodyParser: `${BENCHMARK_OPTIONS.nestBodyParser.value}`,
+    },
+  ]);
 
   for (let runIndex = 1; runIndex <= BENCHMARK_OPTIONS.runs.value; runIndex++) {
     console.log(`\n=== Run ${runIndex}/${BENCHMARK_OPTIONS.runs.value} ===`);

@@ -50,7 +50,7 @@ export async function startServer(
       benchCase.name,
       benchmarkOptions.serverReadyMs.value,
     );
-    return { url, pid: child };
+    return { url, process: child };
   } catch (error) {
     await killChildProcess(child);
     throw error;
@@ -125,7 +125,7 @@ async function waitForServerUrl(
 }
 
 export async function killServer(server: ServerProcess): Promise<void> {
-  await killChildProcess(server.pid);
+  await killChildProcess(server.process);
 }
 
 async function killChildProcess(child: ChildProcess): Promise<void> {

@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 export interface ServerProcess {
   url: string;
-  pid: ChildProcess;
+  process: ChildProcess;
 }
 
 export interface BenchmarkCase {

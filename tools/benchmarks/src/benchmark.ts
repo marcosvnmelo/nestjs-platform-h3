@@ -4,9 +4,9 @@ import type { BenchmarkCase, BenchmarkStats } from './types.ts';
 import { commonArgs } from './constants/args.constants.ts';
 import {
   GET_PATH,
-  GET_REQUEST_OPTIONS,
   POST_PATH,
-  POST_REQUEST_OPTIONS,
+  parseRestMethod,
+  requestOptionsFor,
 } from './constants/route.constants.ts';
 import { ServerEnum } from './constants/server.constants.ts';
 import { runAutocannon } from './utils/autocannon.utils.ts';
@@ -35,6 +35,7 @@ const BENCHMARK_OPTIONS = parseArgs({
 
   restMethod: commonArgs.restMethod,
 });
+const REST_METHOD = parseRestMethod(BENCHMARK_OPTIONS.restMethod.value);
 
 const cases: BenchmarkCase[] = [
   {
@@ -98,24 +99,22 @@ async function run() {
       const POST_URL = server.url + POST_PATH;
 
       const targetUrl =
-        BENCHMARK_OPTIONS.restMethod.value === 'GET' ? GET_URL : POST_URL;
+        REST_METHOD === 'GET' ? GET_URL : POST_URL;
 
       try {
         // Warmup
-        await runAutocannon(GET_URL, {
+        await runAutocannon(targetUrl, {
           duration: BENCHMARK_OPTIONS.warmupSeconds.value,
           connections: BENCHMARK_OPTIONS.connections.value,
           pipelining: BENCHMARK_OPTIONS.pipelining.value,
+          ...requestOptionsFor(REST_METHOD),
         });
 
         const result = await runAutocannon(targetUrl, {
           duration: BENCHMARK_OPTIONS.duration.value,
           connections: BENCHMARK_OPTIONS.connections.value,
           pipelining: BENCHMARK_OPTIONS.pipelining.value,
-
-          ...(BENCHMARK_OPTIONS.restMethod.value === 'GET'
-            ? GET_REQUEST_OPTIONS
-            : POST_REQUEST_OPTIONS),
+          ...requestOptionsFor(REST_METHOD),
         });
 
         const stats = toStats(benchCase.name, result, runIndex);

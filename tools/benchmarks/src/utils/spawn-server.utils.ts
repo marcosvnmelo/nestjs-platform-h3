@@ -44,12 +44,17 @@ export async function startServer(
     console.error(`${benchCase.name} spawn error:`, error);
   });
 
-  const url = await waitForServerUrl(
-    child,
-    benchCase.name,
-    benchmarkOptions.serverReadyMs.value,
-  );
-  return { url, pid: child };
+  try {
+    const url = await waitForServerUrl(
+      child,
+      benchCase.name,
+      benchmarkOptions.serverReadyMs.value,
+    );
+    return { url, pid: child };
+  } catch (error) {
+    await killChildProcess(child);
+    throw error;
+  }
 }
 
 async function waitForServerUrl(
@@ -120,29 +125,33 @@ async function waitForServerUrl(
 }
 
 export async function killServer(server: ServerProcess): Promise<void> {
-  const pid = server.pid.pid;
+  await killChildProcess(server.pid);
+}
+
+async function killChildProcess(child: ChildProcess): Promise<void> {
+  const pid = child.pid;
   if (pid === undefined) {
     return;
   }
 
-  if (server.pid.exitCode !== null || server.pid.signalCode !== null) {
+  if (child.exitCode !== null || child.signalCode !== null) {
     return;
   }
 
-  if (!server.pid.killed) {
-    server.pid.kill('SIGTERM');
+  if (!child.killed) {
+    child.kill('SIGTERM');
   }
 
-  await Promise.race([once(server.pid, 'exit'), delay(8000)]);
+  await Promise.race([once(child, 'exit'), delay(8000)]);
 
-  if (server.pid.exitCode === null && server.pid.signalCode === null) {
+  if (child.exitCode === null && child.signalCode === null) {
     try {
       process.kill(pid, 'SIGKILL');
     } catch {
       // Already dead / invalid pid as expected on races
     }
 
-    await Promise.race([once(server.pid, 'exit'), delay(3000)]);
+    await Promise.race([once(child, 'exit'), delay(3000)]);
   }
 }
 

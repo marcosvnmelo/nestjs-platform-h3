@@ -5,16 +5,10 @@ import { commonArgs } from '../constants/args.constants.ts';
 import { parseArgs } from '../utils/parse-args.utils.ts';
 
 const OPTIONS = parseArgs({
-  nestBodyParser: commonArgs.nestBodyParser,
   port: commonArgs.port,
 });
 
 const app = express();
-
-if (OPTIONS.nestBodyParser.value) {
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-}
 
 app.get('/hello', (_req, res) => {
   res.send('ok');

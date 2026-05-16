@@ -1,6 +1,13 @@
 import type { AddressInfo } from 'node:net';
 import fastify from 'fastify';
 
+import { commonArgs } from '../constants/args.constants.ts';
+import { parseArgs } from '../utils/parse-args.utils.ts';
+
+const OPTIONS = parseArgs({
+  port: commonArgs.port,
+});
+
 const app = fastify({ logger: false });
 
 app.get('/hello', () => 'ok');
@@ -12,7 +19,7 @@ app.post('/all/:path', (req, res) => {
   });
 });
 
-await app.listen({ port: 0, host: '127.0.0.1' });
+await app.listen({ port: OPTIONS.port.value, host: '127.0.0.1' });
 
 const address = app.server.address() as AddressInfo;
 const url = `http://127.0.0.1:${address.port}`;

@@ -41,7 +41,7 @@ async function bootstrap() {
     },
   );
 
-  await app.listen(0, '127.0.0.1');
+  await app.listen(OPTIONS.port.value, '127.0.0.1');
 
   if (OPTIONS.enableProfiling.value) {
     await bootstrapCpuProfiler.stop(OPTIONS.bootstrapProfileOut.value);

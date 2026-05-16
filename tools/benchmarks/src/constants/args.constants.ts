@@ -16,7 +16,7 @@ export const commonArgs = {
 
   enableUnsafePolyfills: booleanArg('enable-unsafe-polyfills', false),
   enableProfiling: booleanArg('profiling', false),
-  port: integerArg('port', 3000),
+  port: integerArg('port', 0),
   bootstrapProfileOut: stringArg(
     'bootstrap-profile-out',
     `cpu-profile.bootstrap.cpuprofile`,

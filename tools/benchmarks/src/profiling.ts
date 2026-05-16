@@ -4,8 +4,8 @@ import type { ServerProcess } from './types.ts';
 import { commonArgs } from './constants/args.constants.ts';
 import {
   GET_PATH,
-  POST_PATH,
   parseRestMethod,
+  POST_PATH,
   requestOptionsFor,
 } from './constants/route.constants.ts';
 import { ServerEnum, serverFileMap } from './constants/server.constants.ts';
@@ -28,7 +28,6 @@ const BENCHMARK_OPTIONS = parseArgs({
 
   enableUnsafePolyfills: commonArgs.enableUnsafePolyfills.defaultValue(true),
   enableProfiling: commonArgs.enableProfiling.defaultValue(true),
-  port: commonArgs.port.defaultValue(3000),
   bootstrapProfileOut: commonArgs.bootstrapProfileOut.defaultValue(
     `cpu-profile-${now}.bootstrap.cpuprofile`,
   ),
@@ -66,7 +65,6 @@ async function run() {
             BENCHMARK_OPTIONS.profileOut.raw,
             BENCHMARK_OPTIONS.enableUnsafePolyfills.raw,
             BENCHMARK_OPTIONS.enableProfiling.raw,
-            BENCHMARK_OPTIONS.port.raw,
             commonArgs.port.format(3000),
           ],
         },
@@ -78,8 +76,7 @@ async function run() {
     const GET_URL = baseUrl + GET_PATH;
     const POST_URL = baseUrl + POST_PATH;
 
-    const targetUrl =
-      REST_METHOD === 'GET' ? GET_URL : POST_URL;
+    const targetUrl = REST_METHOD === 'GET' ? GET_URL : POST_URL;
 
     console.log(
       [

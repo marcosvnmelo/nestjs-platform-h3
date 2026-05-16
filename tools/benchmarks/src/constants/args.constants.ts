@@ -9,6 +9,7 @@ export const commonArgs = {
   connections: integerArg('connections', 10),
   pipelining: integerArg('pipelining', 1),
   warmupSeconds: integerArg('warmup', 2),
+  caseCooldownMs: integerArg('case-cooldown-ms', 500),
   serverReadyMs: integerArg('server-ready-timeout', 120_000),
   nestBodyParser: booleanArg('nest-body-parser', true),
 

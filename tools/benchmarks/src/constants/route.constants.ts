@@ -1,3 +1,5 @@
+import type autocannon from 'autocannon';
+
 export const GET_PATH = '/hello';
 export const POST_PATH = '/all/hello?hello=world';
 export const REST_METHODS = ['GET', 'POST'] as const;
@@ -5,7 +7,7 @@ export type RestMethod = (typeof REST_METHODS)[number];
 
 export const GET_REQUEST_OPTIONS = {
   method: 'GET',
-} as const satisfies RequestInit;
+} as const satisfies Pick<autocannon.Options, 'method'>;
 
 export const POST_REQUEST_OPTIONS = {
   method: 'POST',
@@ -15,7 +17,7 @@ export const POST_REQUEST_OPTIONS = {
   body: JSON.stringify({
     hello: 'world',
   }),
-} as const satisfies RequestInit;
+} as const satisfies Pick<autocannon.Options, 'method' | 'headers' | 'body'>;
 
 export function parseRestMethod(value: string): RestMethod {
   const normalized = value.toUpperCase();

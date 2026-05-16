@@ -4,8 +4,8 @@ import type { BenchmarkCase, BenchmarkStats } from './types.ts';
 import { commonArgs } from './constants/args.constants.ts';
 import {
   GET_PATH,
-  POST_PATH,
   parseRestMethod,
+  POST_PATH,
   requestOptionsFor,
 } from './constants/route.constants.ts';
 import { ServerEnum } from './constants/server.constants.ts';
@@ -19,6 +19,7 @@ import {
 } from './utils/benchmark.utils.ts';
 import { integerArg, parseArgs } from './utils/parse-args.utils.ts';
 import {
+  delay,
   killServer,
   scriptPath,
   startServer,
@@ -29,6 +30,7 @@ const BENCHMARK_OPTIONS = parseArgs({
   connections: commonArgs.connections,
   pipelining: commonArgs.pipelining,
   warmupSeconds: commonArgs.warmupSeconds,
+  caseCooldownMs: commonArgs.caseCooldownMs,
   nestBodyParser: commonArgs.nestBodyParser,
   serverReadyMs: commonArgs.serverReadyMs,
   runs: integerArg('runs', 3),
@@ -81,6 +83,7 @@ async function run() {
       `connections=${BENCHMARK_OPTIONS.connections.value}`,
       `pipelining=${BENCHMARK_OPTIONS.pipelining.value}`,
       `warmup=${BENCHMARK_OPTIONS.warmupSeconds.value}s`,
+      `cooldown=${BENCHMARK_OPTIONS.caseCooldownMs.value}ms`,
       `runs=${BENCHMARK_OPTIONS.runs.value}`,
       `nestBodyParser=${BENCHMARK_OPTIONS.nestBodyParser.value}`,
     ].join(' | '),
@@ -98,8 +101,7 @@ async function run() {
       const GET_URL = server.url + GET_PATH;
       const POST_URL = server.url + POST_PATH;
 
-      const targetUrl =
-        REST_METHOD === 'GET' ? GET_URL : POST_URL;
+      const targetUrl = REST_METHOD === 'GET' ? GET_URL : POST_URL;
 
       try {
         // Warmup
@@ -122,6 +124,8 @@ async function run() {
         printRunStats(stats);
       } finally {
         await killServer(server);
+        runGarbageCollection();
+        await delay(BENCHMARK_OPTIONS.caseCooldownMs.value);
       }
     }
   }
@@ -162,4 +166,8 @@ async function run() {
   printPairComparison(aggregates, 'Pure Fastify', 'Nest Fastify');
   printPairComparison(aggregates, 'Pure H3', 'Nest H3 Adapter');
   printPairComparison(aggregates, 'Pure H3', 'Nest H3 (Unsafe) Adapter');
+}
+
+function runGarbageCollection() {
+  global.gc?.();
 }

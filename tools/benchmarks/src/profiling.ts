@@ -26,8 +26,8 @@ const BENCHMARK_OPTIONS = parseArgs({
 
   restMethod: commonArgs.restMethod,
 
-  enableUnsafePolyfills: commonArgs.enableUnsafePolyfills,
-  enableProfiling: commonArgs.enableProfiling,
+  enableUnsafePolyfills: commonArgs.enableUnsafePolyfills.defaultValue(true),
+  enableProfiling: commonArgs.enableProfiling.defaultValue(true),
   bootstrapProfileOut: commonArgs.bootstrapProfileOut.defaultValue(
     `cpu-profile-${now}.bootstrap.cpuprofile`,
   ),
@@ -63,6 +63,7 @@ async function run() {
             BENCHMARK_OPTIONS.bootstrapProfileOut.raw,
             BENCHMARK_OPTIONS.profileOut.raw,
             BENCHMARK_OPTIONS.enableUnsafePolyfills.raw,
+            BENCHMARK_OPTIONS.enableProfiling.raw,
             commonArgs.port.format(3000),
           ],
         },

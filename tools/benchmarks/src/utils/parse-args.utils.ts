@@ -1,35 +1,60 @@
-type ArgType = string | number | boolean | undefined;
+type ArgType = string | number | boolean;
 
 export interface Arg<T extends ArgType> {
   raw: string;
   value: T;
 }
 
-export interface OptionalArg<T extends ArgType> {
-  raw?: string;
-  value: T | undefined;
+export type OptionalArg<T extends ArgType | undefined> = T extends ArgType
+  ? Arg<T>
+  : {
+      value: undefined;
+    };
+
+interface ArgParserOptions<T extends ArgType> {
+  prefix: string;
+  raw: string;
+  value: T;
 }
 
-abstract class OptionalArgParser<T extends ArgType> {
+type OptionalArgParserOptions<T extends ArgType | undefined> = T extends ArgType
+  ? ArgParserOptions<T>
+  : {
+      prefix: string;
+      value: undefined;
+    };
+
+abstract class ArgParser<
+  T extends ArgType | (ArgType | undefined),
+  TOptions = T extends ArgType
+    ? ArgParserOptions<T>
+    : OptionalArgParserOptions<T>,
+  TParseReturn = T extends ArgType
+    ? Arg<T>
+    : OptionalArg<Exclude<T, undefined>>,
+> {
   protected _defaultValue: (() => T) | undefined;
 
-  constructor(
-    protected options: {
-      prefix: string;
-      raw?: string;
-      value: T | undefined;
-    },
-  ) {}
+  constructor(protected options: TOptions) {}
 
-  format(value: T): string {
-    return this.options.prefix + value;
+  protected get _options() {
+    return this.options as
+      | ArgParserOptions<Exclude<T, undefined>>
+      | OptionalArgParserOptions<Exclude<T, undefined>>;
   }
 
-  parse(): OptionalArg<T> {
+  format(value: T): string {
+    return this._options.prefix + value;
+  }
+
+  parse(): TParseReturn {
+    const value = this._options.value ?? this._defaultValue?.();
     return {
-      raw: this.options.raw,
-      value: this.options.value ?? this._defaultValue?.(),
-    };
+      raw:
+        this._options.raw ??
+        (value !== undefined ? this.format(value as T) : undefined),
+      value,
+    } as TParseReturn;
   }
 
   defaultValue(value: T | (() => T)): this {
@@ -38,23 +63,7 @@ abstract class OptionalArgParser<T extends ArgType> {
   }
 }
 
-abstract class ArgParser<T extends ArgType> extends OptionalArgParser<T> {
-  constructor(
-    protected options: {
-      prefix: string;
-      raw: string;
-      value: T;
-    },
-  ) {
-    super(options);
-  }
-
-  override parse(): Arg<T> {
-    return super.parse() as Arg<T>;
-  }
-}
-
-type Args = Record<string, ArgParser<any> | OptionalArgParser<any>>;
+type Args = Record<string, ArgParser<any>>;
 
 type ParsedArgs<T extends Args> = {
   [K in keyof T]: ReturnType<T[K]['parse']>;
@@ -72,24 +81,35 @@ export function parseArgs<TArgs extends Args>(
   return parsedArgs as ParsedArgs<TArgs>;
 }
 
-class BooleanArgParser extends ArgParser<boolean> {
-  override format(value: boolean): string {
+class BooleanArgParser<T extends boolean | undefined> extends ArgParser<T> {
+  override format(value: T): string {
     return this.options.prefix + (value ? 'true' : 'false');
   }
 }
 
+export function booleanArg(name: string): ArgParser<boolean>;
 export function booleanArg(
   name: string,
   defaultValue: boolean,
-): ArgParser<boolean> {
+): ArgParser<boolean>;
+export function booleanArg(
+  name: string,
+  defaultValue?: boolean,
+): ArgParser<boolean> | ArgParser<boolean | undefined> {
   const prefix = `--${name}=`;
   const rawArg = process.argv.find((arg) => arg.startsWith(prefix));
   if (!rawArg) {
-    return new BooleanArgParser({
+    if (defaultValue === undefined) {
+      return new BooleanArgParser({
+        prefix,
+        value: defaultValue,
+      });
+    }
+
+    return new BooleanArgParser<boolean | undefined>({
       prefix,
-      raw: prefix + defaultValue,
-      value: defaultValue,
-    });
+      value: undefined,
+    }).defaultValue(defaultValue);
   }
 
   const rawValue = rawArg.slice(prefix.length).toLowerCase();
@@ -121,20 +141,31 @@ export function booleanArg(
   throw new Error(`Invalid value for --${name}: ${rawValue}`);
 }
 
-class IntegerArgParser extends ArgParser<number> {}
+class IntegerArgParser<T extends number | undefined> extends ArgParser<T> {}
 
+export function integerArg(name: string): ArgParser<number>;
 export function integerArg(
   name: string,
   defaultValue: number,
-): ArgParser<number> {
+): ArgParser<number>;
+export function integerArg(
+  name: string,
+  defaultValue?: number,
+): ArgParser<number> | ArgParser<number | undefined> {
   const prefix = `--${name}=`;
   const rawArg = process.argv.find((arg) => arg.startsWith(prefix));
   if (!rawArg) {
-    return new IntegerArgParser({
+    if (defaultValue === undefined) {
+      return new IntegerArgParser({
+        prefix,
+        value: defaultValue,
+      });
+    }
+
+    return new IntegerArgParser<number | undefined>({
       prefix,
-      raw: prefix + defaultValue,
-      value: defaultValue,
-    });
+      value: undefined,
+    }).defaultValue(defaultValue);
   }
 
   const parsedValue = Number.parseInt(rawArg.slice(prefix.length), 10);
@@ -151,10 +182,9 @@ export function integerArg(
   });
 }
 
-class StringArgParser extends OptionalArgParser<string> {}
-class OptionalStringArgParser extends OptionalArgParser<string> {}
+class StringArgParser<T extends string | undefined> extends ArgParser<T> {}
 
-export function stringArg(name: string): OptionalArgParser<string>;
+export function stringArg(name: string): ArgParser<string | undefined>;
 export function stringArg(
   name: string,
   defaultValue: string,
@@ -162,23 +192,21 @@ export function stringArg(
 export function stringArg(
   name: string,
   defaultValue?: string,
-): OptionalArgParser<string> | ArgParser<string> {
+): ArgParser<string> | ArgParser<string | undefined> {
   const prefix = `--${name}=`;
   const rawArg = process.argv.find((arg) => arg.startsWith(prefix));
   if (!rawArg) {
     if (defaultValue === undefined) {
-      return new OptionalStringArgParser({
+      return new StringArgParser({
         prefix,
-        raw: rawArg,
         value: defaultValue,
       });
     }
 
-    return new OptionalStringArgParser({
+    return new StringArgParser<string | undefined>({
       prefix,
-      raw: prefix + defaultValue,
-      value: defaultValue,
-    });
+      value: undefined,
+    }).defaultValue(defaultValue);
   }
   const rawValue = rawArg.slice(prefix.length);
   if (!rawValue) {

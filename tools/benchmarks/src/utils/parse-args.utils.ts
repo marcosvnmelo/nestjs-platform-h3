@@ -87,7 +87,7 @@ class BooleanArgParser<T extends boolean | undefined> extends ArgParser<T> {
   }
 }
 
-export function booleanArg(name: string): ArgParser<boolean>;
+export function booleanArg(name: string): ArgParser<boolean | undefined>;
 export function booleanArg(
   name: string,
   defaultValue: boolean,
@@ -143,7 +143,7 @@ export function booleanArg(
 
 class IntegerArgParser<T extends number | undefined> extends ArgParser<T> {}
 
-export function integerArg(name: string): ArgParser<number>;
+export function integerArg(name: string): ArgParser<number | undefined>;
 export function integerArg(
   name: string,
   defaultValue: number,

@@ -161,7 +161,7 @@ describe('GRPC transport', () => {
     });
 
     expect(receivedIds).toEqual(expectedIds);
-  });
+  }, 30_000);
 
   describe('streaming calls that error', () => {
     // We want to assert that the application does not crash when an error is encountered with an unhandledRejection

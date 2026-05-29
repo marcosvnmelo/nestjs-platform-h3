@@ -6,14 +6,14 @@ import { expect } from '@rstest/core';
 import { KafkaContainer } from '@testcontainers/kafka';
 import { GenericContainer, Wait } from 'testcontainers';
 
-// cspell:words mosquitto confluentinc
+// cspell:words mosquitto confluentinc kafkajs
 
 export const IMAGES = {
   redis: 'redis',
   nats: 'nats',
   mosquitto: 'eclipse-mosquitto',
   rabbitmq: 'rabbitmq:management',
-  kafka: 'confluentinc/cp-kafka:8.2.0',
+  kafka: 'confluentinc/cp-kafka:8.2.1',
 } as const;
 
 /** PLAINTEXT client port (see @testcontainers/kafka KAFKA_PORT / addPlaintextListener; not 9092 BROKER). */

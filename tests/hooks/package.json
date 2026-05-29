@@ -24,6 +24,7 @@
     "@rstest/adapter-rslib": "catalog:",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
+    "tsx": "4.22.3",
     "typescript": "catalog:"
   }
 }

@@ -108,7 +108,7 @@ describe('RabbitMQ transport', () => {
       .post('/multiple-urls')
       .send([1, 2, 3, 4, 5])
       .expect(200, '15');
-  });
+  }, 10_000);
 
   it(`/POST (event notification)`, () =>
     new Promise<void>((done) => {

@@ -1,3 +1,18 @@
+## [11.1.24-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.21-1...v11.1.24-1) (2026-05-30)
+
+
+### Bug Fixes
+
+* **benchmarks:** update argument parsers to support optional boolean and integer types ([ec7c0b4](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/ec7c0b4d809db108a1bf5bbf462f851049b61b6c))
+
+
+### Features
+
+* **benchmarks:** add port configuration to server options for improved flexibility ([c581839](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/c58183938f16eeb01a441777d68bc6506fe59162))
+* **benchmarks:** introduce case cooldown option and enhance garbage collection handling ([17582cd](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/17582cd4ddabd5acd83e4d61748717fa8776d46b))
+
+
+
 ## [11.1.21-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.19-3...v11.1.21-1) (2026-05-15)
 
 

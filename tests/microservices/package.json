@@ -2,6 +2,9 @@
   "name": "@marcosvnmelo/microservices-tests",
   "private": true,
   "type": "module",
+  "imports": {
+    "#containers": "./e2e/test-infra/containers.ts"
+  },
   "scripts": {
     "build": "rslib build",
     "test": "rstest",

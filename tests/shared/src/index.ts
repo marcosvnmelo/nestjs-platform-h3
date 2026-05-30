@@ -42,3 +42,5 @@ export function fetchAppHandler(app: NestH3Application, request: Request) {
     request,
   );
 }
+
+export { verify_containers } from './docker.ts';

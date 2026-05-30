@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "testcontainers": "catalog:",
     "typescript": "catalog:"
   }
 }

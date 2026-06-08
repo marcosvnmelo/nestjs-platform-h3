@@ -97,6 +97,7 @@ overrides:
   ansis: '4.3.0'
   class-validator: '$class-validator'
   fast-json-stringify: '6.4.0'
+minimumReleaseAge: 2880
 patchedDependencies:
   '@nestjs/apollo': patches/@nestjs__apollo.patch
   quick-publish: patches/quick-publish.patch

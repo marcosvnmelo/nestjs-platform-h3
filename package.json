@@ -33,7 +33,7 @@
     "@apollo/server": "catalog:",
     "@eslint/js": "10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "4.7.1",
-    "@microsoft/api-extractor": "^7.58.7",
+    "@microsoft/api-extractor": "^7.58.8",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@rslib/core": "catalog:",
@@ -42,9 +42,9 @@
     "@types/node": "catalog:",
     "class-validator": "catalog:",
     "eslint": "10.4.1",
-    "prettier": "3.8.3",
+    "prettier": "3.8.4",
     "quick-publish": "0.7.1",
     "typescript": "catalog:",
-    "typescript-eslint": "8.60.0"
+    "typescript-eslint": "8.61.0"
   }
 }

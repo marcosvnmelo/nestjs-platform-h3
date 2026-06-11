@@ -8,6 +8,13 @@ import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
 
 import { AppModule } from '../src/app.module.ts';
+import {
+  fetchPromiseDelayedSseStats,
+  releasePromiseDelayedSse,
+  sleep,
+  waitForPromiseDelayedSseClose,
+  waitForPromiseDelayedSseRequestStart,
+} from './utils.ts';
 
 describe('Sse (Fastify Application)', () => {
   let app: NestH3Application;
@@ -172,6 +179,75 @@ describe('Sse (Fastify Application)', () => {
         .filter((line) => line.startsWith('data: '));
 
       expect(dataLines).to.have.lengthOf(n);
+    });
+
+    it('should stream events from POST SSE routes with a request body', async () => {
+      const url = await app.getUrl();
+
+      const response = await fetch(`${url}/sse/post`, {
+        method: 'POST',
+        headers: {
+          'accept': 'text/event-stream',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ content: 'chunk-0' }),
+      });
+
+      expect(response.status).to.equal(201);
+      expect(response.headers.get('content-type')).to.contain(
+        'text/event-stream',
+      );
+      expect(await response.text()).to.contain('data: {"content":"chunk-0"}');
+    });
+  });
+
+  describe('Promise<Observable> disconnect handling', () => {
+    beforeEach(async () => {
+      const moduleFixture = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+
+      app = moduleFixture.createNestApplication<NestH3Application>(
+        new H3Adapter(),
+        {
+          forceCloseConnections: true,
+        },
+      );
+
+      await app.listen(0);
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    it('should not start the SSE subscription if the client disconnects before the promise resolves', async () => {
+      const url = await app.getUrl();
+      const abortController = new AbortController();
+      const responsePromise = fetch(`${url}/sse/promise-delayed`, {
+        headers: {
+          accept: 'text/event-stream',
+        },
+        signal: abortController.signal,
+      });
+
+      await waitForPromiseDelayedSseRequestStart(url);
+      abortController.abort();
+
+      await responsePromise.catch((error) => {
+        expect(error.name).to.equal('AbortError');
+      });
+
+      await waitForPromiseDelayedSseClose(url);
+
+      expect(await releasePromiseDelayedSse(url)).to.equal(1);
+
+      await sleep(50);
+
+      const stats = await fetchPromiseDelayedSseStats(url);
+      expect(stats.closeEventsObserved).to.equal(1);
+      expect(stats.requestsStarted).to.equal(1);
+      expect(stats.subscriptionsStarted).to.equal(0);
     });
   });
 });

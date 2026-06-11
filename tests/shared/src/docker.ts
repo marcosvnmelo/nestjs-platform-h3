@@ -99,7 +99,7 @@ export async function verify_containers(
   });
 
   if (missing.length === 0) {
-    console.log('\n✓ All containers ready.');
+    console.log('\n✓ All images ready.');
     return;
   }
 

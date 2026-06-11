@@ -4,6 +4,7 @@ import request from 'supertest';
 import {
   Controller,
   Get,
+  Injectable,
   MiddlewareConsumer,
   Module,
   NestMiddleware,
@@ -26,8 +27,98 @@ import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
 
 import { AppModule } from '../src/app.module.ts';
 
-describe('Middleware (H3Adapter)', () => {
+describe('Middleware (FastifyAdapter)', () => {
   let app: NestH3Application;
+
+  describe('trailing slash handling', () => {
+    @Injectable()
+    class AuthMiddleware implements NestMiddleware {
+      use(
+        req: H3ServerRequest,
+        res: PolyfilledResponse<H3ServerResponse>,
+        next: () => void,
+      ) {
+        if (req.headers['x-auth'] === '1') {
+          return next();
+        }
+        res.statusCode = 401;
+        res.end('unauthorized');
+      }
+    }
+
+    @Controller('users')
+    class UsersController {
+      @Get()
+      findAll() {
+        return 'users';
+      }
+
+      @Get(':id')
+      findOne(@Param('id') id: string) {
+        return `user:${id}`;
+      }
+    }
+
+    @Module({
+      controllers: [UsersController],
+    })
+    class TrailingSlashModule implements NestModule {
+      configure(consumer: MiddlewareConsumer) {
+        consumer
+          .apply(AuthMiddleware)
+          .forRoutes(
+            { path: 'users', method: RequestMethod.ALL },
+            { path: 'users/:id', method: RequestMethod.ALL },
+          );
+      }
+    }
+
+    beforeEach(async () => {
+      app = (
+        await Test.createTestingModule({
+          imports: [TrailingSlashModule],
+        }).compile()
+      ).createNestApplication<NestH3Application>(new H3Adapter());
+
+      await app.init();
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    it('does not bypass middleware on a trailing slash variant', async () => {
+      await fetchAppHandler(
+        app,
+        new Request('http://localhost:3000/users', {
+          method: 'GET',
+        }),
+      ).then(async (response) => {
+        expect(response.status).to.equal(401);
+        expect(await response.text()).to.equal('unauthorized');
+      });
+
+      await fetchAppHandler(
+        app,
+        new Request('http://localhost:3000/users/', {
+          method: 'GET',
+        }),
+      ).then(async (response) => {
+        expect(response.status).to.equal(401);
+        expect(await response.text()).to.equal('unauthorized');
+      });
+
+      await fetchAppHandler(
+        app,
+        new Request('http://localhost:3000/users/1', {
+          method: 'GET',
+        }),
+      ).then(async (response) => {
+        expect(response.status).to.equal(401);
+        expect(await response.text()).to.equal('unauthorized');
+      });
+    });
+  });
 
   describe('should return expected values depending on the route', () => {
     const INCLUDED_VALUE = 'test_included';
@@ -73,7 +164,7 @@ describe('Middleware (H3Adapter)', () => {
     @Controller(QUERY_VALUE)
     class TestQueryController {
       @Get()
-      queryValue(@Query('test') test: string) {
+      test_query(@Query('test') test: string) {
         return test;
       }
     }
@@ -363,6 +454,7 @@ describe('Middleware (H3Adapter)', () => {
         expected: number;
       }) {
         let actual: number | undefined;
+        // actual = request.raw.middlewareExecutionCount;
         actual = request.middlewareExecutionCount;
         actual ??= 0;
 
@@ -520,12 +612,15 @@ describe('Middleware (H3Adapter)', () => {
       async data(@Req() req: H3ServerRequest & { extras: { data: string } }) {
         return {
           success: true,
+          // extras: req?.['raw']?.extras,
           extras: req.extras,
+          // pong: req?.['raw']?.headers?.ping,
           pong: req.headers?.ping,
         };
       }
       @Get('pong')
       async pong(@Req() req: H3ServerRequest) {
+        // return { success: true, pong: req?.['raw']?.headers?.ping };
         return { success: true, pong: req.headers?.ping };
       }
 
@@ -556,6 +651,7 @@ describe('Middleware (H3Adapter)', () => {
               req.headers['ping'] = 'pong';
 
               // When global prefix is set and the route is the root path
+              // if (req.originalUrl === '/api') {
               if (req.url === '/api') {
                 return res.end(JSON.stringify({ success: true, pong: 'pong' }));
               }
@@ -577,6 +673,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix (route: /api/pong)`, async () => {
       app.setGlobalPrefix('/api');
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
       await fetchAppHandler(
         app,
         new Request('http://localhost:3000/api/pong', {
@@ -636,6 +733,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix and exclude patterns`, async () => {
       app.setGlobalPrefix('/api', { exclude: ['/'] });
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
 
       await request(app.getHttpServer())
         .get('/')
@@ -645,6 +743,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix and exclude pattern with wildcard`, async () => {
       app.setGlobalPrefix('/api', { exclude: ['/record/{*path}'] });
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
 
       await request(app.getHttpServer())
         .get('/api/pong')
@@ -657,6 +756,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix and exclude pattern with parameter`, async () => {
       app.setGlobalPrefix('/api', { exclude: ['/record/:id'] });
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
 
       await request(app.getHttpServer())
         .get('/record/abc123')
@@ -669,6 +769,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix and global prefix options`, async () => {
       app.setGlobalPrefix('/api', { exclude: ['/'] });
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
 
       await request(app.getHttpServer())
         .get('/api/data')
@@ -685,6 +786,7 @@ describe('Middleware (H3Adapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix that not starts with /`, async () => {
       app.setGlobalPrefix('api');
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
 
       await request(app.getHttpServer())
         .get('/api/data')
@@ -698,6 +800,196 @@ describe('Middleware (H3Adapter)', () => {
 
     afterEach(async () => {
       await app.close();
+    });
+  });
+
+  describe('should respect fastify routing options', () => {
+    const MIDDLEWARE_RETURN_VALUE = 'middleware_return';
+
+    @Controller()
+    class TestController {
+      @Get('abc/def')
+      included() {
+        return 'whatnot';
+      }
+    }
+    @Module({
+      imports: [AppModule],
+      controllers: [TestController],
+    })
+    class TestModule {
+      configure(consumer: MiddlewareConsumer) {
+        consumer
+          .apply(
+            (
+              _req: H3ServerRequest,
+              res: PolyfilledResponse<H3ServerResponse>,
+              _next: () => void,
+            ) => res.end(MIDDLEWARE_RETURN_VALUE),
+          )
+          .forRoutes({ path: 'abc/def', method: RequestMethod.GET });
+      }
+    }
+
+    // NOTE: Unncessary tests for H3 adapter
+    // describe('[ignoreTrailingSlash] attribute', () => {
+    //   beforeEach(async () => {
+    //     app = (
+    //       await Test.createTestingModule({
+    //         imports: [TestModule],
+    //       }).compile()
+    //     ).createNestApplication<NestFastifyApplication>(
+    //       new FastifyAdapter({
+    //         ignoreTrailingSlash: true,
+    //         // routerOptions: {
+    //         //   ignoreTrailingSlash: true,
+    //         // },
+    //       }),
+    //     );
+    //
+    //     await app.init();
+    //   });
+    //
+    //   it(`GET forRoutes(GET /abc/def/)`, () => {
+    //     return app
+    //       .inject({
+    //         method: 'GET',
+    //         url: '/abc/def/', // trailing slash
+    //       })
+    //       .then(({ payload }) =>
+    //         expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+    //       );
+    //   });
+    //
+    //   afterEach(async () => {
+    //     await app.close();
+    //   });
+    // });
+    //
+    // describe('[ignoreDuplicateSlashes] attribute', () => {
+    //   beforeEach(async () => {
+    //     app = (
+    //       await Test.createTestingModule({
+    //         imports: [TestModule],
+    //       }).compile()
+    //     ).createNestApplication<NestFastifyApplication>(
+    //       new FastifyAdapter({
+    //         routerOptions: {
+    //           ignoreDuplicateSlashes: true,
+    //         },
+    //       }),
+    //     );
+    //
+    //     await app.init();
+    //   });
+    //
+    //   it(`GET forRoutes(GET /abc//def)`, () => {
+    //     return app
+    //       .inject({
+    //         method: 'GET',
+    //         url: '/abc//def', // duplicate slashes
+    //       })
+    //       .then(({ payload }) =>
+    //         expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+    //       );
+    //   });
+    //
+    //   afterEach(async () => {
+    //     await app.close();
+    //   });
+    // });
+    //
+    // describe('[caseSensitive] attribute', () => {
+    //   beforeEach(async () => {
+    //     app = (
+    //       await Test.createTestingModule({
+    //         imports: [TestModule],
+    //       }).compile()
+    //     ).createNestApplication<NestFastifyApplication>(
+    //       new FastifyAdapter({
+    //         routerOptions: {
+    //           caseSensitive: true,
+    //         },
+    //       }),
+    //     );
+    //
+    //     await app.init();
+    //   });
+    //
+    //   it(`GET forRoutes(GET /ABC/DEF)`, () => {
+    //     return app
+    //       .inject({
+    //         method: 'GET',
+    //         url: '/ABC/DEF', // different case
+    //       })
+    //       .then(({ payload }) =>
+    //         expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+    //       );
+    //   });
+    //
+    //   afterEach(async () => {
+    //     await app.close();
+    //   });
+    // });
+    //
+    // describe('[useSemicolonDelimiter] attribute', () => {
+    //   beforeEach(async () => {
+    //     app = (
+    //       await Test.createTestingModule({
+    //         imports: [TestModule],
+    //       }).compile()
+    //     ).createNestApplication<NestFastifyApplication>(
+    //       new FastifyAdapter({
+    //         routerOptions: { useSemicolonDelimiter: true } as any,
+    //       }),
+    //     );
+    //
+    //     await app.init();
+    //   });
+    //
+    //   it(`GET forRoutes(GET /abc/def;foo=bar)`, () => {
+    //     return app
+    //       .inject({
+    //         method: 'GET',
+    //         url: '/abc/def;foo=bar', // semicolon delimiter
+    //       })
+    //       .then(({ payload }) =>
+    //         expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+    //       );
+    //   });
+    //
+    //   afterEach(async () => {
+    //     await app.close();
+    //   });
+    // });
+
+    describe('HEAD auto-forwarding to GET', () => {
+      beforeEach(async () => {
+        app = (
+          await Test.createTestingModule({
+            imports: [TestModule],
+          }).compile()
+        ).createNestApplication<NestH3Application>(new H3Adapter());
+
+        await app.init();
+      });
+
+      it(`GET forRoutes(HEAD /abc/def)`, async () => {
+        await fetchAppHandler(
+          app,
+          new Request('http://localhost:3000/abc/def', {
+            method: 'HEAD',
+          }),
+        )
+          .then((res) => res.text())
+          .then((payload) =>
+            expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+          );
+      });
+
+      afterEach(async () => {
+        await app.close();
+      });
     });
   });
 });

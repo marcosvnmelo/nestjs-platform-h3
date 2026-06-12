@@ -33,6 +33,7 @@ import {
 } from '@nestjs/common/utils/shared.utils.js';
 import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter.js';
 import { LegacyRouteConverter } from '@nestjs/core/router/legacy-route-converter.js';
+import { isRequestMethodAll } from '@nestjs/core/router/utils/exclude-route.util.js';
 
 import type {
   CorsConfig,
@@ -720,15 +721,32 @@ export class H3Adapter extends AbstractHttpAdapter<
   /**
    * The requestMethod parameter is part of the AbstractHttpAdapter interface contract.
    * H3 middleware uses instance.use() which doesn't filter by HTTP method (similar to Fastify).
+   * However, we need to filter by method manually when a specific method is provided.
+   * Express semantics: HEAD requests should be handled by GET middleware.
    */
   public createMiddlewareFactory(
-    _requestMethod: RequestMethod,
+    requestMethod: RequestMethod,
   ): (path: string, callback: Function) => any {
     return (path: string, callback: Function) => {
       const h3Path = this.convertPathPattern(path);
+
       const handler = async (event: H3Event) => {
         const req = extractNodeRequestFromEvent(event);
         const res = extractNodeResponseFromEvent(event);
+
+        if (req.method && !isRequestMethodAll(requestMethod)) {
+          const reqMethod = req.method.toUpperCase();
+
+          const allowedMethod = RequestMethod[requestMethod];
+
+          const isHeadForGet = reqMethod === 'HEAD' && allowedMethod === 'GET';
+          const methodMatches =
+            allowedMethod && (reqMethod === allowedMethod || isHeadForGet);
+
+          if (!methodMatches) {
+            return;
+          }
+        }
 
         const result = await this.invokeHandler(
           callback as H3NodeHandler,
@@ -1128,7 +1146,7 @@ export class H3Adapter extends AbstractHttpAdapter<
       this.registerPath(method, normalizedPath, routePath);
     }
 
-    // Express semantics: HEAD should be implicitly handled by GET route.
+    // HACK: Express semantics: HEAD should be implicitly handled by GET route.
     // Register a HEAD matcher once so GET-only routes can respond to HEAD.
     if (method === 'GET') {
       const implicitHeadRouteKey = `HEAD:${normalizedPath}`;
@@ -1146,7 +1164,7 @@ export class H3Adapter extends AbstractHttpAdapter<
     const routeKey = `${method}:${normalizedPath}`;
     this.registeredPaths.add(routeKey);
 
-    // Create chain handler that performs lazy lookup from route map
+    // NOTE: Create chain handler that performs lazy lookup from route map
     // H3 expects lowercase HTTP methods
     this.instance.on(
       method === 'ALL' ? '' : method,
@@ -1180,7 +1198,7 @@ export class H3Adapter extends AbstractHttpAdapter<
             }
           }
 
-          // For GET fallback, run later registrations first (Fastify parity).
+          // HACK: For GET fallback, run later registrations first (Fastify parity).
           for (let idx = getHandlers.length - 1; idx >= 0; idx--) {
             if (res.headersSent || res.writableEnded) {
               break;
@@ -1219,7 +1237,7 @@ export class H3Adapter extends AbstractHttpAdapter<
           }
         }
 
-        // No handler matched (all called next()) - response should be sent
+        // HACK: No handler matched (all called next()) - response should be sent
         // If response not already sent, return 404 via H3
         if (!res.headersSent && !res.writableEnded) {
           return $h3NotFound;

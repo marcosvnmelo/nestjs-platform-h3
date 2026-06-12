@@ -1,3 +1,12 @@
+## [11.1.26-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.24-1...v11.1.26-1) (2026-06-12)
+
+
+### Bug Fixes
+
+* enhance H3Adapter middleware to correctly handle HEAD requests ([2c468d1](https://github.com/marcosvnmelo/nestjs-platform-h3/commit/2c468d1b5169c736e99104b753d8d02e90b7e775))
+
+
+
 ## [11.1.24-1](https://github.com/marcosvnmelo/nestjs-platform-h3/compare/v11.1.21-1...v11.1.24-1) (2026-05-30)
 
 

@@ -983,7 +983,9 @@ describe('Middleware (FastifyAdapter)', () => {
         )
           .then((res) => res.text())
           .then((payload) =>
-            expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+            // WARN: H3 does not allow to return body for HEAD requests
+            // expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
+            expect(payload).to.be.eql(''),
           );
       });
 

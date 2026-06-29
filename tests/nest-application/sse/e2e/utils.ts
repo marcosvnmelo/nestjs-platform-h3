@@ -1,7 +1,9 @@
 export interface PromiseDelayedSseStats {
   closeEventsObserved: number;
   requestsStarted: number;
+  runningStreams: number;
   subscriptionsStarted: number;
+  teardownsObserved: number;
 }
 
 export const sleep = (ms: number) =>
@@ -22,7 +24,7 @@ export const releasePromiseDelayedSse = async (appUrl: string) => {
     released: number;
   }>);
 
-  return released as number;
+  return released;
 };
 
 const waitForPromiseDelayedSseStat = async (
@@ -58,5 +60,13 @@ export const waitForPromiseDelayedSseClose = async (appUrl: string) => {
     appUrl,
     (stats) => stats.closeEventsObserved > 0,
     'Timed out waiting for the delayed SSE request to close.',
+  );
+};
+
+export const waitForPromiseDelayedSseTeardown = async (appUrl: string) => {
+  await waitForPromiseDelayedSseStat(
+    appUrl,
+    (stats) => stats.teardownsObserved > 0,
+    'Timed out waiting for the delayed SSE teardown to run.',
   );
 };

@@ -11,9 +11,9 @@ import { AppModule } from '../src/app.module.ts';
 import {
   fetchPromiseDelayedSseStats,
   releasePromiseDelayedSse,
-  sleep,
   waitForPromiseDelayedSseClose,
   waitForPromiseDelayedSseRequestStart,
+  waitForPromiseDelayedSseTeardown,
 } from './utils.ts';
 
 describe('Sse (Fastify Application)', () => {
@@ -31,7 +31,7 @@ describe('Sse (Fastify Application)', () => {
       );
       app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-      await app.listen(0);
+      await app.listen(3000);
       const url = await app.getUrl();
 
       eventSource = new EventSource(url + '/sse', {
@@ -97,7 +97,7 @@ describe('Sse (Fastify Application)', () => {
       );
       app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-      await app.listen(0);
+      await app.listen(3000);
       const url = await app.getUrl();
 
       eventSource = new EventSource(url + '/sse', {
@@ -221,7 +221,7 @@ describe('Sse (Fastify Application)', () => {
       await app.close();
     });
 
-    it('should not start the SSE subscription if the client disconnects before the promise resolves', async () => {
+    it('should subscribe and tear down if the GET SSE client disconnects before the promise resolves', async () => {
       const url = await app.getUrl();
       const abortController = new AbortController();
       const responsePromise = fetch(`${url}/sse/promise-delayed`, {
@@ -242,12 +242,48 @@ describe('Sse (Fastify Application)', () => {
 
       expect(await releasePromiseDelayedSse(url)).to.equal(1);
 
-      await sleep(50);
+      await waitForPromiseDelayedSseTeardown(url);
 
       const stats = await fetchPromiseDelayedSseStats(url);
       expect(stats.closeEventsObserved).to.equal(1);
       expect(stats.requestsStarted).to.equal(1);
-      expect(stats.subscriptionsStarted).to.equal(0);
+      expect(stats.runningStreams).to.equal(0);
+      expect(stats.subscriptionsStarted).to.equal(1);
+      expect(stats.teardownsObserved).to.equal(1);
+    });
+
+    it('should subscribe and tear down if the POST SSE client disconnects before the promise resolves', async () => {
+      const url = await app.getUrl();
+      const abortController = new AbortController();
+      const responsePromise = fetch(`${url}/sse/post/promise-delayed`, {
+        method: 'POST',
+        headers: {
+          'accept': 'text/event-stream',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ content: 'chunk-0' }),
+        signal: abortController.signal,
+      });
+
+      await waitForPromiseDelayedSseRequestStart(url);
+      abortController.abort();
+
+      await responsePromise.catch((error) => {
+        expect(error.name).to.equal('AbortError');
+      });
+
+      await waitForPromiseDelayedSseClose(url);
+
+      expect(await releasePromiseDelayedSse(url)).to.equal(1);
+
+      await waitForPromiseDelayedSseTeardown(url);
+
+      const stats = await fetchPromiseDelayedSseStats(url);
+      expect(stats.closeEventsObserved).to.equal(1);
+      expect(stats.requestsStarted).to.equal(1);
+      expect(stats.runningStreams).to.equal(0);
+      expect(stats.subscriptionsStarted).to.equal(1);
+      expect(stats.teardownsObserved).to.equal(1);
     });
   });
 });

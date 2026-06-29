@@ -43,4 +43,68 @@ export function fetchAppHandler(app: NestH3Application, request: Request) {
   );
 }
 
+interface InjectRequestOptions extends Partial<
+  Pick<Request, 'method' | 'headers' | 'body'>
+> {
+  baseUrl?: string;
+  url: string;
+  query?: Record<string, string>;
+}
+
+interface FastifyLikeResponse {
+  statusCode: number;
+  payload: string;
+  raw: Response;
+}
+
+export function wrapH3App(app: NestH3Application) {
+  return {
+    inject: async (requestOptions: InjectRequestOptions) =>
+      injectRequestInto(app, requestOptions),
+  };
+}
+
+async function injectRequestInto(
+  app: NestH3Application,
+  requestOptions: InjectRequestOptions,
+): Promise<FastifyLikeResponse> {
+  const url = buildUrl(requestOptions);
+
+  const response = await fetchAppHandler(
+    app,
+    new Request(url, {
+      method: requestOptions.method,
+      headers: requestOptions.headers,
+      body: requestOptions.body,
+    }),
+  );
+
+  return buildFastifyLikeResponse(response);
+}
+
+function buildUrl(requestOptions: InjectRequestOptions): string {
+  const baseUrl = requestOptions.baseUrl ?? 'http://localhost:3000';
+
+  const url = new URL(baseUrl);
+
+  url.pathname = requestOptions.url;
+
+  if (requestOptions.query) {
+    const queryString = new URLSearchParams(requestOptions.query).toString();
+    url.search = queryString;
+  }
+
+  return url.toString();
+}
+
+async function buildFastifyLikeResponse(
+  response: Response,
+): Promise<FastifyLikeResponse> {
+  return {
+    statusCode: response.status,
+    payload: await response.text(),
+    raw: response,
+  };
+}
+
 export { verify_containers } from './docker.ts';

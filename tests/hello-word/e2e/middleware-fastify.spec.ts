@@ -23,7 +23,7 @@ import type {
   PolyfilledResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
-import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
+import { wrapH3App } from '@marcosvnmelo/testing-shared';
 
 import { AppModule } from '../src/app.module.ts';
 
@@ -59,63 +59,122 @@ describe('Middleware (FastifyAdapter)', () => {
       }
     }
 
-    @Module({
-      controllers: [UsersController],
-    })
-    class TrailingSlashModule implements NestModule {
-      configure(consumer: MiddlewareConsumer) {
-        consumer
-          .apply(AuthMiddleware)
-          .forRoutes(
-            { path: 'users', method: RequestMethod.ALL },
-            { path: 'users/:id', method: RequestMethod.ALL },
-          );
+    describe('manual routes', () => {
+      @Module({
+        controllers: [UsersController],
+      })
+      class TrailingSlashModule implements NestModule {
+        configure(consumer: MiddlewareConsumer) {
+          consumer
+            .apply(AuthMiddleware)
+            .forRoutes(
+              { path: 'users', method: RequestMethod.ALL },
+              { path: 'users/:id', method: RequestMethod.ALL },
+            );
+        }
       }
-    }
 
-    beforeEach(async () => {
-      app = (
-        await Test.createTestingModule({
-          imports: [TrailingSlashModule],
-        }).compile()
-      ).createNestApplication<NestH3Application>(new H3Adapter());
+      beforeEach(async () => {
+        app = (
+          await Test.createTestingModule({
+            imports: [TrailingSlashModule],
+          }).compile()
+        ).createNestApplication<NestH3Application>(new H3Adapter());
 
-      await app.init();
-    });
-
-    afterEach(async () => {
-      await app.close();
-    });
-
-    it('does not bypass middleware on a trailing slash variant', async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/users', {
-          method: 'GET',
-        }),
-      ).then(async (response) => {
-        expect(response.status).to.equal(401);
-        expect(await response.text()).to.equal('unauthorized');
+        await app.init();
       });
 
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/users/', {
-          method: 'GET',
-        }),
-      ).then(async (response) => {
-        expect(response.status).to.equal(401);
-        expect(await response.text()).to.equal('unauthorized');
+      afterEach(async () => {
+        await app.close();
       });
 
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/users/1', {
-          method: 'GET',
-        }),
-      ).then(async (response) => {
-        expect(response.status).to.equal(401);
-        expect(await response.text()).to.equal('unauthorized');
+      it('does not bypass middleware on a trailing slash variant', async () => {
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
+
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users/',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
+
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users/1',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
+      });
+    });
+
+    describe('forRoutes(UsersController)', () => {
+      @Module({
+        controllers: [UsersController],
+      })
+      class TrailingSlashModule implements NestModule {
+        configure(consumer: MiddlewareConsumer) {
+          consumer.apply(AuthMiddleware).forRoutes(UsersController);
+        }
+      }
+
+      beforeEach(async () => {
+        app = (
+          await Test.createTestingModule({
+            imports: [TrailingSlashModule],
+          }).compile()
+        ).createNestApplication<NestH3Application>(new H3Adapter());
+
+        await app.init();
+      });
+
+      afterEach(async () => {
+        await app.close();
+      });
+
+      it('does not bypass middleware on a trailing slash variant', async () => {
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
+
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users/',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
+
+        await wrapH3App(app)
+          .inject({
+            method: 'GET',
+            url: '/users/1',
+          })
+          .then((response) => {
+            expect(response.statusCode).to.equal(401);
+            expect(response.payload).to.equal('unauthorized');
+          });
       });
     });
   });
@@ -251,132 +310,109 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`forRoutes(*)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/hello', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(RETURN_VALUE));
+          url: '/hello',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(RETURN_VALUE));
     });
 
     it(`forRoutes(TestController)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/test', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(SCOPED_VALUE));
+          url: '/test',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(SCOPED_VALUE));
     });
 
     it(`query?test=${QUERY_VALUE} forRoutes(query)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request(`http://localhost:3000/query?test=${QUERY_VALUE}`, {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(QUERY_VALUE));
+          url: '/query',
+          query: {
+            test: QUERY_VALUE,
+          },
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(QUERY_VALUE));
     });
 
     it(`${QUERY_VALUE}?test=${QUERY_VALUE} forRoutes(${QUERY_VALUE})`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request(
-          `http://localhost:3000/${QUERY_VALUE}?test=${QUERY_VALUE}`,
-          {
-            method: 'GET',
+      await wrapH3App(app)
+        .inject({
+          method: 'GET',
+          url: QUERY_VALUE,
+          query: {
+            test: QUERY_VALUE,
           },
-        ),
-      )
-        .then((res) => res.text())
-
-        .then((payload) => expect(payload).toEqual(QUERY_VALUE));
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(QUERY_VALUE));
     });
 
     it(`forRoutes(tests/*path)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/tests/wildcard_nested', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(WILDCARD_VALUE));
+          url: '/tests/wildcard_nested',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(WILDCARD_VALUE));
     });
 
     it(`forRoutes(express_style_wildcard/*)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request(
-          'http://localhost:3000/express_style_wildcard/wildcard_nested',
-          { method: 'GET' },
-        ),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(WILDCARD_VALUE));
+      await wrapH3App(app)
+        .inject({
+          method: 'GET',
+          url: '/express_style_wildcard/wildcard_nested',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(WILDCARD_VALUE));
     });
 
     it(`forRoutes(legacy_style_wildcard/*)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request(
-          'http://localhost:3000/legacy_style_wildcard/wildcard_nested',
-          { method: 'GET' },
-        ),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(WILDCARD_VALUE));
+      await wrapH3App(app)
+        .inject({
+          method: 'GET',
+          url: '/legacy_style_wildcard/wildcard_nested',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(WILDCARD_VALUE));
     });
 
     it(`forRoutes(req/url/)`, async () => {
       const reqUrl = '/test';
-      await fetchAppHandler(
-        app,
-        new Request(`http://localhost:3000/req/url${reqUrl}`, {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(REQ_URL_VALUE));
+          url: `/req/url${reqUrl}`,
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(REQ_URL_VALUE));
     });
 
-    it(`GET forRoutes(GET tests/included)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/tests/included', {
+    it(`GET forRoutes(POST tests/included)`, async () => {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(WILDCARD_VALUE));
+          url: '/tests/included',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(WILDCARD_VALUE));
     });
 
     it(`POST forRoutes(POST tests/included)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/tests/included', {
+      await wrapH3App(app)
+        .inject({
           method: 'POST',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(INCLUDED_VALUE));
+          url: '/tests/included',
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(INCLUDED_VALUE));
     });
 
-    // cspell:word ncluded
     it(`GET forRoutes(POST /tests/%69ncluded) - ensure middleware is executed correctly with encoded characters`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/tests/%69ncluded', {
+      await wrapH3App(app)
+        .inject({
           method: 'POST',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => expect(payload).toEqual(INCLUDED_VALUE));
+          url: '/tests/%69ncluded', // 'i' character is encoded
+        })
+        .then(({ payload }) => expect(payload).to.be.eql(INCLUDED_VALUE));
     });
 
     afterEach(async () => {
@@ -486,15 +522,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/a/b/c)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/a/b/c', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) => {
-          expect(payload).toEqual(
+          url: '/a/b/c',
+        })
+        .then(({ payload }) => {
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -505,15 +539,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/a/b)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/a/b', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/a/b',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -524,15 +556,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/a)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/a', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/a',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -543,15 +573,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/similar)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/similar', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/similar',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -562,16 +590,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/similar/test)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/similar/test', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/similar/test',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -582,15 +607,13 @@ describe('Middleware (FastifyAdapter)', () => {
     });
 
     it(`GET forRoutes(/similar/arbitrary)`, async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/similar/arbitrary', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/similar/arbitrary',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               actual: 1,
@@ -674,15 +697,13 @@ describe('Middleware (FastifyAdapter)', () => {
       app.setGlobalPrefix('/api');
       await app.init();
       // await app.getHttpAdapter().getInstance().ready();
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/api/pong', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/api/pong',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               pong: 'pong',
@@ -694,15 +715,14 @@ describe('Middleware (FastifyAdapter)', () => {
     it(`GET forRoutes('{*path}') with global prefix (route: /api)`, async () => {
       app.setGlobalPrefix('/api');
       await app.init();
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/api', {
+      // await app.getHttpAdapter().getInstance().ready();
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/api',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               pong: 'pong',
@@ -713,15 +733,14 @@ describe('Middleware (FastifyAdapter)', () => {
 
     it(`GET forRoutes('{*path}') without prefix config`, async () => {
       await app.init();
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/pong', {
+      // await app.getHttpAdapter().getInstance().ready();
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      )
-        .then((res) => res.text())
-        .then((payload) =>
-          expect(payload).toEqual(
+          url: '/pong',
+        })
+        .then(({ payload }) =>
+          expect(payload).to.be.eql(
             JSON.stringify({
               success: true,
               pong: 'pong',
@@ -975,14 +994,12 @@ describe('Middleware (FastifyAdapter)', () => {
       });
 
       it(`GET forRoutes(HEAD /abc/def)`, async () => {
-        await fetchAppHandler(
-          app,
-          new Request('http://localhost:3000/abc/def', {
+        await wrapH3App(app)
+          .inject({
             method: 'HEAD',
-          }),
-        )
-          .then((res) => res.text())
-          .then((payload) =>
+            url: '/abc/def',
+          })
+          .then(({ payload }) =>
             // WARN: H3 does not allow to return body for HEAD requests
             // expect(payload).to.be.eql(MIDDLEWARE_RETURN_VALUE),
             expect(payload).to.be.eql(''),

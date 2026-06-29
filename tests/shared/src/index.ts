@@ -35,25 +35,20 @@ export function allocEphemeralTcpPort(): Promise<number> {
   });
 }
 
-export function fetchAppHandler(app: NestH3Application, request: Request) {
-  return fetchNodeHandler(
-    (req: H3ServerRequest, res: H3ServerResponse) =>
-      void app.getHttpServer().emit('request', req, res),
-    request,
-  );
-}
-
 interface InjectRequestOptions extends Partial<
-  Pick<Request, 'method' | 'headers' | 'body'>
+  Pick<RequestInit, 'method' | 'headers'>
 > {
   baseUrl?: string;
   url: string;
   query?: Record<string, string>;
+  payload?: RequestInit['body'];
 }
 
 interface FastifyLikeResponse {
   statusCode: number;
   payload: string;
+  body: string;
+  headers: Record<string, string>;
   raw: Response;
 }
 
@@ -75,7 +70,7 @@ async function injectRequestInto(
     new Request(url, {
       method: requestOptions.method,
       headers: requestOptions.headers,
-      body: requestOptions.body,
+      body: requestOptions.payload,
     }),
   );
 
@@ -97,12 +92,24 @@ function buildUrl(requestOptions: InjectRequestOptions): string {
   return url.toString();
 }
 
+async function fetchAppHandler(app: NestH3Application, request: Request) {
+  return fetchNodeHandler(
+    (req: H3ServerRequest, res: H3ServerResponse) =>
+      void app.getHttpServer().emit('request', req, res),
+    request,
+  );
+}
+
 async function buildFastifyLikeResponse(
   response: Response,
 ): Promise<FastifyLikeResponse> {
+  const body = await response.text();
+
   return {
     statusCode: response.status,
-    payload: await response.text(),
+    payload: body,
+    body,
+    headers: Object.fromEntries(response.headers.entries()),
     raw: response,
   };
 }

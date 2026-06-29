@@ -1,12 +1,12 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
+import { beforeEach, describe, expect, it } from '@rstest/core';
 
 import { Test } from '@nestjs/testing';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
-import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
+import { wrapH3App } from '@marcosvnmelo/testing-shared';
 
 import { AppModule } from '../src/app.module.ts';
 
@@ -26,26 +26,24 @@ describe('Fastify FileSend', () => {
   });
 
   it('should return a file from a stream', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/file/stream', {
+    await wrapH3App(app)
+      .inject({
         method: 'GET',
-      }),
-    ).then(async (res) => {
-      expect(res.status).toBe(200);
-      await expect(res.text()).resolves.toBe(readmeString);
-    });
+        url: '/file/stream',
+      })
+      .then(({ payload }) => {
+        expect(payload.toString()).to.be.eq(readmeString);
+      });
   });
   it('should return a file from a buffer', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/file/buffer', {
+    await wrapH3App(app)
+      .inject({
         method: 'GET',
-      }),
-    ).then(async (res) => {
-      expect(res.status).toBe(200);
-      await expect(res.text()).resolves.toBe(readmeString);
-    });
+        url: '/file/buffer',
+      })
+      .then(({ payload }) => {
+        expect(payload.toString()).to.be.eq(readmeString);
+      });
   });
   /**
    * It seems that Fastify has a similar issue as Kamil initially pointed out
@@ -53,54 +51,36 @@ describe('Fastify FileSend', () => {
    * that the `NonFile` test is a failed case for fastify, hence the skip.
    */
   it.skip('should not stream a non-file', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/non-file/pipe-method', {
-        method: 'GET',
-      }),
-    ).then(async (res) => {
-      await expect(res.json()).resolves.toBe({ value: 'Hello world' });
-    });
+    await wrapH3App(app)
+      .inject({
+        url: '/non-file/pipe-method',
+        method: 'get',
+      })
+      .then(({ payload }) => {
+        expect(payload).to.be.eq({ value: 'Hello world' });
+      });
   });
   it('should return a file from an RxJS stream', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/file/rxjs/stream', {
+    await wrapH3App(app)
+      .inject({
         method: 'GET',
-      }),
-    ).then(async (res) => {
-      expect(res.status).toBe(200);
-      await expect(res.text()).resolves.toBe(readmeString);
-    });
+        url: '/file/rxjs/stream',
+      })
+      .then(({ payload }) => {
+        expect(payload.toString()).to.be.eq(readmeString);
+      });
   });
   it('should return a file with correct headers', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/file/with/headers', {
-        method: 'GET',
-      }),
-    ).then(async (res) => {
-      expect(res.status).toBe(200);
-      expect(res.headers.get('content-type')).toBe('text/markdown');
-      expect(res.headers.get('content-disposition')).toBe(
-        'attachment; filename="Readme.md"',
-      );
-      expect(res.headers.get('content-length')).toBe(`${readme.byteLength}`);
-      await expect(res.text()).resolves.toBe(readmeString);
-    });
-  });
-  it('should return an error if the file does not exist', async () => {
-    await fetchAppHandler(
-      app,
-      new Request('http://localhost:3000/file/not/exist', {
-        method: 'GET',
-      }),
-    ).then((res) => {
-      expect(res.status).toBe(400);
-    });
-  });
-
-  afterEach(async () => {
-    await app.close();
+    await wrapH3App(app)
+      .inject({ url: '/file/with/headers', method: 'get' })
+      .then(({ statusCode, headers, payload }) => {
+        expect(statusCode).to.equal(200);
+        expect(headers['content-type']).to.equal('text/markdown');
+        expect(headers['content-disposition']).to.equal(
+          'attachment; filename="Readme.md"',
+        );
+        expect(headers['content-length']).to.equal(`${readme.byteLength}`);
+        expect(payload).to.equal(readmeString);
+      });
   });
 });

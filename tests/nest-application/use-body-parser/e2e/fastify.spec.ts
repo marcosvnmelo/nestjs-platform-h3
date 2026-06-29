@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 
 import type { NestH3Application } from '@marcosvnmelo/nestjs-platform-h3';
 import { H3Adapter } from '@marcosvnmelo/nestjs-platform-h3';
-import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
+import { wrapH3App } from '@marcosvnmelo/testing-shared';
 
 import { AppModule } from '../src/app.module.ts';
 
@@ -38,31 +38,27 @@ describe('Body Parser (Fastify Application)', () => {
     });
 
     it('should allow request with matching body limit', async () => {
-      const response = await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: stringLimit,
-        }),
-      );
+      const response = await wrapH3App(app).inject({
+        method: 'POST',
+        url: '/',
+        headers: { 'content-type': 'application/json' },
+        payload: stringLimit,
+      });
 
-      await expect(response.json()).resolves.toEqual({
+      expect(JSON.parse(response.body)).to.eql({
         raw: stringLimit,
       });
     });
 
     it('should fail if post body is larger than limit', async () => {
-      const response = await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: stringOverLimit,
-        }),
-      );
+      const response = await wrapH3App(app).inject({
+        method: 'POST',
+        url: '/',
+        headers: { 'content-type': 'application/json' },
+        payload: stringOverLimit,
+      });
 
-      expect(response.status).toBe(413);
+      expect(response.statusCode).to.equal(413);
     });
   });
 
@@ -86,31 +82,27 @@ describe('Body Parser (Fastify Application)', () => {
     });
 
     it('should allow request with matching body limit', async () => {
-      const response = await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000', {
-          method: 'POST',
-          headers: { 'content-type': 'application/x-www-form-urlencoded' },
-          body: stringLimit,
-        }),
-      );
+      const response = await wrapH3App(app).inject({
+        method: 'POST',
+        url: '/',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        payload: stringLimit,
+      });
 
-      await expect(response.json()).resolves.toEqual({
+      expect(JSON.parse(response.body)).to.eql({
         raw: stringLimit,
       });
     });
 
     it('should fail if post body is larger than limit', async () => {
-      const response = await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000', {
-          method: 'POST',
-          headers: { 'content-type': 'application/x-www-form-urlencoded' },
-          body: stringOverLimit,
-        }),
-      );
+      const response = await wrapH3App(app).inject({
+        method: 'POST',
+        url: '/',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        payload: stringOverLimit,
+      });
 
-      expect(response.status).toBe(413);
+      expect(response.statusCode).to.equal(413);
     });
   });
 });

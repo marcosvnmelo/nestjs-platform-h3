@@ -17,9 +17,9 @@ import {
   NestH3Application,
   PolyfilledResponse,
 } from '@marcosvnmelo/nestjs-platform-h3';
-import { fetchAppHandler } from '@marcosvnmelo/testing-shared';
+import { wrapH3App } from '@marcosvnmelo/testing-shared';
 
-describe('Middleware before init (H3Adapter)', () => {
+describe('Middleware before init (FastifyAdapter)', () => {
   let app: NestH3Application;
 
   @Injectable()
@@ -87,21 +87,22 @@ describe('Middleware before init (H3Adapter)', () => {
 
       // Now init the app - queued middleware should be registered
       await app.init();
+      // await app.getHttpAdapter().getInstance().ready();
     });
 
     it('should apply queued middleware after init', async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/test', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      ).then(async (res) => {
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ data: 'test_data' });
-        // Verify both module-level and global middleware were applied
-        expect(res.headers.get('x-middleware')).toBe('applied');
-        expect(res.headers.get('x-global-middleware')).toBe('applied');
-      });
+          url: '/test',
+        })
+        .then(({ statusCode, payload, headers }) => {
+          expect(statusCode).to.equal(200);
+          expect(JSON.parse(payload)).to.deep.equal({ data: 'test_data' });
+          // Verify both module-level and global middleware were applied
+          expect(headers['x-middleware']).to.equal('applied');
+          expect(headers['x-global-middleware']).to.equal('applied');
+        });
     });
 
     afterEach(async () => {
@@ -131,18 +132,20 @@ describe('Middleware before init (H3Adapter)', () => {
           next();
         },
       );
+
+      // await app.getHttpAdapter().getInstance().ready();
     });
 
     it('should register middleware successfully after init', async () => {
-      await fetchAppHandler(
-        app,
-        new Request('http://localhost:3000/test', {
+      await wrapH3App(app)
+        .inject({
           method: 'GET',
-        }),
-      ).then(async (res) => {
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ data: 'test_data' });
-      });
+          url: '/test',
+        })
+        .then(({ statusCode, payload }) => {
+          expect(statusCode).to.equal(200);
+          expect(JSON.parse(payload)).to.deep.equal({ data: 'test_data' });
+        });
     });
 
     afterEach(async () => {

@@ -21,10 +21,7 @@ import type { ServeStaticOptions } from './serve-static-options.interface.ts';
  * HTTP/2 compatible server type for H3.
  */
 export type H3Server =
-  | http.Server
-  | https.Server
-  | http2.Http2Server
-  | http2.Http2SecureServer;
+  http.Server | https.Server | http2.Http2Server | http2.Http2SecureServer;
 
 export type H3EventRequest = H3Event['req'];
 

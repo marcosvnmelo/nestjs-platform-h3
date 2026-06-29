@@ -1,7 +1,7 @@
 {
   "name": "@marcosvnmelo/source",
   "description": "A H3 adapter for NestJS framework",
-  "version": "11.1.24-1",
+  "version": "11.1.27-1",
   "license": "MIT",
   "type": "module",
   "scripts": {

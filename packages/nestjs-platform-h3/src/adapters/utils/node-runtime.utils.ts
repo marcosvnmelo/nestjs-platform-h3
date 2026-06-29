@@ -91,8 +91,7 @@ const paramsDescriptor: PropertyDescriptor = {
     });
 
     const remainingPath = event.context.matchedRoute?.meta?.remainingPath as
-      | string[]
-      | null;
+      string[] | null;
     if (remainingPath?.length) {
       params.path = remainingPath;
     }

@@ -90,13 +90,18 @@ catalog:
   typeorm: '0.3.30'
   typescript: '5.9.3'
   ws: '8.21.0'
-overrides:
-  '@apollo/server': '$@apollo/server'
-  '@nestjs/common': '$@nestjs/common'
-  '@nestjs/core': '$@nestjs/core'
+
+  # TypeORM dependencies overrides
   ansis: '4.3.0'
-  class-validator: '$class-validator'
+  # Fastify dependencies overrides
   fast-json-stringify: '6.4.0'
+overrides:
+  '@apollo/server': 'catalog:'
+  '@nestjs/common': 'catalog:'
+  '@nestjs/core': 'catalog:'
+  ansis: 'catalog:'
+  class-validator: 'catalog:'
+  fast-json-stringify: 'catalog:'
 minimumReleaseAge: 2880
 patchedDependencies:
   '@nestjs/apollo': patches/@nestjs__apollo.patch

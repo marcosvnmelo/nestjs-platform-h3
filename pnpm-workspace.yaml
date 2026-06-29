@@ -42,18 +42,18 @@ catalog:
   '@nestjs/websockets': '11.1.26'
 
   # Build tools
-  '@rslib/core': '0.22.0'
-  '@rstest/adapter-rslib': '0.10.3'
-  '@rstest/core': '0.10.3'
-  '@testcontainers/kafka': '12.0.1'
-  '@testcontainers/nats': '12.0.1'
+  '@rslib/core': '0.23.1'
+  '@rstest/adapter-rslib': '0.10.6'
+  '@rstest/core': '0.10.6'
+  '@testcontainers/kafka': '12.0.3'
+  '@testcontainers/nats': '12.0.3'
   '@types/amqplib': '0.10.8'
   '@types/autocannon': '7.12.7'
   '@types/body-parser': 1.19.6
   '@types/content-type': ^1.1.9
   '@types/express': '5.0.6'
   '@types/mime-types': ^3.0.1
-  '@types/node': '25.9.2'
+  '@types/node': '25.9.3'
   '@types/supertest': '7.2.0'
   '@types/ws': '8.18.1'
   amqp-connection-manager: '5.0.0'
@@ -86,7 +86,7 @@ catalog:
   socket.io-client: '4.8.3'
   srvx: ^0.11.16
   supertest: '^7.2.2'
-  testcontainers: '12.0.1'
+  testcontainers: '12.0.3'
   typeorm: '0.3.30'
   typescript: '5.9.3'
   ws: '8.21.0'

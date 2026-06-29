@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
+import request from 'supertest';
 
 import { Test } from '@nestjs/testing';
 
@@ -34,14 +35,13 @@ describe('Raw body (Fastify Application)', () => {
     const body = '{ "amount":0.0 }';
 
     it('should return exact post body', async () => {
-      const response = await wrapH3App(app).inject({
-        method: 'POST',
-        url: '/',
-        headers: { 'content-type': 'application/json' },
-        payload: body,
-      });
+      const response = await request(app.getHttpServer())
+        .post('/')
+        .set('content-type', 'application/json')
+        .send(body)
+        .expect(201);
 
-      expect(JSON.parse(response.body)).to.eql({
+      expect(response.body).toEqual({
         parsed: {
           amount: 0,
         },
